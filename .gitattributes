@@ -1,0 +1,95 @@
+# ------------------------------
+# 🔧 General settings
+# ------------------------------
+# Normalize line endings automatically
+* text=auto
+
+# ------------------------------
+# 🧠 Code and markup files
+# ------------------------------
+*.cs       text diff=csharp
+*.cshtml   text
+*.razor    text
+*.html     text
+*.css      text
+*.scss     text
+*.js       text
+*.ts       text
+*.tsx      text
+*.json     text
+*.yml      text
+*.yaml     text
+*.xml      text
+*.md       text
+*.sql      text
+*.ps1      text
+
+# ------------------------------
+# 📦 Solution and project files
+# ------------------------------
+*.sln      text eol=crlf
+*.csproj   text eol=crlf
+*.props    text eol=crlf
+*.targets  text eol=crlf
+
+# ------------------------------
+# 🧱 Docker and shell scripts
+# ------------------------------
+Dockerfile text eol=lf
+*.dockerignore text eol=lf
+*.sh text eol=lf
+
+# ------------------------------
+# ⚙️ CI/CD and configuration
+# ------------------------------
+*.env text eol=lf
+*.config text
+*.editorconfig text
+*.gitattributes text
+*.gitignore text
+
+# ------------------------------
+# 🧪 Testing
+# ------------------------------
+*.runsettings text
+*.testsettings text
+*.trx text
+
+# ------------------------------
+# 🚀 Blazor and Swagger UI assets
+# ------------------------------
+*.wasm binary
+*.dll binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.svg text
+*.json text
+
+# ------------------------------
+# 🧩 Binary files (no diffs)
+# ------------------------------
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.exe  binary
+*.pdb  binary
+
+# ------------------------------
+# 💻 Windows batch scripts
+# ------------------------------
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# ------------------------------
+# 🤖 GitHub Linguist (statistics)
+# ------------------------------
+bin/* linguist-generated=true
+obj/* linguist-generated=true
+wwwroot/lib/* linguist-vendored=true
+wwwroot/css/* linguist-generated=true
+wwwroot/js/* linguist-generated=true
