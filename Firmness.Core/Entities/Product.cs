@@ -14,6 +14,8 @@ public class Product
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
+    // navegation
+    public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
     protected Product() { }
     
     // constructor with parameters
