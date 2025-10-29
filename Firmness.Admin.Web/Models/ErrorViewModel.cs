@@ -1,4 +1,4 @@
-namespace Firmness.Web.Models;
+namespace Firmness.Admin.Web.Models;
 
 public class ErrorViewModel
 {

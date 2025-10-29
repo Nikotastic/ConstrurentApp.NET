@@ -1,8 +1,8 @@
 using System.Diagnostics;
+using Firmness.Admin.Web.Models;
 using Microsoft.AspNetCore.Mvc;
-using Firmness.Web.Models;
 
-namespace Firmness.Web.Controllers;
+namespace Firmness.Admin.Web.Controllers;
 
 public class HomeController : Controller
 {
