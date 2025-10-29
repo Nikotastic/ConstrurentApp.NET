@@ -25,4 +25,6 @@ public class User : Person
         Username = username;
         PasswordHash = passwordHash;
     }
+    
+    public string FullName => $"{FirstName} {LastName} your username is {Username}".Trim();
 }

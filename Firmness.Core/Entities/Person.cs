@@ -21,4 +21,5 @@ public abstract class Person
     
     // property for full name
     public string FullName => $"{FirstName} {LastName}".Trim();
+    
 }
