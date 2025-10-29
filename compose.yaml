@@ -1,7 +1,48 @@
-﻿services:
-  firmness.web:
-    image: firmness.web
-    build:
-      context: .
-      dockerfile: Firmness.Web/Dockerfile
+﻿version: "3.8"
 
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    # Para desarrollo usamos la imagen SDK para poder ejecutar dotnet watch
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    working_dir: /app
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ConnectionStrings__DefaultConnection=${CONN_STR}
+    ports:
+      - "${WEB_PORT:-5000}:5000"
+    volumes:
+      - ./:/app:cached
+      - nuget_cache:/root/.nuget/packages:cached
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      /bin/bash -lc "cd /app/Firmness.Admin.Web &&
+      dotnet restore &&
+      dotnet watch run --urls http://0.0.0.0:5000"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  nuget_cache:
