@@ -25,10 +25,10 @@ public class ProductService : IProductService
     }
 
     // Search products using query and return paginated result
-    public async Task<IEnumerable<Product>> SearchAsync(string? query, int page = 1, int pageSize = 50)
+    public async Task<PaginatedResult<Product>> SearchAsync(string? query, int page = 1, int pageSize = 50)
     {
         var (items, total) = await _productRepository.GetPagedAsync(page, pageSize, query);
-        return items;
+        return new PaginatedResult<Product>(items, page, pageSize, total);
     }
 
     public async Task AddAsync(Product product)
