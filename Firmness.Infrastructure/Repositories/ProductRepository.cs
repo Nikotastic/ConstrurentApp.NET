@@ -44,4 +44,27 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
         var p = await _db.Products.FindAsync(id);
         if (p != null) { _db.Products.Remove(p); await _db.SaveChangesAsync(); }
     }
+    
+    // Implementación del nuevo método paginado
+    public async Task<(IEnumerable<Product> Items, long Total)> GetPagedAsync(int page, int pageSize, string? query = null)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+
+        var q = _db.Products.AsNoTracking().AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            q = q.Where(p => p.Name.Contains(query) || p.SKU.Contains(query));
+        }
+
+        var total = await q.LongCountAsync();
+        var items = await q
+            .OrderBy(p => p.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
+    }
 }
