@@ -1,4 +1,4 @@
-﻿// File: Firmness.Infrastructure/Data/AppDbContext.cs
+﻿// File: Firmness.Infrastructure/Data/ApplicationDbContext.cs
 using Firmness.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
