@@ -45,7 +45,7 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
         if (p != null) { _db.Products.Remove(p); await _db.SaveChangesAsync(); }
     }
     
-    // Implementación del nuevo método paginado
+    // Implementation a method of paged
     public async Task<(IEnumerable<Product> Items, long Total)> GetPagedAsync(int page, int pageSize, string? query = null)
     {
         if (page < 1) page = 1;
