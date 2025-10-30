@@ -19,5 +19,8 @@ public class PaginatedResult<T>
         Page = page < 1 ? 1 : page;
         PageSize = pageSize < 1 ? 10 : pageSize;
         TotalItems = totalItems;
+        
+        if (page < 1) throw new ArgumentOutOfRangeException(nameof(page));
+        if (pageSize < 1) throw new ArgumentOutOfRangeException(nameof(pageSize));
     }
 }
