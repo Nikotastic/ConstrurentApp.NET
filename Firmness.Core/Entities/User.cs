@@ -26,5 +26,5 @@ public class User : Person
         PasswordHash = passwordHash;
     }
     
-    public string FullName => $"{FirstName} {LastName} your username is {Username}".Trim();
+    public override string FullName => $"{FirstName} {LastName} your username is {Username}".Trim();
 }

@@ -14,5 +14,5 @@ public class Customer : Person
     {
     }
     
-    public string FullName => $"{FirstName} {LastName}".Trim();
+    public override string FullName => $"{FirstName} {LastName}".Trim();
 }
