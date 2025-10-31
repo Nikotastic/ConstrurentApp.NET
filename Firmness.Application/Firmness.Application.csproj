@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Firmness.Core\Firmness.Core.csproj" />
+    <ProjectReference Include="..\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

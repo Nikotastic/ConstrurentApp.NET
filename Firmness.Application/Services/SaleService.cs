@@ -1,6 +1,7 @@
 ﻿using Firmness.Application.Interfaces;
 using Firmness.Core.Entities;
 using Firmness.Core.Interfaces;
+using Firmness.Infrastructure.Data;
 
 namespace Firmness.Application.Services;
 
@@ -11,12 +12,17 @@ public class SaleService : ISaleService
     private readonly ISaleRepository _saleRepo;
     private readonly IProductRepository _productRepo;
     private readonly ISaleItemRepository _saleItemRepo;
-
-    public SaleService(ISaleRepository saleRepo, IProductRepository productRepo, ISaleItemRepository saleItemRepo)
+    private readonly ICustomerRepository _customerRepo;
+    private readonly ApplicationDbContext _db;
+    //private readonly ILogger<SaleService> _logger;
+    public SaleService(ISaleRepository saleRepo, IProductRepository productRepo, ISaleItemRepository saleItemRepo, ICustomerRepository customerRepo, ApplicationDbContext db)
     {
         _saleRepo = saleRepo;
         _productRepo = productRepo;
         _saleItemRepo = saleItemRepo;
+        _customerRepo = customerRepo;
+        _db = db;
+       // _logger = logger;
     }
 
     // Create sale with validation of stock and persistence

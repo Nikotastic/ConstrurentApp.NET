@@ -5,8 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Firmness.Infrastructure.Data;
 
 // DbContext for the application
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext : DbContext
 {
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+    }
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Customer> Customers { get; set; } = null!;
     public DbSet<Sale> Sales { get; set; } = null!;
