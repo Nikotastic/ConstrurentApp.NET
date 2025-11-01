@@ -4,6 +4,9 @@
 public class User : Person
 {
     // properties
+    // Link to ASP.NET Identity user (FK scalar only).
+    // Keep this as a simple string to avoid Core depending on Infrastructure.
+    public string? IdentityUserId { get; set; }
     public string Username { get; set; } = String.Empty;
     public string PasswordHash { get; set; } = String.Empty;
     public bool IsActive { get; set; } = true;

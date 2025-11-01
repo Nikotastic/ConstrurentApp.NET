@@ -1,24 +1,28 @@
-﻿// File: Firmness.Infrastructure/Data/ApplicationDbContext.cs
-using Firmness.Core.Entities;
+﻿using Firmness.Core.Entities;
+using Firmness.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firmness.Infrastructure.Data;
 
 // DbContext for the application
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
     {
     }
-    public DbSet<User> Users { get; set; } = null!;
+
+    // Domain DbSets - renamed Users -> DomainUsers to avoid collision with Identity
+    public DbSet<User> DomainUsers { get; set; } = null!;
     public DbSet<Customer> Customers { get; set; } = null!;
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
 
-    // OnModelCreating is called when the model is being created
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Important: call Identity configuration first
         base.OnModelCreating(modelBuilder);
 
         // Productos
@@ -34,10 +38,10 @@ public class ApplicationDbContext : DbContext
             b.Property(p => p.Description).HasMaxLength(500).IsRequired();
         });
 
-        // Users
+        // Users (domain) mapped to table "User"
         modelBuilder.Entity<User>(b =>
         {
-            b.ToTable("User");
+            b.ToTable("User"); // your domain table
             b.HasKey(u => u.Id);
             b.Property(u => u.Email).HasMaxLength(200).IsRequired();
             b.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
@@ -46,6 +50,21 @@ public class ApplicationDbContext : DbContext
             b.Property(u => u.Username).HasMaxLength(50).IsRequired();
             b.HasIndex(u => u.Email).IsUnique();
             b.HasIndex(u => u.Username).IsUnique();
+
+            // Index for Identity FK
+            b.HasIndex(u => u.IdentityUserId).IsUnique(false);
+
+            // Configure optional 1:1 with AspNetUsers (ApplicationUser)
+            // Option A (recommended): no navigation on Core.User
+            // If ApplicationUser has a navigation property to User (e.g. public virtual User? User {get;set;})
+            // you can use .WithOne(a => a.User). Otherwise use .WithOne() below.
+            //
+            // Use the .WithOne() variant to avoid requiring a navigation property in Core:
+            b.HasOne<ApplicationUser>()
+             .WithOne() // or .WithOne(a => a.User) if ApplicationUser exposes the navigation
+             .HasForeignKey<User>(u => u.IdentityUserId)
+             .IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Customers
