@@ -1,6 +1,4 @@
-﻿version: "3.8"
-
-services:
+﻿services:
   postgres:
     image: postgres:15
     restart: unless-stopped
@@ -21,8 +19,9 @@ services:
       retries: 5
 
   web:
-    # Para desarrollo usamos la imagen SDK para poder ejecutar dotnet watch
-    image: mcr.microsoft.com/dotnet/sdk:8.0
+    build:
+      context: .
+      dockerfile: Dockerfile
     working_dir: /app
     env_file:
       - .env
@@ -38,11 +37,32 @@ services:
       postgres:
         condition: service_healthy
     command: >
-      /bin/bash -lc "cd /app/Firmness.Admin.Web &&
+      /bin/bash -lc "
+      dotnet tool install --global dotnet-ef &&
+      export PATH=$PATH:/root/.dotnet/tools &&
+      cd /app/Firmness.Admin.Web &&
       dotnet restore &&
+      dotnet ef database update --project ../Firmness.Infrastructure/Firmness.Infrastructure.csproj --startup-project . --context Firmness.Infrastructure.Data.ApplicationDbContext &&
       dotnet watch run --urls http://0.0.0.0:5000"
     restart: unless-stopped
 
+  migrator:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /src
+    volumes:
+      - ./:/src:cached
+      - nuget_cache:/root/.nuget/packages:cached
+    command: >
+      /bin/bash -lc "
+      dotnet tool install --global dotnet-ef || true &&
+      export PATH=\$PATH:/root/.dotnet/tools &&
+      tail -f /dev/null
+      "
 volumes:
   postgres_data:
   nuget_cache:
