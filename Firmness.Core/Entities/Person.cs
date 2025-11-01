@@ -1,8 +1,11 @@
-﻿namespace Firmness.Core.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Firmness.Core.Entities;
 
 // abstract class for all persons
 public abstract class Person
 {
+    [NotMapped]
     public Guid Id { get; protected set; } = Guid.NewGuid();
     public string FirstName { get; set; } = String.Empty;
     public string LastName { get; set; } = String.Empty;
