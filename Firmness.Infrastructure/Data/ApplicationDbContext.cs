@@ -25,6 +25,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         // Important: call Identity configuration first
         base.OnModelCreating(modelBuilder);
 
+        // Treat Person as non-entity (ignore it). User and Customer will be independent entities.
+        modelBuilder.Ignore<Person>();
+
         // Productos
         modelBuilder.Entity<Product>(b =>
         {
@@ -41,8 +44,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         // Users (domain) mapped to table "User"
         modelBuilder.Entity<User>(b =>
         {
-            b.ToTable("User"); // your domain table
-            b.HasKey(u => u.Id);
+            b.ToTable("User"); // domain table
+            b.HasKey(u => u.Id); // now allowed because Person is ignored
             b.Property(u => u.Email).HasMaxLength(200).IsRequired();
             b.Property(u => u.PasswordHash).HasMaxLength(200).IsRequired();
             b.Property(u => u.FirstName).HasMaxLength(50).IsRequired();
@@ -51,31 +54,27 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.HasIndex(u => u.Email).IsUnique();
             b.HasIndex(u => u.Username).IsUnique();
 
-            // Index for Identity FK
+            // Identity FK scalar (exists in domain User)
+            b.Property(u => u.IdentityUserId).HasMaxLength(450).IsRequired(false);
             b.HasIndex(u => u.IdentityUserId).IsUnique(false);
 
-            // Configure optional 1:1 with AspNetUsers (ApplicationUser)
-            // Option A (recommended): no navigation on Core.User
-            // If ApplicationUser has a navigation property to User (e.g. public virtual User? User {get;set;})
-            // you can use .WithOne(a => a.User). Otherwise use .WithOne() below.
-            //
-            // Use the .WithOne() variant to avoid requiring a navigation property in Core:
+            // Configure optional 1:1 with AspNetUsers (ApplicationUser) without requiring a navigation on Core
             b.HasOne<ApplicationUser>()
-             .WithOne() // or .WithOne(a => a.User) if ApplicationUser exposes the navigation
+             .WithOne() // or .WithOne(a => a.User) if ApplicationUser exposes navigation
              .HasForeignKey<User>(u => u.IdentityUserId)
              .IsRequired(false)
              .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // Customers
-        modelBuilder.Entity<Customer>(b =>
+        // Customers (domain) mapped to table "Customer"
+        modelBuilder.Entity<Customer>(c =>
         {
-            b.ToTable("Customer");
-            b.HasKey(c => c.Id);
-            b.Property(c => c.FirstName).HasMaxLength(50).IsRequired();
-            b.Property(c => c.LastName).HasMaxLength(50).IsRequired();
-            b.Property(c => c.Email).HasMaxLength(200).IsRequired();
-            b.HasIndex(c => c.Email).IsUnique();
+            c.ToTable("Customer");
+            c.HasKey(cu => cu.Id); // now allowed because Person is ignored
+            c.Property(cu => cu.FirstName).HasMaxLength(50).IsRequired();
+            c.Property(cu => cu.LastName).HasMaxLength(50).IsRequired();
+            c.Property(cu => cu.Email).HasMaxLength(200).IsRequired();
+            c.HasIndex(cu => cu.Email).IsUnique();
         });
 
         // Sales
