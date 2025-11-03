@@ -1,15 +1,21 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-
-namespace Firmness.Infrastructure.Identity;
-
-public static class SeedData
+namespace Firmness.Infrastructure.Identity
 {
-    public static async Task InitializeAsync(IServiceProvider services)
+    public static class SeedData
+    {
+        public static async Task InitializeAsync(IServiceProvider services)
         {
+            if (services == null) throw new ArgumentNullException(nameof(services));
+
             using var scope = services.CreateScope();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var sp = scope.ServiceProvider;
+
+            var roleManager = sp.GetService<RoleManager<IdentityRole>>();
+            var userManager = sp.GetService<UserManager<ApplicationUser>>();
+
+            if (roleManager == null) throw new InvalidOperationException("RoleManager<IdentityRole> not registered in DI.");
+            if (userManager == null) throw new InvalidOperationException("UserManager<ApplicationUser> not registered in DI.");
 
             string[] roles = new[] { "Admin", "Client" };
 
@@ -20,7 +26,8 @@ public static class SeedData
                     var r = await roleManager.CreateAsync(new IdentityRole(role));
                     if (!r.Succeeded)
                     {
-                        throw new Exception($"Error to create role {role}: {string.Join(", ", r.Errors.Select(e => e.Description))}");
+                        var errors = string.Join(", ", r.Errors.Select(e => e.Description));
+                        throw new Exception($"Error creating role '{role}': {errors}");
                     }
                 }
             }
@@ -44,7 +51,21 @@ public static class SeedData
                 }
                 else
                 {
-                    throw new Exception($"Error to create user admin: {string.Join(", ", create.Errors.Select(e => e.Description))}");
+                    var errors = string.Join(", ", create.Errors.Select(e => e.Description));
+                    throw new Exception($"Error creating admin user: {errors}");
+                }
+            }
+            else
+            {
+                // Sure admin has Admin role
+                if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+                {
+                    var roleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+                    if (!roleResult.Succeeded)
+                    {
+                        var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        throw new Exception($"Error adding Admin role to existing admin user: {errors}");
+                    }
                 }
             }
 
@@ -65,6 +86,19 @@ public static class SeedData
                 {
                     await userManager.AddToRoleAsync(clientUser, "Client");
                 }
+                else 
+                {
+                    var errors = string.Join(", ", createClient.Errors.Select(e => e.Description));
+                    throw new Exception($"Error creating client user: {errors}");
+                }
+            }
+            else
+            {
+                if (!await userManager.IsInRoleAsync(clientUser, "Client"))
+                {
+                    await userManager.AddToRoleAsync(clientUser, "Client");
+                }
             }
         }
+    }
 }
