@@ -1,0 +1,19 @@
+﻿@* Partial: barra lateral para el panel admin (Bootstrap 5) *@
+<nav id="sidebarMenu" class="d-md-block bg-light sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item mb-1">
+                <a class="nav-link" asp-controller="Admin" asp-action="Index">Inicio</a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link" asp-controller="Products" asp-action="Index">Productos</a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link" asp-controller="Customers" asp-action="Index">Clientes</a>
+            </li>
+            <li class="nav-item mb-1">
+                <a class="nav-link" asp-controller="Sales" asp-action="Index">Ventas</a>
+            </li>
+        </ul>
+    </div>
+</nav>
