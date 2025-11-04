@@ -29,4 +29,9 @@ public class CustomerService : ICustomerService
     {
         return await _customerRepo.CountAsync(cancellationToken);
     }
+
+    public Task<string?> GetAllAsync(int page, int pageSize)
+    {
+        throw new NotImplementedException();
+    }
 }

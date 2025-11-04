@@ -10,5 +10,5 @@ public interface ICustomerService
     Task UpdateAsync(Customer customer);
     Task DeleteAsync(Guid id);
     Task<long> CountAsync(CancellationToken cancellationToken = default);
-
+    Task<string?> GetAllAsync(int page, int pageSize);
 }
