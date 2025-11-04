@@ -1,4 +1,5 @@
 using Firmness.Application.Interfaces;
+using Firmness.Infrastructure.DependencyInjection;
 using Firmness.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -86,17 +87,7 @@ builder.Services.AddRazorPages(options =>
 // ---------- Application DI registrations (keep your existing registrations) ----------
 // Identity adapter
 builder.Services.AddScoped<IIdentityService, IdentityService>();
-// Repositories
-builder.Services.AddScoped<Firmness.Core.Interfaces.IProductRepository, Firmness.Infrastructure.Repositories.ProductRepository>();
-builder.Services.AddScoped<Firmness.Core.Interfaces.ICustomerRepository, Firmness.Infrastructure.Repositories.CustomerRepository>();
-builder.Services.AddScoped<Firmness.Core.Interfaces.ISaleRepository, Firmness.Infrastructure.Repositories.SaleRepository>();
-builder.Services.AddScoped<Firmness.Core.Interfaces.ISaleItemRepository, Firmness.Infrastructure.Repositories.SaleItemRepository>();
-
-// Services
-builder.Services.AddScoped<Firmness.Application.Interfaces.IProductService, Firmness.Application.Services.ProductService>();
-builder.Services.AddScoped<Firmness.Application.Interfaces.ISaleService, Firmness.Application.Services.SaleService>();
-builder.Services.AddScoped<Firmness.Application.Interfaces.ICustomerService, Firmness.Application.Services.CustomerService>();
-
+builder.Services.AddInfrastructureServices(builder.Configuration);
 var app = builder.Build();
 
 // ---------- Ensure DB + Seed data ----------
