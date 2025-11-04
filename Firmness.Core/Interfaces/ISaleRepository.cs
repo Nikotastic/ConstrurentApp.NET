@@ -12,4 +12,5 @@ public interface ISaleRepository
     Task AddAsync(Sale sale);
     Task UpdateAsync(Sale sale);
     Task DeleteAsync(Guid sale);
+    Task<long> CountAsync(CancellationToken cancellationToken = default);
 }
