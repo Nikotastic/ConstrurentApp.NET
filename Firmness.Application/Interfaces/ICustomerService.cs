@@ -9,4 +9,6 @@ public interface ICustomerService
     Task AddAsync(Customer customer);
     Task UpdateAsync(Customer customer);
     Task DeleteAsync(Guid id);
+    Task<long> CountAsync(CancellationToken cancellationToken = default);
+
 }

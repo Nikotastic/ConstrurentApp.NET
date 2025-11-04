@@ -11,4 +11,5 @@ public interface IProductService
     Task AddAsync(Product product);
     Task UpdateAsync(Product product);
     Task DeleteAsync(Guid id);
+    Task<long> CountAsync(CancellationToken cancellationToken = default);
 }
