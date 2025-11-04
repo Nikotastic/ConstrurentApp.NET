@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Firmness.Infrastructure.Identity; // ApplicationUser
+using Firmness.Infrastructure.Identity;
 
 namespace Firmness.Admin.Web.Areas.Identity.Pages.Account
 {
@@ -41,32 +41,32 @@ namespace Firmness.Admin.Web.Areas.Identity.Pages.Account
         }
 
         [BindProperty]
-        public InputModel Input { get; set; }
+        public InputModel Input { get; set; } = null!;
 
-        public string ReturnUrl { get; set; }
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+        public string ReturnUrl { get; set; } = String.Empty;
+        public IList<AuthenticationScheme> ExternalLogins { get; set; } = new List<AuthenticationScheme>();
 
         public class InputModel
         {
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
-            public string Email { get; set; }
+            public string Email { get; set; } = null!;
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
-            public string Password { get; set; }
+            public string Password { get; set; }  = null!;
 
             [DataType(DataType.Password)]
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-            public string ConfirmPassword { get; set; }
+            public string ConfirmPassword { get; set; } = null!;
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null!)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -76,7 +76,7 @@ namespace Firmness.Admin.Web.Areas.Identity.Pages.Account
         // and then redirects the user to a profile/Customer creation page so the domain Customer
         // can be created and linked to the ApplicationUser.Id. It DOES NOT sign in the user
         // into the Razor Admin panel (so Clients cannot use Razor).
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -85,8 +85,8 @@ namespace Firmness.Admin.Web.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 // set username equal to email to avoid UserName vs Email confusion
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.Email!, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, Input.Email!, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -113,13 +113,17 @@ namespace Firmness.Admin.Web.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
+                    if (!string.IsNullOrEmpty(Input.Email))
+                    {
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl ?? string.Empty)}'>clicking here</a>.");
+                    }
+                   
                     // Do NOT sign in the user into the Razor Admin panel if they are a Client.
                     // Instead, redirect them to complete their Customer profile (linking domain data).
                     // Adjust the route /Customers/Create to match your Customers controller / view.
-                    return LocalRedirect(Url.Content($"~/Customers/Create?userId={userId}&email={Uri.EscapeDataString(user.Email)}"));
+                    var safeEmail = user.Email ?? string.Empty;
+                    return LocalRedirect(Url.Content($"~/Customers/Create?userId={userId}&email={Uri.EscapeDataString(safeEmail!)}"));
                 }
                 foreach (var error in result.Errors)
                 {
