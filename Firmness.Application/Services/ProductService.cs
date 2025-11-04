@@ -45,4 +45,8 @@ public class ProductService : IProductService
     }
 
     public Task DeleteAsync(Guid id) => _productRepository.DeleteAsync(id);
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _productRepository.CountAsync(cancellationToken);
+    }
 }

@@ -63,6 +63,11 @@ public class SaleService : ISaleService
     }
 
     public Task<Sale?> GetByIdAsync(Guid id) => _saleRepo.GetByIdAsync(id);
+    
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _saleRepo.CountAsync(cancellationToken);
+    }
 
     public Task<IEnumerable<Sale>> GetByCustomerIdAsync(Guid customerId) => _saleRepo.GetByCustomerIdAsync(customerId);
 }

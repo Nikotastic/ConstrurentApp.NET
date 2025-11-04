@@ -24,4 +24,9 @@ public class CustomerService : ICustomerService
     public Task UpdateAsync(Customer customer) => _customerRepo.UpdateAsync(customer);
 
     public Task DeleteAsync(Guid id) => _customerRepo.DeleteAsync(id);
+    
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _customerRepo.CountAsync(cancellationToken);
+    }
 }
