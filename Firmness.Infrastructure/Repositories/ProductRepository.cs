@@ -64,4 +64,7 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
 
         return (items, total);
     }
+
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+        => await db.Products.LongCountAsync(cancellationToken);
 }

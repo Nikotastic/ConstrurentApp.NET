@@ -16,5 +16,6 @@ public interface ICustomerRepository
     Task UpdateAsync(Customer customer);
     Task DeleteAsync(Guid customer);
     Task<bool> ExistsAsync(Guid id);
+    Task<long> CountAsync(CancellationToken cancellationToken = default);
 }
 

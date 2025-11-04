@@ -13,4 +13,5 @@ public interface IProductRepository
     Task UpdateAsync(Product product);
     Task DeleteAsync(Guid product);
     Task<(IEnumerable<Product> Items, long Total)> GetPagedAsync(int page, int pageSize, string? query = null);
+    Task<long> CountAsync(CancellationToken cancellationToken = default);
 }
