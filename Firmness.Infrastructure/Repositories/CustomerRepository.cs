@@ -83,6 +83,9 @@ public class CustomerRepository(ApplicationDbContext db) : ICustomerRepository
             .ToListAsync();
     }
     
+    public async Task<long> CountAsync(CancellationToken cancellationToken = default)
+        => await db.Customers.LongCountAsync(cancellationToken);
+    
     
     
 }
