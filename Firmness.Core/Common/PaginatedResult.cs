@@ -6,6 +6,7 @@ public class PaginatedResult<T>
     public int Page { get; init; }
     public int PageSize { get; init; }
     public long TotalItems { get; init; }
+    public long Total => TotalItems;
     public int TotalPages => PageSize == 0 ? 0 : (int)Math.Ceiling((double)TotalItems / PageSize);
 
     public bool HasPrevious => Page > 1;
