@@ -11,9 +11,7 @@ public class Product
     public decimal Price { get; set; }
     public string ImageUrl { get; set; } = String.Empty;
     public decimal Stock { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    
+
     // navegation
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
     protected Product() { }

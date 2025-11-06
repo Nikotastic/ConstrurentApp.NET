@@ -1,21 +1,22 @@
 ﻿namespace Firmness.Core.Entities;
 
 // class for sale items
-public class SaleItem
+public class SaleItem : BaseEntity
 {
-    public Guid Id { get; protected set; } = Guid.NewGuid();
     // Fk
     public Guid SaleId { get; set; }
     public Guid ProductId { get; set; }
     // business 
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
-   
     public decimal LineaTotal => UnitPrice * Quantity;
+
     
     // navegation
     public Sale Sale { get; set; } = null!;
     public Product Product { get; set; } = null!;
+  
+
     
     public SaleItem() { }
     
