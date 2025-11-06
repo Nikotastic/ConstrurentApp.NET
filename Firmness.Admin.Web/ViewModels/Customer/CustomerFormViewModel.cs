@@ -38,8 +38,8 @@ public class CustomerFormViewModel {
         [Display(Name = "Asset")]
         public bool IsActive { get; set; } = true;
 
-        // Optional file for customer's avatar/photo
-        /*[Display(Name = "Photo (optional)")]
+        //Optional file for customer's avatar/photo
+        [Display(Name = "Photo (optional)")]
         public IFormFile? PhotoFile { get; set; }
 
         // If you store a url in entity, use this to show existing photo
@@ -49,6 +49,6 @@ public class CustomerFormViewModel {
         public string? PhotoUrl { get; set; }
 
         // Convenience: full name for views
-        public string FullName => $"{FirstName} {LastName}".Trim();*/
+        public string FullName => $"{FirstName} {LastName}".Trim();
     
 }

@@ -22,11 +22,19 @@ public class AdminController : Controller
     
     public async Task<IActionResult> Index()
     {
+        var prodRes = await _productService.CountAsync();
+        var custRes = await _customerService.CountAsync();
+        var saleRes = await _saleService.CountAsync();
+
+        if (!prodRes.IsSuccess) _logger.LogWarning("Failed to get product count: {Message}", prodRes.ErrorMessage);
+        if (!custRes.IsSuccess) _logger.LogWarning("Failed to get customer count: {Message}", custRes.ErrorMessage);
+        if (!saleRes.IsSuccess) _logger.LogWarning("Failed to get sale count: {Message}", saleRes.ErrorMessage);
+
         var vm = new DashboardViewModel
         {
-            TotalProducts = await _productService.CountAsync(),
-            TotalCustomers = await _customerService.CountAsync(),
-            TotalSales = await _saleService.CountAsync()
+            TotalProducts = prodRes.IsSuccess ? prodRes.Value : 0L,
+            TotalCustomers = custRes.IsSuccess ? custRes.Value : 0L,
+            TotalSales = saleRes.IsSuccess ? saleRes.Value : 0L
         };
 
         return View(vm);

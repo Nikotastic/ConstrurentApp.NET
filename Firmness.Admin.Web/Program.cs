@@ -121,15 +121,13 @@ if (!env.IsDevelopment())
 }
 else
 {
-    // In dev show migrations endpoint or developer exceptions as needed
+    // In dev show developer exceptions as needed
     app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -139,9 +137,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-
-// If you are using Server-side Blazor, enable these:
-// app.MapBlazorHub();
-// app.MapFallbackToPage("/_Host");
-
 app.Run();

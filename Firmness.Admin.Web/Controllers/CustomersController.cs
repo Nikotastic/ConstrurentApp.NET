@@ -104,10 +104,9 @@ namespace Firmness.Admin.Web.Controllers
                 customer.Phone = vm.Phone?.Trim() ?? string.Empty;
                 customer.Address = vm.Address?.Trim() ?? string.Empty;
                 customer.IsActive = vm.IsActive;
-                customer.UpdatedAt = DateTime.UtcNow;
 
                 await _service.UpdateAsync(customer);
-                TempData["Success"] = "Cliente actualizado correctamente.";
+                TempData["Success"] = "Client update correctly.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

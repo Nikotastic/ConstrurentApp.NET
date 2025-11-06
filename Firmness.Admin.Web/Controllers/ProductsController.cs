@@ -3,14 +3,11 @@ using Firmness.Application.Interfaces;
 using Firmness.Core.Entities;
 using Firmness.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Firmness.Admin.Web.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
         private readonly IProductService _service;
         private readonly ILogger<ProductsController> _logger;
         public ProductsController(IProductService service, ILogger<ProductsController> logger)
@@ -28,18 +25,25 @@ namespace Firmness.Admin.Web.Controllers
 
             try
             {
-                var result = string.IsNullOrWhiteSpace(q)
+                var serviceResult = string.IsNullOrWhiteSpace(q)
                     ? await _service.GetAllAsync(page, pageSize)
                     : await _service.SearchAsync(q.Trim(), page, pageSize);
 
+                if (!serviceResult.IsSuccess)
+                {
+                    _logger.LogWarning("Products listing failed: {Message}", serviceResult.ErrorMessage);
+                    TempData["Error"] = "Los productos no pudieron cargarse. Intenta nuevamente más tarde.";
+                    var empty = new Firmness.Core.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
+                    return View(empty);
+                }
+
                 ViewData["Query"] = q;
-                return View(result);
+                return View(serviceResult.Value);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error listing products.");
-                TempData["Error"] = "NThe products could not be loaded. Please try again later.";
-                // return empty paginated result to avoid null reference in view
+                _logger.LogError(ex, "Unexpected error listing products.");
+                TempData["Error"] = "Los productos no pudieron cargarse. Intenta nuevamente más tarde.";
                 var empty = new Firmness.Core.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
                 return View(empty);
             }
@@ -48,9 +52,9 @@ namespace Firmness.Admin.Web.Controllers
         // GET: Products/Details/5
         public async Task<IActionResult> Details(Guid id)
         {
-            var product = await _service.GetByIdAsync(id);
-            if (product == null) return NotFound();
-            return View(MapToFormVm(product));
+            var result = await _service.GetByIdAsync(id);
+            if (!result.IsSuccess || result.Value == null) return NotFound();
+            return View(MapToFormVm(result.Value));
         }
 
         // GET: Products/Create
@@ -61,9 +65,6 @@ namespace Firmness.Admin.Web.Controllers
 
 
         // POST: Products/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        // POST: /Products/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductFormViewModel vm)
@@ -74,14 +75,21 @@ namespace Firmness.Admin.Web.Controllers
             {
                 var entity = new Product(vm.SKU, vm.Name, vm.Description ?? string.Empty, vm.Price ?? 0m, vm.ImageUrl ?? string.Empty, vm.Stock ?? 0m);
 
-                await _service.AddAsync(entity);
-                TempData["Success"] = "Product created correctly.";
+                var result = await _service.AddAsync(entity);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Create product failed: {Message}", result.ErrorMessage);
+                    ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "No se pudo crear el producto.");
+                    return View(vm);
+                }
+
+                TempData["Success"] = "Producto creado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating product.");
-                ModelState.AddModelError(string.Empty, "An error occurred while creating the product. Please try again.");
+                ModelState.AddModelError(string.Empty, "Ocurrió un error al crear el producto. Intenta nuevamente.");
                 return View(vm);
             }
         }
@@ -89,9 +97,9 @@ namespace Firmness.Admin.Web.Controllers
         // GET: /Products/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
         {
-            var product = await _service.GetByIdAsync(id);
-            if (product == null) return NotFound();
-            return View(MapToFormVm(product));
+            var result = await _service.GetByIdAsync(id);
+            if (!result.IsSuccess || result.Value == null) return NotFound();
+            return View(MapToFormVm(result.Value));
         }
 
         // POST: /Products/Edit/{id}
@@ -104,8 +112,10 @@ namespace Firmness.Admin.Web.Controllers
 
             try
             {
-                var product = await _service.GetByIdAsync(id);
-                if (product == null) return NotFound();
+                var getResult = await _service.GetByIdAsync(id);
+                if (!getResult.IsSuccess || getResult.Value == null) return NotFound();
+
+                var product = getResult.Value;
 
                 // apply changes
                 product.SKU = vm.SKU;
@@ -114,16 +124,22 @@ namespace Firmness.Admin.Web.Controllers
                 product.Price = vm.Price ?? product.Price;
                 product.ImageUrl = vm.ImageUrl ?? product.ImageUrl;
                 product.Stock = vm.Stock ?? product.Stock;
-                product.UpdatedAt = DateTime.UtcNow;
 
-                await _service.UpdateAsync(product);
-                TempData["Success"] = "Product successfully updated.";
+                var updateResult = await _service.UpdateAsync(product);
+                if (!updateResult.IsSuccess)
+                {
+                    _logger.LogWarning("Update product failed: {Message}", updateResult.ErrorMessage);
+                    ModelState.AddModelError(string.Empty, updateResult.ErrorMessage ?? "No se pudo actualizar el producto.");
+                    return View(vm);
+                }
+
+                TempData["Success"] = "Producto actualizado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product {ProductId}", id);
-                ModelState.AddModelError(string.Empty, "An error occurred while updating the product. Please try again.");
+                ModelState.AddModelError(string.Empty, "Ocurrió un error al actualizar el producto. Intenta nuevamente.");
                 return View(vm);
             }
         }
@@ -131,9 +147,9 @@ namespace Firmness.Admin.Web.Controllers
         // GET: /Products/Delete/{id}
         public async Task<IActionResult> Delete(Guid id)
         {
-            var product = await _service.GetByIdAsync(id);
-            if (product == null) return NotFound();
-            return View(MapToFormVm(product));
+            var result = await _service.GetByIdAsync(id);
+            if (!result.IsSuccess || result.Value == null) return NotFound();
+            return View(MapToFormVm(result.Value));
         }
 
         // POST: /Products/Delete/{id}
@@ -143,14 +159,21 @@ namespace Firmness.Admin.Web.Controllers
         {
             try
             {
-                await _service.DeleteAsync(id);
-                TempData["Success"] = "Product successfully removed.";
+                var result = await _service.DeleteAsync(id);
+                if (!result.IsSuccess)
+                {
+                    _logger.LogWarning("Delete product failed: {Message}", result.ErrorMessage);
+                    TempData["Error"] = result.ErrorMessage ?? "Ocurrió un error al eliminar el producto.";
+                    return RedirectToAction(nameof(Delete), new { id });
+                }
+
+                TempData["Success"] = "Producto eliminado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting product {ProductId}", id);
-                TempData["Error"] = "An error occurred while deleting the product..";
+                TempData["Error"] = "Ocurrió un error al eliminar el producto.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
         }

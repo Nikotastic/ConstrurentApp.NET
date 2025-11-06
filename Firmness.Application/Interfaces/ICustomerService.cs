@@ -1,4 +1,5 @@
-﻿using Firmness.Core.Entities;
+﻿using Firmness.Core.Common;
+using Firmness.Core.Entities;
 
 namespace Firmness.Application.Interfaces;
 
@@ -6,9 +7,9 @@ public interface ICustomerService
 {
     Task<Customer?> GetByIdAsync(Guid id);
     Task<IEnumerable<Customer>> GetAllAsync();
+    Task<IPaginatedResult<Customer>> GetAllAsync(int page, int pageSize);
     Task AddAsync(Customer customer);
     Task UpdateAsync(Customer customer);
     Task DeleteAsync(Guid id);
-    Task<long> CountAsync(CancellationToken cancellationToken = default);
-    Task<string?> GetAllAsync(int page, int pageSize);
+    Task<Result<long>> CountAsync(CancellationToken cancellationToken = default);
 }
