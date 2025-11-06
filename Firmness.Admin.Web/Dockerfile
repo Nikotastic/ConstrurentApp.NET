@@ -13,21 +13,20 @@ WORKDIR /src
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# Copiar proyecto principal y restaurar
-COPY ["Firmness.Web/Firmness.Web.csproj", "Firmness.Web/"]
-RUN dotnet restore "Firmness.Web/Firmness.Web.csproj"
-
-# Copiar el codigo fuente
+# Copiar 
 COPY . .
 
-# Compilar el proyecto
-WORKDIR "/src/Firmness.Web"
-RUN dotnet build "./Firmness.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
+# Restaurar el proyecto desde su ruta original dentro del repo
+RUN dotnet restore "Firmness.Admin.Web/Firmness.Admin.Web.csproj"
+
+# Compilar el proyecto usando la ruta relativa original
+RUN dotnet build "Firmness.Admin.Web/Firmness.Admin.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Publicar para producción
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Firmness.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR /src
+RUN dotnet publish "Firmness.Admin.Web/Firmness.Admin.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Etapa final para ejecución
 FROM base AS final
@@ -40,4 +39,4 @@ COPY --from=publish /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Comando por defecto (puede ser sobrescrito en docker-compose)
-ENTRYPOINT ["dotnet", "Firmness.Web.dll"]
+ENTRYPOINT ["dotnet", "Firmness.Admin.Web.dll"]
