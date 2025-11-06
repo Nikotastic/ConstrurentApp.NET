@@ -1,4 +1,5 @@
-﻿using Firmness.Core.Entities;
+﻿using Firmness.Core.Common;
+using Firmness.Core.Entities;
 using Firmness.Core.Interfaces;
 using Firmness.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +9,37 @@ namespace Firmness.Infrastructure.Repositories;
 // Implementation of ICustomerRepository
 public class CustomerRepository(ApplicationDbContext db) : ICustomerRepository
 {
+    // Get a customer by id
+    public async Task<Customer?> GetByIdAsync(Guid id)
+    {
+        return await db.Customers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+    }
+    // Get a customer by identity user id
+    public async Task<Customer?> GetByIdentityUserIdAsync(string identityUserId)
+    {
+        return await db.Customers.AsNoTracking().FirstOrDefaultAsync(x => x.IdentityUserId == identityUserId);
+    }
     // Add a new customer
+    
+    public async Task<IPaginatedResult<Customer>> GetAllAsync(int page, int pageSize)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var query = db.Customers.AsNoTracking().OrderBy(c => c.FirstName);
+        var total = await query.LongCountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedResult<Customer>(items, page, pageSize, total);
+    }
+
     public async Task AddAsync(Customer customer)
     {
+        
+        if (customer is null) throw new ArgumentNullException(nameof(customer));
         await db.Customers.AddAsync(customer);
         await db.SaveChangesAsync();
     }
@@ -38,20 +67,10 @@ public class CustomerRepository(ApplicationDbContext db) : ICustomerRepository
             q = q.Where(c => c.IdentityUserId != null && (c.FirstName.Contains(query) || c.IdentityUserId.Contains(query)));
         return await q.ToListAsync();
     }
-
-    // Get a customer by id
-    public async Task<Customer?> GetByIdAsync(Guid id)
-    {
-        return await db.Customers.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-    }
-    // Get a customer by identity user id
-    public async Task<Customer?> GetByIdentityUserIdAsync(string identityUserId)
-    {
-        return await db.Customers.AsNoTracking().FirstOrDefaultAsync(x => x.IdentityUserId == identityUserId);
-    }
     // Update a customer
     public async Task UpdateAsync(Customer customer)
     {
+        if (customer is null) throw new ArgumentNullException(nameof(customer));
         db.Customers.Update(customer);
         await db.SaveChangesAsync();
     }
@@ -65,6 +84,9 @@ public class CustomerRepository(ApplicationDbContext db) : ICustomerRepository
     // Search customers by name or identity user id
     public async Task<IEnumerable<Customer>> SearchByNameOrDocumentAsync(string? term, int page = 1, int pageSize = 50)
     {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
         var q = db.Customers.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(term))
@@ -85,7 +107,4 @@ public class CustomerRepository(ApplicationDbContext db) : ICustomerRepository
     
     public async Task<long> CountAsync(CancellationToken cancellationToken = default)
         => await db.Customers.LongCountAsync(cancellationToken);
-    
-    
-    
 }

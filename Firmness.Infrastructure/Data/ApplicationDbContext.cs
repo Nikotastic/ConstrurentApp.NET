@@ -1,4 +1,5 @@
 ﻿using Firmness.Core.Entities;
+using Firmness.Core.Interfaces;
 using Firmness.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Firmness.Infrastructure.Data;
 
 // DbContext for the application
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfWork
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
@@ -82,7 +83,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         {
             b.ToTable("Sale");
             b.HasKey(s => s.Id);
-            b.Property(s => s.CreatedAt).IsRequired();
             b.Property(s => s.TotalAmount).HasColumnType("decimal(18,2)").IsRequired();
             b.HasOne(s => s.Customer).WithMany(c => c.Sales).HasForeignKey(s => s.CustomerId);
         });
@@ -97,5 +97,30 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             b.HasOne(si => si.Sale).WithMany(s => s.Items).HasForeignKey(si => si.SaleId);
             b.HasOne(si => si.Product).WithMany(p => p.SaleItems).HasForeignKey(si => si.ProductId);
         });
+    }
+    
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        UpdateTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void UpdateTimestamps()
+    {
+        var utcNow = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = utcNow;
+                entry.Entity.UpdatedAt = utcNow;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = utcNow;
+                entry.Property(e => e.CreatedAt).IsModified = false;
+            }
+        }
     }
 }

@@ -6,38 +6,43 @@ using Microsoft.EntityFrameworkCore;
 namespace Firmness.Infrastructure.Repositories;
 
 // Implementation of ISaleRepository
-public class SaleRepository(ApplicationDbContext db) : ISaleRepository
+public class SaleRepository : ISaleRepository
 {
+    private readonly ApplicationDbContext _db;
+    
+    public SaleRepository(ApplicationDbContext db)
+    {
+        _db = db;
+    }
     // Add a new sale
     public async Task AddAsync(Sale sale)
     {
         if (sale == null) throw new ArgumentNullException(nameof(sale));
-        await db.Sales.AddAsync(sale);
-        await db.SaveChangesAsync();
+        await _db.Sales.AddAsync(sale);
     }
     
     // Update an existing sale
-    public async Task UpdateAsync(Sale sale)
+    public Task UpdateAsync(Sale sale)
     {
         if (sale == null) throw new ArgumentNullException(nameof(sale));
-        db.Sales.Update(sale);
-        await db.SaveChangesAsync();
+        _db.Sales.Update(sale);
+        return Task.CompletedTask;
     }
     
     // Delete a sale by id
     public async Task DeleteAsync(Guid id)
     {
-        var sale = await db.Sales.Include(s => s.Items).FirstOrDefaultAsync(s => s.Id == id);
+        var sale = await _db.Sales
+            .Include(s => s.Items)
+            .FirstOrDefaultAsync(s => s.Id == id);
         if (sale == null) return;
-
-        db.Sales.Remove(sale);
-        await db.SaveChangesAsync();
+        _db.Sales.Remove(sale);
     }
     
     // Get all sales
     public async Task<IEnumerable<Sale>> GetAllAsync()
     {
-        return await db.Sales
+        return await _db.Sales
             .AsNoTracking()
             .Include(s => s.Items)
             .Include(s => s.Customer)
@@ -48,7 +53,7 @@ public class SaleRepository(ApplicationDbContext db) : ISaleRepository
     // Get a sale by id
     public async Task<Sale?> GetByIdAsync(Guid id)
     {
-        return await db.Sales
+        return await _db.Sales
             .AsNoTracking()
             .Include(s => s.Items)
             .Include(s => s.Customer)
@@ -58,7 +63,7 @@ public class SaleRepository(ApplicationDbContext db) : ISaleRepository
     // Get all sales by customer id
     public async Task<IEnumerable<Sale>> GetByCustomerIdAsync(Guid customerId)
     {
-        return await db.Sales
+        return await _db.Sales
             .AsNoTracking()
             .Where(s => s.CustomerId == customerId)
             .Include(s => s.Items)
@@ -69,7 +74,7 @@ public class SaleRepository(ApplicationDbContext db) : ISaleRepository
     // Get all sales by date range
     public async Task<IEnumerable<Sale>> GetByDateRangeAsync(DateTime from, DateTime to)
     {
-        return await db.Sales
+        return await _db.Sales
             .AsNoTracking()
             .Where(s => s.CreatedAt >= from && s.CreatedAt <= to)
             .Include(s => s.Items)
@@ -79,6 +84,6 @@ public class SaleRepository(ApplicationDbContext db) : ISaleRepository
     }
     
     public async Task<long> CountAsync(CancellationToken cancellationToken = default)
-        => await db.Sales.LongCountAsync(cancellationToken);
+        => await _db.Sales.LongCountAsync(cancellationToken);
     
 }

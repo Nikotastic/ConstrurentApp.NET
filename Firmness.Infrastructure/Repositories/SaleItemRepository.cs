@@ -9,8 +9,8 @@ public class SaleItemRepository(ApplicationDbContext db) : ISaleItemRepository
 {
     public async Task AddAsync(SaleItem saleItem)
     {
+        if (saleItem == null) throw new ArgumentNullException(nameof(saleItem));
         await db.SaleItems.AddAsync(saleItem);
-        await db.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -18,7 +18,6 @@ public class SaleItemRepository(ApplicationDbContext db) : ISaleItemRepository
         var entity = await db.SaleItems.FindAsync(id);
         if (entity == null) return;
         db.SaleItems.Remove(entity);
-        await db.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<SaleItem>> GetByProductIdAsync(Guid productId)
@@ -48,10 +47,11 @@ public class SaleItemRepository(ApplicationDbContext db) : ISaleItemRepository
             .FirstOrDefaultAsync(si => si.Id == id);
     }
 
-    public async Task UpdateAsync(SaleItem saleItem)
+    public Task UpdateAsync(SaleItem saleItem)
     {
+        if (saleItem == null) throw new ArgumentNullException(nameof(saleItem));
         db.SaleItems.Update(saleItem);
-        await db.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public async Task<bool> ExistsAsync(Guid id)
