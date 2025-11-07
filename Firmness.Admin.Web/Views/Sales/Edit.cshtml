@@ -1,4 +1,4 @@
-@model Firmness.Core.Entities.Sale
+@model Firmness.Admin.Web.ViewModels.Sales.SaleFormViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -11,15 +11,16 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" method="post" class="row g-3">
+            @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             <div class="form-group">
                 <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
+                <select asp-for="CustomerId" class="form-control" asp-items="Model.Customers"></select>
                 <span asp-validation-for="CustomerId" class="text-danger"></span>
             </div>
-           
+
             <div class="form-group">
                 <label asp-for="TotalAmount" class="control-label"></label>
                 <input asp-for="TotalAmount" class="form-control" />
