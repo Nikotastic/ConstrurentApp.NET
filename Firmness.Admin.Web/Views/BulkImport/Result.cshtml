@@ -1,0 +1,141 @@
+﻿@model Firmness.Application.Models.BulkImportResult
+@{
+    ViewData["Title"] = "Resultado de Importación";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2><i class="fas fa-file-import"></i> Resultado de Importación</h2>
+            <hr />
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Resumen de Importación</h5>
+                    
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-light">
+                                <h3 class="text-primary">@Model.TotalRows</h3>
+                                <p class="mb-0">Total de Filas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-success text-white">
+                                <h3>@Model.SuccessfulRows</h3>
+                                <p class="mb-0">Exitosas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-danger text-white">
+                                <h3>@Model.FailedRows</h3>
+                                <p class="mb-0">Fallidas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-info text-white">
+                                <h3>@((Model.TotalRows > 0 ? (Model.SuccessfulRows * 100.0 / Model.TotalRows).ToString("F1") : "0"))%</h3>
+                                <p class="mb-0">Tasa de Éxito</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <i class="fas fa-box"></i> Productos
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><strong>Creados:</strong> <span class="badge bg-success">@Model.ProductsCreated</span></li>
+                                <li><strong>Actualizados:</strong> <span class="badge bg-info">@Model.ProductsUpdated</span></li>
+                                <li><strong>Total:</strong> <span class="badge bg-primary">@(Model.ProductsCreated + Model.ProductsUpdated)</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <i class="fas fa-users"></i> Clientes
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><strong>Creados:</strong> <span class="badge bg-success">@Model.CustomersCreated</span></li>
+                                <li><strong>Actualizados:</strong> <span class="badge bg-info">@Model.CustomersUpdated</span></li>
+                                <li><strong>Total:</strong> <span class="badge bg-primary">@(Model.CustomersCreated + Model.CustomersUpdated)</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <i class="fas fa-shopping-cart"></i> Ventas
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><strong>Creadas:</strong> <span class="badge bg-success">@Model.SalesCreated</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.HasErrors)
+            {
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-danger text-white">
+                        <i class="fas fa-exclamation-triangle"></i> Errores y Advertencias (@Model.Errors.Count)
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Fila</th>
+                                        <th>Campo</th>
+                                        <th>Error</th>
+                                        <th>Datos</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var error in Model.Errors)
+                                    {
+                                        <tr>
+                                            <td><span class="badge bg-secondary">@error.RowNumber</span></td>
+                                            <td><code>@error.Field</code></td>
+                                            <td>@error.ErrorMessage</td>
+                                            <td class="small text-muted">@error.RowData</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-arrow-left"></i> Nueva Importación
+                </a>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-box"></i> Ver Productos
+                </a>
+                <a asp-controller="Customers" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-users"></i> Ver Clientes
+                </a>
+                <a asp-controller="Sales" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-shopping-cart"></i> Ver Ventas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
