@@ -7,11 +7,13 @@ public class CustomerFormViewModel {
 
         [Required(ErrorMessage = "Name is required.")]
         [StringLength(100, ErrorMessage = "The name cannot exceed 100 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "The name can only contain letters and spaces.")]
         [Display(Name = "Name")]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The surname is mandatory.")]
         [StringLength(100, ErrorMessage = "The surname cannot exceed 100 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "The name can only contain letters and spaces.")]
         [Display(Name = "LastName")]
         public string LastName { get; set; } = string.Empty;
 
@@ -32,6 +34,7 @@ public class CustomerFormViewModel {
         public string? Phone { get; set; }
 
         [StringLength(500, ErrorMessage = "The address cannot exceed 500 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "The name can only contain letters and spaces.")]
         [Display(Name = "Address")]
         public string? Address { get; set; }
 
