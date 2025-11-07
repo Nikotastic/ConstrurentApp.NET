@@ -20,12 +20,13 @@ public class CustomerFormViewModel {
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "The email does not have a valid format.")]
         [StringLength(320, ErrorMessage = "The email is too long.")]
+        
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The document is mandatory.")]
         [StringLength(50, ErrorMessage = "The document cannot exceed 50 characters.")]
-        [Display(Name = "Document (NIT / ID Card)")]
+        [Display(Name = "Document (NIT / ID Card)")] 
         public string Document { get; set; } = string.Empty;
 
         [Phone(ErrorMessage = "The phone number is not in a valid format..")]
@@ -53,5 +54,5 @@ public class CustomerFormViewModel {
 
         // Convenience: full name for views
         public string FullName => $"{FirstName} {LastName}".Trim();
-    
+        
 }

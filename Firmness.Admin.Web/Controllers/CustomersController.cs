@@ -21,7 +21,27 @@ namespace Firmness.Admin.Web.Controllers
 
 
         // GET: /Customers
-        public async Task<IActionResult> Index() => View(await _service.GetAllAsync());
+        public async Task<IActionResult> Index(string? q)
+        {
+            var customers = await _service.GetAllAsync();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var term = q.Trim();
+                customers = customers
+                    .Where(c =>
+                        (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(c.LastName)  && c.LastName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(c.Email)     && c.Email.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(c.Phone)     && c.Phone.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                        (!string.IsNullOrWhiteSpace(c.Document)  && c.Document.Contains(term, StringComparison.OrdinalIgnoreCase))
+                    )
+                    .ToList();
+            }
+
+            ViewData["q"] = q;
+            return View(customers);
+        }
         
         
         // GET: /Customers/Details/{id}
@@ -36,6 +56,7 @@ namespace Firmness.Admin.Web.Controllers
         public IActionResult Create() => View(new CustomerFormViewModel());
 
         // POST: /Customers/Create
+        // csharp
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CustomerFormViewModel vm)
@@ -44,23 +65,49 @@ namespace Firmness.Admin.Web.Controllers
 
             try
             {
-                if (!IsValidDocument(vm.Document))
+                var firstName = vm.FirstName?.Trim() ?? string.Empty;
+                var lastName  = vm.LastName?.Trim()  ?? string.Empty;
+                var email     = vm.Email?.Trim()     ?? string.Empty;
+                var document  = vm.Document?.Trim()  ?? string.Empty;
+                var phone     = vm.Phone?.Trim()     ?? string.Empty;
+                var address   = vm.Address?.Trim()   ?? string.Empty;
+
+               
+                if (string.IsNullOrWhiteSpace(firstName))
                 {
-                    ModelState.AddModelError(nameof(vm.Document), "The document does not have a valid format..");
+                    ModelState.AddModelError(nameof(vm.FirstName), "First name is required.");
+                    return View(vm);
+                }
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    ModelState.AddModelError(nameof(vm.Email), "Email is required.");
+                    return View(vm);
+                }
+                if (!IsValidDocument(document))
+                {
+                    ModelState.AddModelError(nameof(vm.Document), "The document does not have a valid format.");
                     return View(vm);
                 }
 
-                var entity = new Customer(vm.FirstName.Trim(), vm.LastName.Trim(), vm.Email.Trim())
+                var entity = new Customer(firstName, lastName, email)
                 {
-                    Document = vm.Document.Trim(),
-                    Phone = vm.Phone?.Trim() ?? string.Empty,
-                    Address = vm.Address?.Trim() ?? string.Empty,
+                    Document = document,
+                    Phone = string.IsNullOrEmpty(phone) ? string.Empty : phone,
+                    Address = string.IsNullOrEmpty(address) ? string.Empty : address,
                     IsActive = vm.IsActive
                 };
 
                 await _service.AddAsync(entity);
-                TempData["Success"] = "Client created successfully.";
+
+               
+                TempData["Success"] = $"Client created successfully. Id: {entity.Id}";
                 return RedirectToAction(nameof(Index));
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Database error creating customer.");
+                ModelState.AddModelError(string.Empty, "A database error occurred while creating the client.");
+                return View(vm);
             }
             catch (Exception ex)
             {
@@ -69,6 +116,7 @@ namespace Firmness.Admin.Web.Controllers
                 return View(vm);
             }
         }
+
 
        // GET: /Customers/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
