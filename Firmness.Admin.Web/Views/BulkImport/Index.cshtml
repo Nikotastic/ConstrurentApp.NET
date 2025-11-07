@@ -1,0 +1,163 @@
+﻿@{
+    ViewData["Title"] = "Importación Masiva de Datos";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="bi bi-file-earmark-excel"></i> Importación Masiva de Datos
+            </h1>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["Warning"] != null)
+            {
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-circle-fill"></i> @TempData["Warning"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="row">
+                <!-- Instrucciones -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold">¿Qué puedes importar?</h6>
+                            <p>Este sistema permite importar datos desnormalizados de:</p>
+                            <ul>
+                                <li><strong>Productos:</strong> SKU, nombre, descripción, precio, stock</li>
+                                <li><strong>Clientes:</strong> nombre, apellido, email, teléfono, dirección, documento</li>
+                                <li><strong>Ventas:</strong> producto, cliente, cantidad, precio unitario</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">Características del sistema:</h6>
+                            <ul>
+                                <li>✅ Normaliza automáticamente los datos</li>
+                                <li>✅ Identifica y relaciona productos, clientes y ventas</li>
+                                <li>✅ Actualiza registros existentes</li>
+                                <li>✅ Crea nuevos registros</li>
+                                <li>✅ Genera log detallado de errores</li>
+                                <li>✅ Valida datos obligatorios</li>
+                            </ul>
+
+                            <h6 class="fw-bold mt-3">Formatos aceptados:</h6>
+                            <ul>
+                                <li>Archivos Excel: .xlsx, .xls</li>
+                                <li>Tamaño máximo: 10 MB</li>
+                                <li>Primera fila debe contener encabezados</li>
+                            </ul>
+
+                            <div class="alert alert-info mt-3">
+                                <small>
+                                    <strong>Tip:</strong> Los nombres de las columnas son flexibles. 
+                                    El sistema reconoce variantes como "Producto", "Product", "NombreProducto", etc.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario de carga -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Cargar Archivo</h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                                <div class="mb-3">
+                                    <label for="file" class="form-label fw-bold">Seleccionar archivo Excel:</label>
+                                    <input type="file" 
+                                           class="form-control" 
+                                           id="file" 
+                                           name="file" 
+                                           accept=".xlsx,.xls" 
+                                           required>
+                                    <div class="form-text">
+                                        Formatos permitidos: .xlsx, .xls (máximo 10 MB)
+                                    </div>
+                                </div>
+
+                                <div id="fileInfo" class="alert alert-secondary d-none mb-3">
+                                    <small>
+                                        <strong>Archivo seleccionado:</strong> <span id="fileName"></span><br>
+                                        <strong>Tamaño:</strong> <span id="fileSize"></span>
+                                    </small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg" id="btnUpload">
+                                        <i class="bi bi-upload"></i> Importar Datos
+                                    </button>
+                                    <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
+                                        <i class="bi bi-download"></i> Descargar Plantilla de Ejemplo
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Ejemplos de columnas aceptadas -->
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-list-columns"></i> Ejemplos de Columnas</h6>
+                        </div>
+                        <div class="card-body">
+                            <small>
+                                <strong>Productos:</strong> SKU, Producto, Descripcion, Precio, Stock<br>
+                                <strong>Clientes:</strong> Nombre, Apellido, Email, Telefono, Direccion, Documento<br>
+                                <strong>Ventas:</strong> CantidadVendida, Fecha
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                document.getElementById('fileInfo').classList.remove('d-none');
+                
+                // Validar tamaño
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('El archivo es demasiado grande. Tamaño máximo: 10 MB');
+                    e.target.value = '';
+                    document.getElementById('fileInfo').classList.add('d-none');
+                }
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const btn = document.getElementById('btnUpload');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+        });
+    </script>
+}
+
