@@ -1,0 +1,11 @@
+﻿@{
+    var q = ViewContext.HttpContext.Request.Query["q"].ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+<form method="get" class="mb-3">
+    <div class="input-group">
+        <input type="search" name="q" value="@q" class="form-control" placeholder="Search for ID, name..." />
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Clear</a>
+    </div>
+</form>

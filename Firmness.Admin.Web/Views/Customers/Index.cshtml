@@ -1,31 +1,32 @@
 @model IEnumerable<Firmness.Core.Entities.Customer>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Customer";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<h1>Customer</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+@await Html.PartialAsync("_SearchBar")
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.IdentityUserId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
-            </th>
+            <th>ID</th>
+            <th>Fist Name</th>
+            <th>Last Name</th>
             <th>
                 @Html.DisplayNameFor(model => model.Email)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Phone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Document)
+            </th>
+            <th>Photo</th>
         </tr>
     </thead>
     <tbody>
@@ -42,6 +43,15 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Phone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Document)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PhotoFile)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
