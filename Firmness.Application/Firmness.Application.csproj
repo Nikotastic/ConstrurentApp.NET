@@ -4,6 +4,10 @@
     <ProjectReference Include="..\Firmness.Core\Firmness.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="8.2.1" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
