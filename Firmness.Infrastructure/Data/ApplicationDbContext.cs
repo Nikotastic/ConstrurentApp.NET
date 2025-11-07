@@ -99,7 +99,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
         });
     }
     
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         UpdateTimestamps();
         return base.SaveChangesAsync(cancellationToken);
