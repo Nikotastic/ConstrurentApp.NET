@@ -63,6 +63,6 @@
       export PATH=\$PATH:/root/.dotnet/tools &&
       tail -f /dev/null
       "
-volumes:
-  postgres_data:
-  nuget_cache:
+
+
+
