@@ -8,7 +8,7 @@ using ApplicationDbContext = Firmness.Infrastructure.Data.ApplicationDbContext;
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
 
-// Cargar .env (igual que antes)
+// Load the main .env file (for Docker)
 var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
 if (!File.Exists(envPath))
 {
@@ -26,7 +26,7 @@ if (!File.Exists(envPath))
 }
 if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
 
-// Resolver connection string
+// Resolve connection string from environment variables or appsettings
 var configuration = builder.Configuration;
 var defaultConn = Environment.GetEnvironmentVariable("CONN_STR")
                   ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
@@ -35,15 +35,15 @@ var defaultConn = Environment.GetEnvironmentVariable("CONN_STR")
 if (string.IsNullOrWhiteSpace(defaultConn))
     throw new InvalidOperationException("Connection string not configured. Se buscó: CONN_STR, ConnectionStrings__DefaultConnection, appsettings.");
 
-// Si no estamos corriendo dentro de un contenedor, sustituir host 'postgres' por 'localhost'
+// If we are not running inside a container, replace host 'postgres' with 'localhost'
 var inContainer = string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase);
 if (!inContainer && defaultConn.IndexOf("Host=postgres", StringComparison.OrdinalIgnoreCase) >= 0)
 {
-    Console.WriteLine("Info: reemplazando Host=postgres por Host=localhost para ejecución local.");
+    Console.WriteLine("Info: replacing Host=postgres with Host=localhost for local execution.");
     defaultConn = defaultConn.Replace("Host=postgres", "Host=localhost", StringComparison.OrdinalIgnoreCase);
 }
 
-// Registrar DbContext usando la cadena final
+// Register DbContext using the final string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
         defaultConn,
