@@ -7,6 +7,8 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +16,7 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.10" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.*" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,9 +28,22 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Firmness.Api\Firmness.Api.csproj" />
       <ProjectReference Include="..\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
       <ProjectReference Include="..\Firmness.Application\Firmness.Application.csproj" />
       <ProjectReference Include="..\Firmness.Admin.Web\Firmness.Admin.Web.csproj" />
     </ItemGroup>
+
+    <!-- xml -->
+    <Target Name="CopyAspNetCodegenDeps" AfterTargets="Build">
+        <PropertyGroup>
+            <_WebProjOut>..\Firmness\bin\$(Configuration)\$(TargetFramework)\</_WebProjOut>
+        </PropertyGroup>
+        <ItemGroup>
+            <_DepsFile Include="$(_WebProjOut)dotnet-aspnet-codegenerator-design.deps.json" />
+        </ItemGroup>
+        <Copy SourceFiles="@(_DepsFile)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('@(_DepsFile)')" />
+    </Target>
+    
 
 </Project>

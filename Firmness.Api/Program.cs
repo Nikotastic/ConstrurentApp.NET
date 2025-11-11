@@ -1,36 +1,56 @@
 using Firmness.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ApplicationDbContext = Firmness.Infrastructure.Data.ApplicationDbContext;
+using Firmness.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
 
-// Load .env if present (same approach as Admin.Web)
-var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
-if (!File.Exists(envPath))
+// Load .env or .env.local if present (same approach as Admin.Web, prefer .env.local)
+string[] candidates = { ".env.local", ".env" };
+string? envPath = null;
+foreach (var name in candidates)
+{
+    var candidate = Path.Combine(builder.Environment.ContentRootPath, name);
+    if (File.Exists(candidate))
+    {
+        envPath = candidate;
+        break;
+    }
+}
+if (envPath == null)
 {
     var dir = new DirectoryInfo(AppContext.BaseDirectory);
     while (dir != null)
     {
-        var candidate = Path.Combine(dir.FullName, ".env");
-        if (File.Exists(candidate))
+        foreach (var name in candidates)
         {
-            envPath = candidate;
-            break;
+            var candidate = Path.Combine(dir.FullName, name);
+            if (File.Exists(candidate))
+            {
+                envPath = candidate;
+                break;
+            }
         }
+        if (envPath != null) break;
         dir = dir.Parent;
     }
 }
-if (File.Exists(envPath))
+if (!string.IsNullOrEmpty(envPath))
 {
     try
     {
-        // DotNetEnv is optional; if available load env vars
+  
         DotNetEnv.Env.Load(envPath);
+        Console.WriteLine($"Loaded env file: {envPath}");
     }
     catch
     {
-        // ignore if DotNetEnv not available
+        // ignore
     }
 }
 
@@ -63,14 +83,105 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
+// ---------- Identity configuration ----------
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequiredLength = 6;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// JWT configuration
+// IMPORTANT: default must be at least 256 bits (32 bytes). Prefer setting JWT__Key in env or appsettings.
+var jwtKey = Environment.GetEnvironmentVariable("JWT__Key") ?? configuration["Jwt:Key"] ?? "dev_default_change_me_to_a_strong_secret_please_!2025";
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT__Issuer") ?? configuration["Jwt:Issuer"] ?? "Firmness.Api";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT__Audience") ?? configuration["Jwt:Audience"] ?? "FirmnessClients";
+
+var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+// Validate key size: HS256 requires at least 256 bits (32 bytes)
+if (keyBytes.Length < 32)
+{
+    throw new InvalidOperationException($"JWT key is too short ({keyBytes.Length * 8} bits). The key must be at least 256 bits (32 bytes). Set environment variable JWT__Key or configuration 'Jwt:Key' with a sufficiently long secret.");
+}
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromSeconds(30)
+    };
+});
+
+// Authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    // Usar el rol 'Client' (consistente con SeedData and AuthController)
+    options.AddPolicy("RequireClientRole", policy => policy.RequireRole("Client"));
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Add infrastructure services (includes application services and repositories)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Configure Swagger to accept JWT
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
+            }, new string[] { }
+        }
+    });
+});
 
 var app = builder.Build();
+
+// Apply migrations and seed Identity data (roles/users)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+        await SeedData.InitializeAsync(services);
+        logger.LogInformation("Database migrated and seed data initialized (Identity roles/users).");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error while migrating or seeding the database.");
+        // Do not rethrow to allow the app to run in a degraded state if necessary.
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -81,6 +192,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
