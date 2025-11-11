@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firmness.Admin.Web", "Firmness.Admin.Web\Firmness.Admin.Web.csproj", "{A41B6942-C029-40C5-B743-83FE72E5293F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firmness.Web", "Firmness.Admin.Web\Firmness.Web.csproj", "{A41B6942-C029-40C5-B743-83FE72E5293F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A7480932-8D39-40D0-A730-983814F49BA0}"
 	ProjectSection(SolutionItems) = preProject
@@ -8,7 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.env = .env
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firmness.Core", "Firmness.Core\Firmness.Core.csproj", "{24D545C1-33DB-4777-8A92-81CE74EEFA47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firmness.Domain", "Firmness.Domain\Firmness.Domain.csproj", "{24D545C1-33DB-4777-8A92-81CE74EEFA47}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Firmness.Infrastructure", "Firmness.Infrastructure\Firmness.Infrastructure.csproj", "{49798D03-07D3-40D8-9F6F-D4A9B3C24228}"
 EndProject

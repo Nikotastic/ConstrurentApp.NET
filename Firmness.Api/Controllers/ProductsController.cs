@@ -1,5 +1,5 @@
 ﻿using Firmness.Application.Interfaces;
-using Firmness.Core.Entities;
+using Firmness.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 

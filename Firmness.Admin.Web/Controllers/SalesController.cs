@@ -2,7 +2,7 @@ using Firmness.Admin.Web.ViewModels.Sales;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Firmness.Core.Entities;
+using Firmness.Domain.Entities;
 using Firmness.Infrastructure.Data;
 
 namespace Firmness.Admin.Web.Controllers

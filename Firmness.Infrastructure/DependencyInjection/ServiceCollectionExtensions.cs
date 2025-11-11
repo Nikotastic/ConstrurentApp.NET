@@ -1,6 +1,6 @@
 ﻿using Firmness.Application.Interfaces;
 using Firmness.Application.Services;
-using Firmness.Core.Interfaces;
+using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

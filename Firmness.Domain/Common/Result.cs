@@ -1,4 +1,4 @@
-﻿namespace Firmness.Core.Common
+﻿namespace Firmness.Domain.Common
 {
     // Resultado simple que representa éxito o fracaso con un mensaje opcional y un código de error
     public class Result

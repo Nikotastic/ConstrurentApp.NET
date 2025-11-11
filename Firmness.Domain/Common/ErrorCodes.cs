@@ -1,5 +1,5 @@
-﻿// filepath: c:\Users\NikoC\RiderProjects\ConstrurentApp.NET\Firmness.Core\Common\ErrorCodes.cs
-namespace Firmness.Core.Common
+﻿// filepath: c:\Users\NikoC\RiderProjects\ConstrurentApp.NET\Firmness.Domain\Common\ErrorCodes.cs
+namespace Firmness.Domain.Common
 {
     public static class ErrorCodes
     {

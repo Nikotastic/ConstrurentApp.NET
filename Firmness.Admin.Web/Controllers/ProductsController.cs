@@ -1,6 +1,6 @@
 using Firmness.Admin.Web.ViewModels.Product;
 using Firmness.Application.Interfaces;
-using Firmness.Core.Entities;
+using Firmness.Domain.Entities;
 using Firmness.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,7 +33,7 @@ namespace Firmness.Admin.Web.Controllers
                 {
                     _logger.LogWarning("Products listing failed: {Message}", serviceResult.ErrorMessage);
                     TempData["Error"] = "Los productos no pudieron cargarse. Intenta nuevamente más tarde.";
-                    var empty = new Firmness.Core.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
+                    var empty = new Firmness.Domain.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
                     return View(empty);
                 }
 
@@ -44,7 +44,7 @@ namespace Firmness.Admin.Web.Controllers
             {
                 _logger.LogError(ex, "Unexpected error listing products.");
                 TempData["Error"] = "Los productos no pudieron cargarse. Intenta nuevamente más tarde.";
-                var empty = new Firmness.Core.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
+                var empty = new Firmness.Domain.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), 0, page, pageSize);
                 return View(empty);
             }
         }

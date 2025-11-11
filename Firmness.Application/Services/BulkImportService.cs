@@ -1,7 +1,7 @@
 ﻿using Firmness.Application.Interfaces;
 using Firmness.Application.Models;
-using Firmness.Core.Entities;
-using Firmness.Core.Interfaces;
+using Firmness.Domain.Entities;
+using Firmness.Domain.Interfaces;
 using OfficeOpenXml;
 
 namespace Firmness.Application.Services;

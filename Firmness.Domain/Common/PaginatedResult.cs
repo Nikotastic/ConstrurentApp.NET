@@ -1,4 +1,4 @@
-﻿namespace Firmness.Core.Common;
+﻿namespace Firmness.Domain.Common;
 
 public class PaginatedResult<T> : IPaginatedResult<T>
 {

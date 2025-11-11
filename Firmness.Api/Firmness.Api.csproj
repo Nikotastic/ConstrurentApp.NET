@@ -17,7 +17,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Firmness.Application\Firmness.Application.csproj" />
         <ProjectReference Include="..\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
-        <ProjectReference Include="..\Firmness.Core\Firmness.Core.csproj" />
     </ItemGroup>
 
 </Project>

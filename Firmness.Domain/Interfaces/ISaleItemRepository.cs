@@ -1,6 +1,6 @@
-﻿using Firmness.Core.Entities;
+﻿using Firmness.Domain.Entities;
 
-namespace Firmness.Core.Interfaces;
+namespace Firmness.Domain.Interfaces;
 
 public interface ISaleItemRepository
 {

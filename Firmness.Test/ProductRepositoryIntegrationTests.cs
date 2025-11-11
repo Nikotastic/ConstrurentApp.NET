@@ -1,4 +1,4 @@
-using Firmness.Core.Entities;
+using Firmness.Domain.Entities;
 using Firmness.Infrastructure.Data;
 using Firmness.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;

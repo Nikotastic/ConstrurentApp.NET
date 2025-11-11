@@ -1,5 +1,5 @@
-﻿using Firmness.Core.Entities;
-using Firmness.Core.Interfaces;
+﻿using Firmness.Domain.Entities;
+using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

@@ -31,7 +31,7 @@
       <ProjectReference Include="..\Firmness.Api\Firmness.Api.csproj" />
       <ProjectReference Include="..\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
       <ProjectReference Include="..\Firmness.Application\Firmness.Application.csproj" />
-      <ProjectReference Include="..\Firmness.Admin.Web\Firmness.Admin.Web.csproj" />
+      <ProjectReference Include="..\Firmness.Admin.Web\Firmness.Web.csproj" />
     </ItemGroup>
 
     <!-- xml -->

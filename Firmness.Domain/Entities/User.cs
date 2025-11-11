@@ -1,4 +1,4 @@
-﻿namespace Firmness.Core.Entities;
+﻿namespace Firmness.Domain.Entities;
 
 // class for users heritage from Person
 public class User : Person

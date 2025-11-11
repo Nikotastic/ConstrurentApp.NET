@@ -1,4 +1,4 @@
-﻿namespace Firmness.Core.Entities;
+﻿namespace Firmness.Domain.Entities;
 
 // class for sale items
 public class SaleItem : BaseEntity

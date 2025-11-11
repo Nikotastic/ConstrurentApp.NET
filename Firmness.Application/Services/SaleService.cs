@@ -1,7 +1,7 @@
 ﻿using Firmness.Application.Interfaces;
-using Firmness.Core.Entities;
-using Firmness.Core.Interfaces;
-using Firmness.Core.Common;
+using Firmness.Domain.Entities;
+using Firmness.Domain.Interfaces;
+using Firmness.Domain.Common;
 namespace Firmness.Application.Services;
 
 // Service for sales

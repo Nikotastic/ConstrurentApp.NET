@@ -25,7 +25,7 @@ namespace Firmness.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Firmness.Core.Entities.Customer", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace Firmness.Infrastructure.Migrations
                     b.ToTable("Customer", (string)null);
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Product", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,7 +100,7 @@ namespace Firmness.Infrastructure.Migrations
                     b.ToTable("Product", (string)null);
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Sale", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Sale", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -122,7 +122,7 @@ namespace Firmness.Infrastructure.Migrations
                     b.ToTable("Sale", (string)null);
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.SaleItem", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.SaleItem", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -149,7 +149,7 @@ namespace Firmness.Infrastructure.Migrations
                     b.ToTable("SaleItem", (string)null);
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.User", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -203,9 +203,9 @@ namespace Firmness.Infrastructure.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Sale", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Sale", b =>
                 {
-                    b.HasOne("Firmness.Core.Entities.Customer", "Customer")
+                    b.HasOne("Firmness.Domain.Entities.Customer", "Customer")
                         .WithMany("Sales")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -214,15 +214,15 @@ namespace Firmness.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.SaleItem", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.SaleItem", b =>
                 {
-                    b.HasOne("Firmness.Core.Entities.Product", "Product")
+                    b.HasOne("Firmness.Domain.Entities.Product", "Product")
                         .WithMany("SaleItems")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Firmness.Core.Entities.Sale", "Sale")
+                    b.HasOne("Firmness.Domain.Entities.Sale", "Sale")
                         .WithMany("Items")
                         .HasForeignKey("SaleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -233,17 +233,17 @@ namespace Firmness.Infrastructure.Migrations
                     b.Navigation("Sale");
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Customer", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Sales");
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Product", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Product", b =>
                 {
                     b.Navigation("SaleItems");
                 });
 
-            modelBuilder.Entity("Firmness.Core.Entities.Sale", b =>
+            modelBuilder.Entity("Firmness.Domain.Entities.Sale", b =>
                 {
                     b.Navigation("Items");
                 });

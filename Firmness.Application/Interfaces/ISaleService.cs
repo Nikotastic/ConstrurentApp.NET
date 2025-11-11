@@ -1,5 +1,5 @@
-﻿using Firmness.Core.Entities;
-using Firmness.Core.Common;
+﻿using Firmness.Domain.Entities;
+using Firmness.Domain.Common;
 
 namespace Firmness.Application.Interfaces;
 

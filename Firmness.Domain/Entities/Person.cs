@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Firmness.Core.Entities;
+namespace Firmness.Domain.Entities;
 
 // abstract class for all persons
 public abstract class Person : BaseEntity

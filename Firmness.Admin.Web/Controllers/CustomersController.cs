@@ -3,7 +3,7 @@ using Firmness.Admin.Web.ViewModels.Customer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Firmness.Application.Interfaces;
-using Firmness.Core.Entities;
+using Firmness.Domain.Entities;
 
 namespace Firmness.Admin.Web.Controllers
 {
