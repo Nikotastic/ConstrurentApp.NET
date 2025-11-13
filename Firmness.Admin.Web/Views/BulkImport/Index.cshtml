@@ -109,7 +109,10 @@
                                         <i class="bi bi-upload"></i> Importar Datos
                                     </button>
                                     <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
-                                        <i class="bi bi-download"></i> Descargar Plantilla de Ejemplo
+                                        <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Plantilla Vacía
+                                    </a>
+                                    <a asp-action="DownloadSample" class="btn btn-outline-success">
+                                        <i class="bi bi-download"></i> Descargar Ejemplo con Datos
                                     </a>
                                 </div>
                             </form>
@@ -119,14 +122,37 @@
                     <!-- Ejemplos de columnas aceptadas -->
                     <div class="card">
                         <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="bi bi-list-columns"></i> Ejemplos de Columnas</h6>
+                            <h6 class="mb-0"><i class="bi bi-list-columns"></i> Columnas Reconocidas (Inglés/Español)</h6>
                         </div>
                         <div class="card-body">
+                            <p class="mb-2"><strong>📋 El sistema acepta nombres de columnas en INGLÉS y ESPAÑOL:</strong></p>
                             <small>
-                                <strong>Productos:</strong> SKU, Producto, Descripcion, Precio, Stock<br>
-                                <strong>Clientes:</strong> Nombre, Apellido, Email, Telefono, Direccion, Documento<br>
-                                <strong>Ventas:</strong> CantidadVendida, Fecha
+                                <strong>Productos/Insumos:</strong><br>
+                                • SKU / Codigo / Code<br>
+                                • Product / Producto / ProductName / NombreProducto<br>
+                                • Description / Descripcion / Desc<br>
+                                • Price / Precio / UnitPrice / PrecioUnitario<br>
+                                • Stock / Existencia / Inventory<br><br>
+                                
+                                <strong>Clientes:</strong><br>
+                                • FirstName / Nombre / Name<br>
+                                • LastName / Apellido / Surname<br>
+                                • Email / Correo / Mail<br>
+                                • Phone / Telefono / Tel / Celular<br>
+                                • Address / Direccion / Dir<br>
+                                • Document / Documento / DNI / ID<br><br>
+                                
+                                <strong>Ventas/Rentas:</strong><br>
+                                • Quantity / Cantidad / Qty (unidades para insumos, días para vehículos)
                             </small>
+                            <hr>
+                            <div class="alert alert-success mb-0 mt-2">
+                                <small>
+                                    <strong><i class="bi bi-lightbulb"></i> Ejemplos de SKU:</strong><br>
+                                    • Insumos: CEM-001 (Cemento), VAR-002 (Varillas), LAD-003 (Ladrillos), ARE-004 (Arena)<br>
+                                    • Vehículos: VEH-001 (Retroexcavadora), VEH-002 (Volquete), VEH-003 (Mezcladora), VEH-004 (Compactadora)
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -160,4 +186,3 @@
         });
     </script>
 }
-

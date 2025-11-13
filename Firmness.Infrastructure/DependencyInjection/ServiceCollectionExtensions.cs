@@ -27,6 +27,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IBulkImportService, BulkImportService>();
+        services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
 
         // añadir otros infra services (email, storage, etc.) aquí
 

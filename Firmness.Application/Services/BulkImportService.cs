@@ -50,6 +50,10 @@ public class BulkImportService : IBulkImportService
             
             result.TotalRows = worksheet.Dimension.Rows - 1;
 
+            // Cargar datos existentes en memoria para búsquedas más rápidas
+            var existingProducts = (await _productRepo.GetAllAsync()).ToList();
+            var existingCustomers = (await _customerRepo.GetAllAsync()).ToList();
+
             for (int row = 2; row <= worksheet.Dimension.Rows; row++)
             {
                 try
@@ -59,7 +63,7 @@ public class BulkImportService : IBulkImportService
                     if (IsEmptyRow(rowData))
                         continue;
 
-                    await ProcessRow(rowData, headers, dataType, result, row);
+                    await ProcessRow(rowData, dataType, result, row, existingProducts, existingCustomers);
                     result.SuccessfulRows++;
                 }
                 catch (Exception ex)
@@ -149,72 +153,84 @@ public class BulkImportService : IBulkImportService
         return "mixed";
     }
 
-    private async Task ProcessRow(Dictionary<string, object?> rowData, Dictionary<string, int> headers, 
-        string dataType, BulkImportResult result, int rowNumber)
+    private async Task ProcessRow(Dictionary<string, object?> rowData, 
+        string dataType, BulkImportResult result, int rowNumber,
+        List<Product> existingProducts, List<Customer> existingCustomers)
     {
         if (dataType == "mixed")
         {
-            await ProcessMixedRow(rowData, result, rowNumber);
+            await ProcessMixedRow(rowData, result, rowNumber, existingProducts, existingCustomers);
         }
         else if (dataType == "product")
         {
-            await ProcessProductRow(rowData, result);
+            await ProcessProductRow(rowData, result, existingProducts);
         }
         else if (dataType == "customer")
         {
-            await ProcessCustomerRow(rowData, result);
+            await ProcessCustomerRow(rowData, result, existingCustomers);
         }
     }
 
-    private async Task ProcessMixedRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber)
+    private async Task ProcessMixedRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber,
+        List<Product> existingProducts, List<Customer> existingCustomers)
     {
-        var productSku = GetStringValue(rowData, "SKU", "ProductoSKU", "ProductSKU");
-        var productName = GetStringValue(rowData, "Producto", "ProductName", "NombreProducto", "Product");
+        var productSku = GetStringValue(rowData, "SKU", "ProductSKU", "ProductoSKU", "Codigo", "Code");
+        var productName = GetStringValue(rowData, "Product", "ProductName", "Producto", "NombreProducto", "Name");
         
         Guid? productId = null;
         
+        // Procesar Producto si hay datos
         if (!string.IsNullOrWhiteSpace(productName))
         {
             try
             {
-                var price = GetDecimalValue(rowData, "Precio", "Price", "PrecioProducto", "ProductPrice");
-                var stock = GetDecimalValue(rowData, "Stock", "Existencia", "StockProducto");
-                var description = GetStringValue(rowData, "Descripcion", "Description", "DescripcionProducto");
-                var imageUrl = GetStringValue(rowData, "Imagen", "Image", "ImageUrl");
+                var price = GetDecimalValue(rowData, "Price", "Precio", "ProductPrice", "PrecioProducto", "PrecioUnitario", "UnitPrice");
+                var stock = GetDecimalValue(rowData, "Stock", "Existencia", "StockProducto", "Inventario", "Inventory");
+                var description = GetStringValue(rowData, "Description", "Descripcion", "DescripcionProducto", "Desc");
+                var imageUrl = GetStringValue(rowData, "ImageUrl", "Image", "Imagen", "Foto", "Photo");
 
                 if (price <= 0)
-                    throw new Exception("El precio del producto debe ser mayor a cero");
-
-                var existingProducts = await _productRepo.GetAllAsync();
-                var existingProduct = existingProducts.FirstOrDefault(p => 
-                    !string.IsNullOrEmpty(productSku) && p.SKU.Equals(productSku, StringComparison.OrdinalIgnoreCase));
-
-                if (existingProduct != null)
                 {
-                    existingProduct.Name = productName;
-                    existingProduct.Price = price;
-                    existingProduct.Stock = stock;
-                    existingProduct.Description = description ?? string.Empty;
-                    existingProduct.ImageUrl = imageUrl ?? string.Empty;
-                    
-                    await _productRepo.UpdateAsync(existingProduct);
-                    result.ProductsUpdated++;
-                    productId = existingProduct.Id;
+                    result.Errors.Add(new ImportError
+                    {
+                        RowNumber = rowNumber,
+                        Field = "Precio",
+                        ErrorMessage = "El precio del producto debe ser mayor a cero"
+                    });
                 }
                 else
                 {
-                    var product = new Product(
-                        productSku ?? $"SKU-{Guid.NewGuid().ToString()[..8]}",
-                        productName,
-                        description ?? string.Empty,
-                        price,
-                        imageUrl ?? string.Empty,
-                        stock
-                    );
-                    
-                    await _productRepo.AddAsync(product);
-                    result.ProductsCreated++;
-                    productId = product.Id;
+                    var existingProduct = existingProducts.FirstOrDefault(p => 
+                        !string.IsNullOrEmpty(productSku) && p.SKU.Equals(productSku, StringComparison.OrdinalIgnoreCase));
+
+                    if (existingProduct != null)
+                    {
+                        existingProduct.Name = productName;
+                        existingProduct.Price = price;
+                        existingProduct.Stock = stock;
+                        existingProduct.Description = description;
+                        existingProduct.ImageUrl = imageUrl;
+                        
+                        await _productRepo.UpdateAsync(existingProduct);
+                        result.ProductsUpdated++;
+                        productId = existingProduct.Id;
+                    }
+                    else
+                    {
+                        var product = new Product(
+                            productSku ?? $"SKU-{Guid.NewGuid().ToString()[..8]}",
+                            productName,
+                            description,
+                            price,
+                            imageUrl,
+                            stock
+                        );
+                        
+                        await _productRepo.AddAsync(product);
+                        existingProducts.Add(product);
+                        result.ProductsCreated++;
+                        productId = product.Id;
+                    }
                 }
             }
             catch (Exception ex)
@@ -228,8 +244,10 @@ public class BulkImportService : IBulkImportService
             }
         }
 
-        var customerEmail = GetStringValue(rowData, "Email", "ClienteEmail", "CustomerEmail", "Correo");
-        var customerName = GetStringValue(rowData, "Cliente", "CustomerName", "NombreCliente", "Customer");
+        // Procesar Cliente si hay datos
+        var customerEmail = GetStringValue(rowData, "Email", "ClienteEmail", "CustomerEmail", "Correo", "Mail");
+        var firstName = GetStringValue(rowData, "Nombre", "FirstName", "Name");
+        var lastName = GetStringValue(rowData, "Apellido", "LastName", "Surname");
         
         Guid? customerId = null;
         
@@ -237,23 +255,20 @@ public class BulkImportService : IBulkImportService
         {
             try
             {
-                var firstName = customerName ?? GetStringValue(rowData, "Nombre", "FirstName");
-                var lastName = GetStringValue(rowData, "Apellido", "LastName", "Surname");
-                var document = GetStringValue(rowData, "Documento", "Document", "DNI");
-                var phone = GetStringValue(rowData, "Telefono", "Phone", "Tel");
+                var document = GetStringValue(rowData, "Documento", "Document", "DNI", "ID");
+                var phone = GetStringValue(rowData, "Telefono", "Phone", "Tel", "Celular");
                 var address = GetStringValue(rowData, "Direccion", "Address", "Dir");
 
                 if (string.IsNullOrWhiteSpace(firstName))
                     firstName = customerEmail.Split('@')[0];
 
-                var existingCustomers = await _customerRepo.GetAllAsync();
                 var existingCustomer = existingCustomers.FirstOrDefault(c => 
                     c.Email.Equals(customerEmail, StringComparison.OrdinalIgnoreCase));
 
                 if (existingCustomer != null)
                 {
                     existingCustomer.FirstName = firstName;
-                    existingCustomer.LastName = lastName ?? string.Empty;
+                    existingCustomer.LastName = lastName;
                     existingCustomer.Document = document ?? existingCustomer.Document;
                     existingCustomer.Phone = phone ?? existingCustomer.Phone;
                     existingCustomer.Address = address ?? existingCustomer.Address;
@@ -266,13 +281,14 @@ public class BulkImportService : IBulkImportService
                 {
                     var customer = new Customer(firstName, lastName ?? string.Empty, customerEmail)
                     {
-                        Document = document ?? string.Empty,
-                        Phone = phone ?? string.Empty,
-                        Address = address ?? string.Empty,
+                        Document = document,
+                        Phone = phone,
+                        Address = address,
                         IsActive = true
                     };
                     
                     await _customerRepo.AddAsync(customer);
+                    existingCustomers.Add(customer);
                     result.CustomersCreated++;
                     customerId = customer.Id;
                 }
@@ -288,36 +304,46 @@ public class BulkImportService : IBulkImportService
             }
         }
 
-        var quantity = GetIntValue(rowData, "Cantidad", "Quantity", "Qty", "CantidadVenta");
+        // Procesar Venta si hay datos suficientes
+        var quantity = GetIntValue(rowData, "Quantity", "Cantidad", "Qty", "CantidadVendida", "CantidadVenta");
         
         if (quantity > 0 && productId.HasValue && customerId.HasValue)
         {
             try
             {
-                var unitPrice = GetDecimalValue(rowData, "PrecioUnitario", "UnitPrice", "PrecioVenta");
+                var unitPrice = GetDecimalValue(rowData, "UnitPrice", "PrecioUnitario", "Price", "PrecioVenta");
                 
                 if (unitPrice <= 0)
                 {
-                    var product = await _productRepo.GetByIdAsync(productId.Value);
+                    var product = existingProducts.FirstOrDefault(p => p.Id == productId.Value);
                     unitPrice = product?.Price ?? 0;
                 }
 
                 if (unitPrice <= 0)
-                    throw new Exception("No se pudo determinar el precio unitario para la venta");
-
-                var sale = new Sale(customerId.Value)
                 {
-                    TotalAmount = unitPrice * quantity
-                };
-                
-                await _saleRepo.AddAsync(sale);
+                    result.Errors.Add(new ImportError
+                    {
+                        RowNumber = rowNumber,
+                        Field = "Venta",
+                        ErrorMessage = "No se pudo determinar el precio unitario para la venta"
+                    });
+                }
+                else
+                {
+                    var sale = new Sale(customerId.Value)
+                    {
+                        TotalAmount = unitPrice * quantity
+                    };
+                    
+                    await _saleRepo.AddAsync(sale);
 
-                var saleItem = new SaleItem(productId.Value, quantity, unitPrice);
-                saleItem.AssignToSale(sale.Id);
-                
-                await _saleItemRepo.AddAsync(saleItem);
-                
-                result.SalesCreated++;
+                    var saleItem = new SaleItem(productId.Value, quantity, unitPrice);
+                    saleItem.AssignToSale(sale.Id);
+                    
+                    await _saleItemRepo.AddAsync(saleItem);
+                    
+                    result.SalesCreated++;
+                }
             }
             catch (Exception ex)
             {
@@ -331,7 +357,7 @@ public class BulkImportService : IBulkImportService
         }
     }
 
-    private async Task ProcessProductRow(Dictionary<string, object?> rowData, BulkImportResult result)
+    private async Task ProcessProductRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Product> existingProducts)
     {
         var sku = GetStringValue(rowData, "SKU", "Codigo", "Code");
         var name = GetStringValue(rowData, "Nombre", "Name", "Producto", "Product");
@@ -346,17 +372,16 @@ public class BulkImportService : IBulkImportService
         if (price <= 0)
             throw new Exception("El precio debe ser mayor a cero");
 
-        var existingProducts = await _productRepo.GetAllAsync();
         var existingProduct = existingProducts.FirstOrDefault(p => 
             !string.IsNullOrEmpty(sku) && p.SKU.Equals(sku, StringComparison.OrdinalIgnoreCase));
 
         if (existingProduct != null)
         {
             existingProduct.Name = name;
-            existingProduct.Description = description ?? string.Empty;
+            existingProduct.Description = description;
             existingProduct.Price = price;
             existingProduct.Stock = stock;
-            existingProduct.ImageUrl = imageUrl ?? string.Empty;
+            existingProduct.ImageUrl = imageUrl;
             
             await _productRepo.UpdateAsync(existingProduct);
             result.ProductsUpdated++;
@@ -366,25 +391,26 @@ public class BulkImportService : IBulkImportService
             var product = new Product(
                 sku ?? $"SKU-{Guid.NewGuid().ToString()[..8]}",
                 name,
-                description ?? string.Empty,
+                description,
                 price,
-                imageUrl ?? string.Empty,
+                imageUrl,
                 stock
             );
             
             await _productRepo.AddAsync(product);
+            existingProducts.Add(product);
             result.ProductsCreated++;
         }
     }
 
-    private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result)
+    private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Customer> existingCustomers)
     {
-        var firstName = GetStringValue(rowData, "Nombre", "FirstName", "Name");
-        var lastName = GetStringValue(rowData, "Apellido", "LastName", "Surname");
+        var firstName = GetStringValue(rowData, "FirstName", "Nombre", "Name");
+        var lastName = GetStringValue(rowData, "LastName", "Apellido", "Surname");
         var email = GetStringValue(rowData, "Email", "Correo", "Mail");
-        var document = GetStringValue(rowData, "Documento", "Document", "DNI", "ID");
-        var phone = GetStringValue(rowData, "Telefono", "Phone", "Tel", "Celular");
-        var address = GetStringValue(rowData, "Direccion", "Address", "Dir");
+        var document = GetStringValue(rowData, "Document", "Documento", "DNI", "ID");
+        var phone = GetStringValue(rowData, "Phone", "Telefono", "Tel", "Celular");
+        var address = GetStringValue(rowData, "Address", "Direccion", "Dir");
 
         if (string.IsNullOrWhiteSpace(firstName))
             throw new Exception("El nombre es obligatorio");
@@ -392,18 +418,17 @@ public class BulkImportService : IBulkImportService
         if (string.IsNullOrWhiteSpace(email))
             throw new Exception("El email es obligatorio");
 
-        var existingCustomers = await _customerRepo.GetAllAsync();
         var existingCustomer = existingCustomers.FirstOrDefault(c => 
             c.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 
         if (existingCustomer != null)
         {
             existingCustomer.FirstName = firstName;
-            existingCustomer.LastName = lastName ?? string.Empty;
+            existingCustomer.LastName = lastName;
             existingCustomer.Email = email;
-            existingCustomer.Document = document ?? string.Empty;
-            existingCustomer.Phone = phone ?? string.Empty;
-            existingCustomer.Address = address ?? string.Empty;
+            existingCustomer.Document = document;
+            existingCustomer.Phone = phone;
+            existingCustomer.Address = address;
             
             await _customerRepo.UpdateAsync(existingCustomer);
             result.CustomersUpdated++;
@@ -412,13 +437,14 @@ public class BulkImportService : IBulkImportService
         {
             var customer = new Customer(firstName, lastName ?? string.Empty, email)
             {
-                Document = document ?? string.Empty,
-                Phone = phone ?? string.Empty,
-                Address = address ?? string.Empty,
+                Document = document,
+                Phone = phone,
+                Address = address,
                 IsActive = true
             };
             
             await _customerRepo.AddAsync(customer);
+            existingCustomers.Add(customer);
             result.CustomersCreated++;
         }
     }

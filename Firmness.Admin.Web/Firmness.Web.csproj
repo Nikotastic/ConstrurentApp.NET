@@ -5,8 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-        <EPPlusLicenseContext>NonCommercial</EPPlusLicenseContext>
-        <RootNamespace>Firmness.Admin.Web</RootNamespace>
+        <RootNamespace>Firmness.Web</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,7 +18,7 @@
     <ItemGroup>
       <PackageReference Include="AWSSDK.S3" Version="4.0.11" />
       <PackageReference Include="DotNetEnv" Version="3.1.1" />
-      <PackageReference Include="EPPlus" Version="8.2.1" />
+      <PackageReference Include="EPPlus" Version="5.2.5" />
       <PackageReference Include="itext7" Version="9.3.0" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.21" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.*" />

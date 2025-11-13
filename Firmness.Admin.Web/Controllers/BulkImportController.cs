@@ -1,6 +1,9 @@
 ﻿using Firmness.Application.Interfaces;
+using Firmness.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 namespace Firmness.Admin.Web.Controllers;
 
@@ -8,11 +11,16 @@ namespace Firmness.Admin.Web.Controllers;
 public class BulkImportController : Controller
 {
     private readonly IBulkImportService _bulkImportService;
+    private readonly IExcelTemplateService _excelTemplateService;
     private readonly ILogger<BulkImportController> _logger;
 
-    public BulkImportController(IBulkImportService bulkImportService, ILogger<BulkImportController> logger)
+    public BulkImportController(
+        IBulkImportService bulkImportService, 
+        IExcelTemplateService excelTemplateService,
+        ILogger<BulkImportController> logger)
     {
         _bulkImportService = bulkImportService;
+        _excelTemplateService = excelTemplateService;
         _logger = logger;
     }
 
@@ -73,71 +81,36 @@ public class BulkImportController : Controller
     // GET: BulkImport/DownloadTemplate
     public IActionResult DownloadTemplate()
     {
-        // Crear un archivo Excel de plantilla
-        var fileName = "Plantilla_ImportacionMasiva.xlsx";
-        var filePath = Path.Combine(Path.GetTempPath(), fileName);
-
         try
         {
-            CreateTemplateFile(filePath);
-            var fileBytes = System.IO.File.ReadAllBytes(filePath);
-            System.IO.File.Delete(filePath);
-
+            var fileBytes = _excelTemplateService.GenerateTemplate();
+            var fileName = "BulkImport_Template.xlsx";
+            
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al crear plantilla");
+            _logger.LogError(ex, "Error generating template");
             TempData["Error"] = "Error al crear la plantilla";
             return RedirectToAction(nameof(Index));
         }
     }
-
-    private void CreateTemplateFile(string filePath)
+    
+    // GET: BulkImport/DownloadSample
+    public IActionResult DownloadSample()
     {
-        using var package = new OfficeOpenXml.ExcelPackage();
-        var worksheet = package.Workbook.Worksheets.Add("Datos");
-
-        // Encabezados
-        worksheet.Cells[1, 1].Value = "SKU";
-        worksheet.Cells[1, 2].Value = "Producto";
-        worksheet.Cells[1, 3].Value = "Descripcion";
-        worksheet.Cells[1, 4].Value = "Precio";
-        worksheet.Cells[1, 5].Value = "Stock";
-        worksheet.Cells[1, 6].Value = "Nombre";
-        worksheet.Cells[1, 7].Value = "Apellido";
-        worksheet.Cells[1, 8].Value = "Email";
-        worksheet.Cells[1, 9].Value = "Telefono";
-        worksheet.Cells[1, 10].Value = "Direccion";
-        worksheet.Cells[1, 11].Value = "Documento";
-        worksheet.Cells[1, 12].Value = "CantidadVendida";
-        worksheet.Cells[1, 13].Value = "Fecha";
-
-        // Estilo de encabezados
-        using (var range = worksheet.Cells[1, 1, 1, 13])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+            var fileBytes = _excelTemplateService.GenerateSampleData();
+            var fileName = "BulkImport_SampleData.xlsx";
+            
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
-
-        // Datos de ejemplo
-        worksheet.Cells[2, 1].Value = "PROD001";
-        worksheet.Cells[2, 2].Value = "Laptop HP";
-        worksheet.Cells[2, 3].Value = "Laptop HP 15.6 pulgadas";
-        worksheet.Cells[2, 4].Value = 850.00;
-        worksheet.Cells[2, 5].Value = 10;
-        worksheet.Cells[2, 6].Value = "Juan";
-        worksheet.Cells[2, 7].Value = "Pérez";
-        worksheet.Cells[2, 8].Value = "juan.perez@email.com";
-        worksheet.Cells[2, 9].Value = "555-1234";
-        worksheet.Cells[2, 10].Value = "Calle Principal 123";
-        worksheet.Cells[2, 11].Value = "12345678";
-        worksheet.Cells[2, 12].Value = 2;
-        worksheet.Cells[2, 13].Value = DateTime.Now.ToString("yyyy-MM-dd");
-
-        worksheet.Cells.AutoFitColumns();
-
-        package.SaveAs(new FileInfo(filePath));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating sample data");
+            TempData["Error"] = "Error al crear el archivo de ejemplo";
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

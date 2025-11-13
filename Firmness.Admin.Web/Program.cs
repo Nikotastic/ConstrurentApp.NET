@@ -4,9 +4,14 @@ using Firmness.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ApplicationDbContext = Firmness.Infrastructure.Data.ApplicationDbContext;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
+
+// Configurar EPPlus para usar licencia no comercial (gratis)
+// Para EPPlus 5.x usamos ExcelPackage.LicenseContext
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Load the main .env file (for Docker)
 var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
