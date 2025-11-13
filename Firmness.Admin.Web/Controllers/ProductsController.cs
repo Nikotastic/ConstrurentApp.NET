@@ -189,5 +189,38 @@ namespace Firmness.Admin.Web.Controllers
             ImageUrl = p.ImageUrl,
             Stock = p.Stock
         };
+        
+        // GET: Products/ExportToExcel
+        public async Task<IActionResult> ExportToExcel([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var excelBytes = await exportService.ExportProductsToExcelAsync();
+                return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    $"productos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting products to Excel");
+                TempData["Error"] = "No se pudo exportar a Excel.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Products/ExportToPdf
+        public async Task<IActionResult> ExportToPdf([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var pdfBytes = await exportService.ExportProductsToPdfAsync();
+                return File(pdfBytes, "application/pdf", $"productos_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting products to PDF");
+                TempData["Error"] = "No se pudo exportar a PDF.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
     }
 }

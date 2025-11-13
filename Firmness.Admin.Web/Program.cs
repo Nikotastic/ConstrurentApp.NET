@@ -1,6 +1,7 @@
 using Firmness.Application.Interfaces;
 using Firmness.Infrastructure.DependencyInjection;
 using Firmness.Infrastructure.Identity;
+using Firmness.Web.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ApplicationDbContext = Firmness.Infrastructure.Data.ApplicationDbContext;
@@ -92,6 +93,9 @@ builder.Services.AddRazorPages(options =>
 // ---------- Application DI registrations (keep your existing registrations) ----------
 // Identity adapter
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+// Export and Receipt services
+builder.Services.AddScoped<IExportService, ExportService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 var app = builder.Build();
 

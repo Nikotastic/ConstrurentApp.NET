@@ -1,4 +1,5 @@
 using Firmness.Admin.Web.ViewModels.Sales;
+using Firmness.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,13 @@ namespace Firmness.Admin.Web.Controllers
         
         private readonly ApplicationDbContext _context;
         private readonly ILogger<SalesController> _logger;
+        private readonly IReceiptService _receiptService;
 
-        public SalesController(ApplicationDbContext context, ILogger<SalesController> logger)
+        public SalesController(ApplicationDbContext context, ILogger<SalesController> logger, IReceiptService receiptService)
         {
             _context = context;
             _logger = logger;
+            _receiptService = receiptService;
         }
 
         private async Task<List<SelectListItem>> BuildCustomerList(object? selected = null)
@@ -94,6 +97,19 @@ namespace Firmness.Admin.Web.Controllers
                 var sale = MapToEntity(vm);
                 _context.Add(sale);
                 await _context.SaveChangesAsync();
+                
+                // Generar recibo PDF automáticamente
+                try
+                {
+                    await _receiptService.GenerateReceiptAsync(sale.Id);
+                    _logger.LogInformation("Recibo generado para la venta {SaleId}", sale.Id);
+                }
+                catch (Exception exReceipt)
+                {
+                    _logger.LogWarning(exReceipt, "No se pudo generar el recibo para la venta {SaleId}", sale.Id);
+                    // No fallar la venta si el recibo falla
+                }
+
                 TempData["Success"] = "Sale created successfully.";
                 return RedirectToAction(nameof(Index));
             }
@@ -203,6 +219,57 @@ namespace Firmness.Admin.Web.Controllers
         }
 
         private bool SaleExists(Guid id) => _context.Sales.Any(e => e.Id == id);
+        
+        // GET: Sales/DownloadReceipt/5
+        public async Task<IActionResult> DownloadReceipt(Guid? id)
+        {
+            if (id == null) return NotFound();
+
+            try
+            {
+                var pdfBytes = await _receiptService.GetReceiptBytesAsync(id.Value);
+                return File(pdfBytes, "application/pdf", $"recibo_{id.Value.ToString().Substring(0, 8)}.pdf");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading receipt for sale {SaleId}", id);
+                TempData["Error"] = "No se pudo descargar el recibo.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Sales/ExportToExcel
+        public async Task<IActionResult> ExportToExcel([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var excelBytes = await exportService.ExportSalesToExcelAsync();
+                return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    $"ventas_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting sales to Excel");
+                TempData["Error"] = "No se pudo exportar a Excel.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Sales/ExportToPdf
+        public async Task<IActionResult> ExportToPdf([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var pdfBytes = await exportService.ExportSalesToPdfAsync();
+                return File(pdfBytes, "application/pdf", $"ventas_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting sales to PDF");
+                TempData["Error"] = "No se pudo exportar a PDF.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
 
         // helpers
         private static SaleFormViewModel MapToFormVm(Sale s) => new SaleFormViewModel

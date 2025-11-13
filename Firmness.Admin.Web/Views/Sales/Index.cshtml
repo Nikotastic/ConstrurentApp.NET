@@ -8,7 +8,13 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Sales</h1>
     <div>
-        <a class="btn btn-primary" asp-action="Create">New Product</a>
+        <a class="btn btn-success me-2" asp-action="ExportToExcel" title="Exportar a Excel">
+            <i class="bi bi-file-excel"></i> Excel
+        </a>
+        <a class="btn btn-danger me-2" asp-action="ExportToPdf" title="Exportar a PDF">
+            <i class="bi bi-file-pdf"></i> PDF
+        </a>
+        <a class="btn btn-primary" asp-action="Create">New Sale</a>
     </div>
 </div>
 @await Html.PartialAsync("_SearchBar")
@@ -20,6 +26,7 @@
             @Html.DisplayNameFor(model => model.Customer)
         </th>
         <th>Total</th>
+        <th>Actions</th>
     </tr>
     </thead>
     <tbody>
@@ -36,6 +43,9 @@
             @Html.DisplayFor(modelItem => item.TotalAmount)
         </td>
         <td>
+            <a asp-action="DownloadReceipt" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Descargar Recibo">
+                <i class="bi bi-download"></i> Recibo
+            </a>
             <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
             <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
             <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>

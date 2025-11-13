@@ -1,4 +1,3 @@
-
 using Firmness.Admin.Web.ViewModels.Customer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -189,6 +188,39 @@ namespace Firmness.Admin.Web.Controllers
                 _logger.LogError(ex, "Error deleting customer {CustomerId}", id);
                 TempData["Error"] = "An error occurred while deleting the client.";
                 return RedirectToAction(nameof(Delete), new { id });
+            }
+        }
+
+        // GET: Customers/ExportToExcel
+        public async Task<IActionResult> ExportToExcel([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var excelBytes = await exportService.ExportCustomersToExcelAsync();
+                return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
+                    $"clientes_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting customers to Excel");
+                TempData["Error"] = "No se pudo exportar a Excel.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        
+        // GET: Customers/ExportToPdf
+        public async Task<IActionResult> ExportToPdf([FromServices] IExportService exportService)
+        {
+            try
+            {
+                var pdfBytes = await exportService.ExportCustomersToPdfAsync();
+                return File(pdfBytes, "application/pdf", $"clientes_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting customers to PDF");
+                TempData["Error"] = "No se pudo exportar a PDF.";
+                return RedirectToAction(nameof(Index));
             }
         }
 

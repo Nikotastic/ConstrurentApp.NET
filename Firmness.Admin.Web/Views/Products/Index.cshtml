@@ -7,6 +7,12 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h3">Productos</h1>
     <div>
+        <a class="btn btn-success me-2" asp-action="ExportToExcel" title="Exportar a Excel">
+            <i class="bi bi-file-excel"></i> Excel
+        </a>
+        <a class="btn btn-danger me-2" asp-action="ExportToPdf" title="Exportar a PDF">
+            <i class="bi bi-file-pdf"></i> PDF
+        </a>
         <a class="btn btn-primary" asp-action="Create">Nuevo producto</a>
     </div>
 </div>
