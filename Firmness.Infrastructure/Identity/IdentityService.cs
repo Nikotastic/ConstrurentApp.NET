@@ -64,10 +64,10 @@ public class IdentityService : IIdentityService
         await _userManager.AddToRoleAsync(user, role);
     }
 
-    public async Task<ApplicationUserDto?> GetByEmailAsync(string email)
+    public async Task<IdentityUserDto?> GetByEmailAsync(string email)
     {
         var user = await _userManager.FindByEmailAsync(email);
         if (user == null) return null;
-        return new ApplicationUserDto(user.Id, user.Email ?? string.Empty, user.UserName);
+        return new IdentityUserDto(user.Id, user.Email ?? string.Empty, user.UserName);
     }
 }

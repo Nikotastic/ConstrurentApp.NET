@@ -24,6 +24,6 @@
         /// <summary>
         /// Busca un usuario por email y devuelve información básica.
         /// </summary>
-        Task<ApplicationUserDto?> GetByEmailAsync(string email);
+        Task<IdentityUserDto?> GetByEmailAsync(string email);
     }
-    public record ApplicationUserDto(string Id, string Email, string? UserName);
+    public record IdentityUserDto(string Id, string Email, string? UserName);
