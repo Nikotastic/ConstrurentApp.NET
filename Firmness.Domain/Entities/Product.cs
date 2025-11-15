@@ -11,8 +11,14 @@ public class Product
     public decimal Price { get; set; }
     public string ImageUrl { get; set; } = String.Empty;
     public decimal Stock { get; set; }
+    public Guid? CategoryId { get; set; }
+    public bool IsActive { get; set; } = true;
+    public decimal? MinStock { get; set; }
+    public decimal? Cost { get; set; }
+    public string? Barcode { get; set; }
 
     // navegation
+    public Category? Category { get; set; }
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
     protected Product() { }
     
@@ -25,5 +31,6 @@ public class Product
         Price = price;
         ImageUrl = imageUrl;
         Stock = stock;
+        IsActive = true;
     }
 }

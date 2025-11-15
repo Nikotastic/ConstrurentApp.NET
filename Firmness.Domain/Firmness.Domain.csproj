@@ -10,8 +10,4 @@
     <Compile Remove="Interfaces\IStorageService.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Response\" />
-  </ItemGroup>
-
 </Project>
