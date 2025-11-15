@@ -152,11 +152,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
             {
                 entry.Entity.CreatedAt = utcNow;
                 entry.Entity.UpdatedAt = utcNow;
+                // entry.Entity.CreatedBy = _currentUserService?.UserId;
             }
             else if (entry.State == EntityState.Modified)
             {
                 entry.Entity.UpdatedAt = utcNow;
+                //entry.Entity.UpdatedBy = _currentUserService?.UserId;
                 entry.Property(e => e.CreatedAt).IsModified = false;
+                entry.Property(e => e.CreatedBy).IsModified = false;
             }
         }
     }
