@@ -1,16 +1,16 @@
-@model Firmness.Admin.Web.ViewModels.Product.ProductFormViewModel
+@model Firmness.Web.ViewModels.Product.ProductFormViewModel
 @{
-    ViewData["Title"] = "Eliminar producto";
+    ViewData["Title"] = "Remove product";
 }
 
-<h2>Eliminar producto</h2>
+<h2>Remove product</h2>
 
 <div class="alert alert-warning">
-    ¿Está seguro que desea eliminar el producto <strong>@Model.Name</strong>?
+    Are you sure you want to delete the product<strong>@Model.Name</strong>?
 </div>
 
 <form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Eliminar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

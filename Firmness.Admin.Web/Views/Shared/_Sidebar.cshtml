@@ -1,21 +1,102 @@
-﻿@* Partial: barra lateral para el panel admin (Bootstrap 5) *@
-<nav id="sidebarMenu" class="d-md-block bg-light sidebar collapse">
+﻿@* Professional Sidebar Navigation *@
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<nav id="sidebar" class="sidebar">
+    <div class="sidebar-brand">
+        <span class="brand-text">
+            <i class="bi bi-gear-fill"></i> Admin Panel
+        </span>
+        <button class="sidebar-toggle" id="sidebarToggle" title="Contraer/Expandir">
+            <i class="bi bi-arrow-left-circle"></i>
+        </button>
+    </div>
+
     <div class="position-sticky pt-3">
+        <!-- Dashboard Section -->
+        <div class="nav-section">Dashboard</div>
         <ul class="nav flex-column">
-            <li class="nav-item mb-1">
-                <a class="nav-link" asp-controller="Admin" asp-action="Index">Inicio</a>
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Home" && action == "Index" ? "active" : "")" 
+                   asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-speedometer2"></i>
+                    <span class="nav-text">Login</span>
+                </a>
             </li>
-            <li class="nav-item mb-1">
-                <a class="nav-link" asp-controller="Products" asp-action="Index">Productos</a>
+        </ul>
+
+        <!-- Inventory Section -->
+        <div class="nav-section">Inventory</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Products" ? "active" : "")" 
+                   asp-controller="Products" asp-action="Index">
+                    <i class="bi bi-box-seam"></i>
+                    <span class="nav-text">Products</span>
+                </a>
             </li>
-            <li class="nav-item mb-1">
-                <a class="nav-link" asp-controller="Customers" asp-action="Index">Clientes</a>
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Categories" ? "active" : "")" 
+                   asp-controller="Categories" asp-action="Index">
+                    <i class="bi bi-tags"></i>
+                    <span class="nav-text">Categories</span>
+                </a>
             </li>
-            <li class="nav-item mb-1">
-                <a class="nav-link" asp-controller="Sales" asp-action="Index">Ventas</a>
+        </ul>
+
+        <!-- Sales Section -->
+        <div class="nav-section">Sales</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Sales" ? "active" : "")" 
+                   asp-controller="Sales" asp-action="Index">
+                    <i class="bi bi-cart-check"></i>
+                    <span class="nav-text">Sales</span>
+                </a>
             </li>
-            <li class="nav-item mb-1">
-                <a class="nav-link" asp-controller="BulkImport" asp-action="index">Importar masivo</a>
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Customers" ? "active" : "")" 
+                   asp-controller="Customers" asp-action="Index">
+                    <i class="bi bi-people"></i>
+                    <span class="nav-text">Customers</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Tools Section -->
+        <div class="nav-section">Tools</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(controller == "BulkImport" ? "active" : "")" 
+                   asp-controller="BulkImport" asp-action="Index">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span class="nav-text">Bulk Data Import</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" asp-controller="Sales" asp-action="ExportToExcel">
+                    <i class="bi bi-file-excel"></i>
+                    <span class="nav-text">Export Data</span>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Reports Section -->
+        <div class="nav-section">Reports</div>
+        <ul class="nav flex-column mb-4">
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-graph-up"></i>
+                    <span class="nav-text">Statistics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span class="nav-text">Information</span>
+                </a>
             </li>
         </ul>
     </div>

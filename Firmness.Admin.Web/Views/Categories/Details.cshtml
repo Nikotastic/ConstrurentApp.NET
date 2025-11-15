@@ -1,0 +1,113 @@
+﻿@model Firmness.Web.ViewModels.Category.CategoryFormViewModel
+
+@{
+    ViewData["Title"] = "Category Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Category Details
+                </h4>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">
+                        <i class="bi bi-tag me-1"></i>Name
+                    </dt>
+                    <dd class="col-sm-9">
+                        <h5 class="mb-0">@Model.Name</h5>
+                    </dd>
+
+                    <dt class="col-sm-3">
+                        <i class="bi bi-text-paragraph me-1"></i>Description
+                    </dt>
+                    <dd class="col-sm-9">
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <p>@Model.Description</p>
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">No Description</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">
+                        <i class="bi bi-toggle-on me-1"></i>State
+                    </dt>
+                    <dd class="col-sm-9">
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                <i class="bi bi-x-circle"></i> Inactive
+                            </span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">
+                        <i class="bi bi-box-seam me-1"></i>Products
+                    </dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-info text-dark fs-6">
+                            @Model.ProductCount producto@(Model.ProductCount != 1 ? "s" : "")
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">
+                        <i class="bi bi-calendar-plus me-1"></i>Creation Date
+                    </dt>
+                    <dd class="col-sm-9">
+                        @if (Model.CreatedAt.HasValue)
+                        {
+                            <span>@Model.CreatedAt.Value.ToString("dddd, dd 'of' MMMM 'of' yyyy 'at' HH:mm")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not available</span>
+                        }
+                    </dd>
+
+                    @if (Model.UpdatedAt.HasValue && Model.UpdatedAt != Model.CreatedAt)
+                    {
+                        <dt class="col-sm-3">
+                            <i class="bi bi-calendar-check me-1"></i>Last Update
+                        </dt>
+                        <dd class="col-sm-9">
+                            <span>@Model.UpdatedAt.Value.ToString("dddd, dd 'of' MMMM 'of' yyyy 'at' HH:mm")</span>
+                        </dd>
+                    }
+
+                    <dt class="col-sm-3">
+                        <i class="bi bi-fingerprint me-1"></i>ID
+                    </dt>
+                    <dd class="col-sm-9">
+                        <code>@Model.Id</code>
+                    </dd>
+                </dl>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to List
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

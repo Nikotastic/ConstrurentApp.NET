@@ -1,141 +1,217 @@
 ﻿@model Firmness.Application.Models.BulkImportResult
 @{
-    ViewData["Title"] = "Resultado de Importación";
+    ViewData["Title"] = "Import Result";
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <h2><i class="fas fa-file-import"></i> Resultado de Importación</h2>
-            <hr />
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-clipboard-check"></i> Import Result
+        </h2>
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-2"></i>New Import
+        </a>
+    </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Resumen de Importación</h5>
-                    
-                    <div class="row text-center">
-                        <div class="col-md-3">
-                            <div class="p-3 border rounded bg-light">
-                                <h3 class="text-primary">@Model.TotalRows</h3>
-                                <p class="mb-0">Total de Filas</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-3 border rounded bg-success text-white">
-                                <h3>@Model.SuccessfulRows</h3>
-                                <p class="mb-0">Exitosas</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-3 border rounded bg-danger text-white">
-                                <h3>@Model.FailedRows</h3>
-                                <p class="mb-0">Fallidas</p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="p-3 border rounded bg-info text-white">
-                                <h3>@((Model.TotalRows > 0 ? (Model.SuccessfulRows * 100.0 / Model.TotalRows).ToString("F1") : "0"))%</h3>
-                                <p class="mb-0">Tasa de Éxito</p>
-                            </div>
-                        </div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- General Summary -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Import Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center g-3">
+                <div class="col-md-3">
+                    <div class="p-4 border rounded bg-light">
+                        <i class="bi bi-file-earmark-text text-primary" style="font-size: 2rem;"></i>
+                        <h3 class="text-primary mt-2 mb-0">@Model.TotalRows</h3>
+                        <p class="mb-0 text-muted">Total Rows</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-primary text-white">
-                            <i class="fas fa-box"></i> Productos
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li><strong>Creados:</strong> <span class="badge bg-success">@Model.ProductsCreated</span></li>
-                                <li><strong>Actualizados:</strong> <span class="badge bg-info">@Model.ProductsUpdated</span></li>
-                                <li><strong>Total:</strong> <span class="badge bg-primary">@(Model.ProductsCreated + Model.ProductsUpdated)</span></li>
-                            </ul>
-                        </div>
+                <div class="col-md-3">
+                    <div class="p-4 border rounded bg-success bg-opacity-10">
+                        <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+                        <h3 class="text-success mt-2 mb-0">@Model.SuccessfulRows</h3>
+                        <p class="mb-0 text-muted">Successful</p>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-success text-white">
-                            <i class="fas fa-users"></i> Clientes
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li><strong>Creados:</strong> <span class="badge bg-success">@Model.CustomersCreated</span></li>
-                                <li><strong>Actualizados:</strong> <span class="badge bg-info">@Model.CustomersUpdated</span></li>
-                                <li><strong>Total:</strong> <span class="badge bg-primary">@(Model.CustomersCreated + Model.CustomersUpdated)</span></li>
-                            </ul>
-                        </div>
+                <div class="col-md-3">
+                    <div class="p-4 border rounded bg-danger bg-opacity-10">
+                        <i class="bi bi-x-circle text-danger" style="font-size: 2rem;"></i>
+                        <h3 class="text-danger mt-2 mb-0">@Model.FailedRows</h3>
+                        <p class="mb-0 text-muted">Failed</p>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-info text-white">
-                            <i class="fas fa-shopping-cart"></i> Ventas
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                <li><strong>Creadas:</strong> <span class="badge bg-success">@Model.SalesCreated</span></li>
-                            </ul>
-                        </div>
+                <div class="col-md-3">
+                    <div class="p-4 border rounded bg-info bg-opacity-10">
+                        <i class="bi bi-percent text-info" style="font-size: 2rem;"></i>
+                        <h3 class="text-info mt-2 mb-0">@((Model.TotalRows > 0 ? (Model.SuccessfulRows * 100.0 / Model.TotalRows).ToString("F1") : "0"))%</h3>
+                        <p class="mb-0 text-muted">Success Rate</p>
                     </div>
                 </div>
-            </div>
-
-            @if (Model.HasErrors)
-            {
-                <div class="card shadow-sm mt-4">
-                    <div class="card-header bg-danger text-white">
-                        <i class="fas fa-exclamation-triangle"></i> Errores y Advertencias (@Model.Errors.Count)
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Fila</th>
-                                        <th>Campo</th>
-                                        <th>Error</th>
-                                        <th>Datos</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var error in Model.Errors)
-                                    {
-                                        <tr>
-                                            <td><span class="badge bg-secondary">@error.RowNumber</span></td>
-                                            <td><code>@error.Field</code></td>
-                                            <td>@error.ErrorMessage</td>
-                                            <td class="small text-muted">@error.RowData</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            <div class="mt-4">
-                <a asp-action="Index" class="btn btn-primary">
-                    <i class="fas fa-arrow-left"></i> Nueva Importación
-                </a>
-                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="fas fa-box"></i> Ver Productos
-                </a>
-                <a asp-controller="Customers" asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="fas fa-users"></i> Ver Clientes
-                </a>
-                <a asp-controller="Sales" asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="fas fa-shopping-cart"></i> Ver Ventas
-                </a>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Details by Type -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-box me-2"></i>Products</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Created
+                            <span class="badge bg-success rounded-pill">@Model.ProductsCreated</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Updated
+                            <span class="badge bg-info rounded-pill">@Model.ProductsUpdated</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Total</strong>
+                            <span class="badge bg-primary rounded-pill">@(Model.ProductsCreated + Model.ProductsUpdated)</span>
+                        </li>
+                    </ul>
+                    <div class="mt-3">
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-eye me-2"></i>View Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="bi bi-people me-2"></i>Customers</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Created
+                            <span class="badge bg-success rounded-pill">@Model.CustomersCreated</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Updated
+                            <span class="badge bg-info rounded-pill">@Model.CustomersUpdated</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Total</strong>
+                            <span class="badge bg-success rounded-pill">@(Model.CustomersCreated + Model.CustomersUpdated)</span>
+                        </li>
+                    </ul>
+                    <div class="mt-3">
+                        <a asp-controller="Customers" asp-action="Index" class="btn btn-outline-success btn-sm w-100">
+                            <i class="bi bi-eye me-2"></i>View Clients
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-cart me-2"></i>Sales</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Created
+                            <span class="badge bg-success rounded-pill">@Model.SalesCreated</span>
+                        </li>
+                        <li class="list-group-item">
+                            <small class="text-muted">Sales are created from imported data</small>
+                        </li>
+                    </ul>
+                    <div class="mt-3">
+                        <a asp-controller="Sales" asp-action="Index" class="btn btn-outline-info btn-sm w-100">
+                            <i class="bi bi-eye me-2"></i>View Sales
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Errores -->
+    @if (Model.HasErrors)
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Errors and Warnings (@Model.Errors.Count)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle me-2"></i>
+                    The following rows contained errors during import. Please correct them and try again.
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Row</th> 
+                                <th style="width: 150px;">Field</th> 
+                                <th>Error</th> 
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var error in Model.Errors)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-secondary">@error.RowNumber</span></td>
+                                    <td><code class="small">@error.Field</code></td>
+                                    <td class="text-danger">@error.ErrorMessage</td>
+                                    <td class="small text-muted text-truncate" style="max-width: 300px;" title="@error.RowData">
+                                        @error.RowData
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success">
+            <h5 class="alert-heading"><i class="bi bi-check-circle me-2"></i>Import Completed!</h5>
+            <p class="mb-0">All data was imported correctly without errors.</p>
+        </div>
+    }
+
+    <!-- Actions -->
+    <div class="mt-4 d-flex gap-2 flex-wrap">
+        <a asp-action="Index" class="btn btn-primary">
+            <i class="bi bi-arrow-clockwise me-2"></i>New Import
+        </a>
+        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary">
+            <i class="bi bi-box me-2"></i>View Products
+        </a>
+        <a asp-controller="Customers" asp-action="Index" class="btn btn-outline-success">
+            <i class="bi bi-people me-2"></i>View Clients
+        </a>
+        <a asp-controller="Sales" asp-action="Index" class="btn btn-outline-info">
+            <i class="bi bi-cart me-2"></i>View Sales
+        </a>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-house me-2"></i>Home
+        </a>
+    </div>
+</div>

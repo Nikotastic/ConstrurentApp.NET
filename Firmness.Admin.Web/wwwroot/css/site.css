@@ -1,5 +1,7 @@
 html {
   font-size: 14px;
+  margin: 0;
+  padding: 0;
 }
 
 @media (min-width: 768px) {
@@ -18,5 +20,40 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* Smooth transitions for all elements */
+* {
+  box-sizing: border-box;
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* Table improvements */
+.table-hover tbody tr:hover {
+  background-color: rgba(0,0,0,0.03);
+}
+
+/* Button improvements */
+.btn {
+  transition: all 0.2s ease;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 }

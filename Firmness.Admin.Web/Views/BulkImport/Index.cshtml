@@ -1,161 +1,200 @@
 ﻿@{
-    ViewData["Title"] = "Importación Masiva de Datos";
+    ViewData["Title"] = "Bulk Data Import";
 }
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="bi bi-file-earmark-excel"></i> Bulk Data Import
+        </h1>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-house"></i> Home
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="row">
-        <div class="col-md-12">
-            <h1 class="mb-4">
-                <i class="bi bi-file-earmark-excel"></i> Importación Masiva de Datos
-            </h1>
-
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <!-- Instructions -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Instructions</h5>
                 </div>
-            }
+                <div class="card-body">
+                    <h6 class="fw-bold">What can you import?</h6>
+                    <p>This system allows you to import data from:</p>
+                    <ul>
+                        <li><strong>Products:</strong> SKU, name, description, price, cost, stock, category</li>
+                        <li><strong>Customers:</strong> name, lastname, email, phone, address, document</li>
+                        <li><strong>Sales:</strong> product, customer, quantity, unit price</li>
+                    </ul>
 
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <h6 class="fw-bold mt-3">System features:</h6>
+                    <ul class="mb-0">
+                        <li>✅ Automatically normalizes data</li>
+                        <li>✅ Identifies and links products, customers, and sales</li>
+                        <li>✅ Updates existing records</li>
+                        <li>✅ Creates new records</li>
+                        <li>✅ Generates detailed error logs</li>
+                        <li>✅ Validates required data</li>
+                    </ul>
                 </div>
-            }
+            </div>
 
-            @if (TempData["Warning"] != null)
-            {
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-circle-fill"></i> @TempData["Warning"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-list-columns me-2"></i>Recognized Columns</h6>
                 </div>
-            }
-
-            <div class="row">
-                <!-- Instrucciones -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="fw-bold">¿Qué puedes importar?</h6>
-                            <p>Este sistema permite importar datos desnormalizados de:</p>
-                            <ul>
-                                <li><strong>Productos:</strong> SKU, nombre, descripción, precio, stock</li>
-                                <li><strong>Clientes:</strong> nombre, apellido, email, teléfono, dirección, documento</li>
-                                <li><strong>Ventas:</strong> producto, cliente, cantidad, precio unitario</li>
-                            </ul>
-
-                            <h6 class="fw-bold mt-3">Características del sistema:</h6>
-                            <ul>
-                                <li>✅ Normaliza automáticamente los datos</li>
-                                <li>✅ Identifica y relaciona productos, clientes y ventas</li>
-                                <li>✅ Actualiza registros existentes</li>
-                                <li>✅ Crea nuevos registros</li>
-                                <li>✅ Genera log detallado de errores</li>
-                                <li>✅ Valida datos obligatorios</li>
-                            </ul>
-
-                            <h6 class="fw-bold mt-3">Formatos aceptados:</h6>
-                            <ul>
-                                <li>Archivos Excel: .xlsx, .xls</li>
-                                <li>Tamaño máximo: 10 MB</li>
-                                <li>Primera fila debe contener encabezados</li>
-                            </ul>
-
-                            <div class="alert alert-info mt-3">
-                                <small>
-                                    <strong>Tip:</strong> Los nombres de las columnas son flexibles. 
-                                    El sistema reconoce variantes como "Producto", "Product", "NombreProducto", etc.
-                                </small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Formulario de carga -->
-                <div class="col-md-6">
-                    <div class="card mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="bi bi-cloud-upload"></i> Cargar Archivo</h5>
-                        </div>
-                        <div class="card-body">
-                            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
-                                <div class="mb-3">
-                                    <label for="file" class="form-label fw-bold">Seleccionar archivo Excel:</label>
-                                    <input type="file" 
-                                           class="form-control" 
-                                           id="file" 
-                                           name="file" 
-                                           accept=".xlsx,.xls" 
-                                           required>
-                                    <div class="form-text">
-                                        Formatos permitidos: .xlsx, .xls (máximo 10 MB)
-                                    </div>
-                                </div>
-
-                                <div id="fileInfo" class="alert alert-secondary d-none mb-3">
+                <div class="card-body">
+                    <p class="mb-2"><strong>The system accepts names in ENGLISH and SPANISH:</strong></p>
+                    <div class="accordion" id="accordionColumns">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducts">
+                                    <i class="bi bi-box me-2"></i> Products
+                                </button>
+                            </h2>
+                            <div id="collapseProducts" class="accordion-collapse collapse show" data-bs-parent="#accordionColumns">
+                                <div class="accordion-body">
                                     <small>
-                                        <strong>Archivo seleccionado:</strong> <span id="fileName"></span><br>
-                                        <strong>Tamaño:</strong> <span id="fileSize"></span>
+                                        • <strong>SKU:</strong> SKU / Code<br>
+                                        •<strong>Name:</strong> Product / Product Name / Product Name<br>
+                                        •<strong>Description:</strong> Description / Description / Description<br>
+                                        •<strong>Price:</strong> Price / Unit Price / Unit Price<br>
+                                        •<strong>Cost:</strong> Cost / Cost<br>
+                                        •<strong>Stock:</strong> Stock / Inventory / Quantity<br>
+                                        •<strong>Category:</strong> Category / Category Name
                                     </small>
                                 </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-success btn-lg" id="btnUpload">
-                                        <i class="bi bi-upload"></i> Importar Datos
-                                    </button>
-                                    <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
-                                        <i class="bi bi-file-earmark-spreadsheet"></i> Descargar Plantilla Vacía
-                                    </a>
-                                    <a asp-action="DownloadSample" class="btn btn-outline-success">
-                                        <i class="bi bi-download"></i> Descargar Ejemplo con Datos
-                                    </a>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers">
+                                    <i class="bi bi-person me-2"></i> Customers
+                                </button>
+                            </h2>
+                            <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionColumns">
+                                <div class="accordion-body">
+                                    <small>
+                                        • <strong>First Name:</strong>
+                                        • <strong>Lastname:</strong>
+                                        • <strong>Email:</strong>
+                                        • <strong>Phone:</strong>
+                                        • <strong>Address:</strong>
+                                        • <strong>Document:</strong>
+                                        • <strong>ID:</strong>
+                                    </small>
                                 </div>
-                            </form>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Ejemplos de columnas aceptadas -->
-                    <div class="card">
-                        <div class="card-header bg-info text-white">
-                            <h6 class="mb-0"><i class="bi bi-list-columns"></i> Columnas Reconocidas (Inglés/Español)</h6>
-                        </div>
-                        <div class="card-body">
-                            <p class="mb-2"><strong>📋 El sistema acepta nombres de columnas en INGLÉS y ESPAÑOL:</strong></p>
-                            <small>
-                                <strong>Productos/Insumos:</strong><br>
-                                • SKU / Codigo / Code<br>
-                                • Product / Producto / ProductName / NombreProducto<br>
-                                • Description / Descripcion / Desc<br>
-                                • Price / Precio / UnitPrice / PrecioUnitario<br>
-                                • Stock / Existencia / Inventory<br><br>
-                                
-                                <strong>Clientes:</strong><br>
-                                • FirstName / Nombre / Name<br>
-                                • LastName / Apellido / Surname<br>
-                                • Email / Correo / Mail<br>
-                                • Phone / Telefono / Tel / Celular<br>
-                                • Address / Direccion / Dir<br>
-                                • Document / Documento / DNI / ID<br><br>
-                                
-                                <strong>Ventas/Rentas:</strong><br>
-                                • Quantity / Cantidad / Qty (unidades para insumos, días para vehículos)
-                            </small>
-                            <hr>
-                            <div class="alert alert-success mb-0 mt-2">
-                                <small>
-                                    <strong><i class="bi bi-lightbulb"></i> Ejemplos de SKU:</strong><br>
-                                    • Insumos: CEM-001 (Cemento), VAR-002 (Varillas), LAD-003 (Ladrillos), ARE-004 (Arena)<br>
-                                    • Vehículos: VEH-001 (Retroexcavadora), VEH-002 (Volquete), VEH-003 (Mezcladora), VEH-004 (Compactadora)
-                                </small>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSales">
+                                    <i class="bi bi-cart me-2"></i> Sales
+                                </button>
+                            </h2>
+                            <div id="collapseSales" class="accordion-collapse collapse" data-bs-parent="#accordionColumns">
+                                <div class="accordion-body">
+                                    <small>
+                                        • <strong>Quantity:</strong> Quantity / Quantity / Qty<br>
+                                        • <strong>Customer:</strong> Customer / Client / CustomerName<br>
+                                        • <strong>Product:</strong> Product / Producto / ProductName
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Upload form -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Upload File</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+                        <div class="mb-3">
+                            <label for="file" class="form-label fw-bold">Select Excel file:</label>
+                            <input type="file" 
+                                   class="form-control form-control-lg" 
+                                   id="file" 
+                                   name="file" 
+                                   accept=".xlsx,.xls" 
+                                   required>
+                            <div class="form-text">
+                                Allowed formats: .xlsx, .xls (maximum 10 MB)
+                            </div>
+                        </div>
+
+                        <div id="fileInfo" class="alert alert-secondary d-none mb-3">
+                            <small>
+                                <strong>Selected file:</strong> <span id="fileName"></span><br>
+                                <strong>Size:</strong> <span id="fileSize"></span>
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="btnUpload">
+                                <i class="bi bi-upload me-2"></i>Import Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="bi bi-download me-2"></i>Templates and Examples</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Download a template to make importing easier:</p>
+                    <div class="d-grid gap-2">
+                        <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Download Empty Template
+                        </a>
+                        <a asp-action="DownloadSample" class="btn btn-outline-success">
+                            <i class="bi bi-file-earmark-excel me-2"></i>Download Sample with Data
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <h6 class="alert-heading"><i class="bi bi-lightbulb me-2"></i>Tips</h6>
+                <ul class="mb-0 small">
+                    <li>The first row must contain the column headers</li>
+                    <li>Column names are flexible (English/Spanish)</li>
+                    <li>The SKU must be unique for each product</li>
+                    <li>The document must be unique for each customer</li>
+                    <li>Empty fields are filled with default values</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -167,22 +206,22 @@
             const file = e.target.files[0];
             if (file) {
                 document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+                document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
                 document.getElementById('fileInfo').classList.remove('d-none');
-                
-                // Validar tamaño
+
+                // Validate size
                 if (file.size > 10 * 1024 * 1024) {
-                    alert('El archivo es demasiado grande. Tamaño máximo: 10 MB');
+                    alert('The file is too large. Maximum size: 10 MB');
                     e.target.value = '';
                     document.getElementById('fileInfo').classList.add('d-none');
                 }
             }
         });
 
-        document.getElementById('uploadForm').addEventListener('submit', function() {
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('btnUpload');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Importing...';
         });
     </script>
 }

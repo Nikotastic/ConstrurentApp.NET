@@ -1,69 +1,249 @@
-﻿@model Firmness.Admin.Web.Controllers.DashboardViewModel
+﻿@model Firmness.Web.Controllers.DashboardViewModel
 @{
-    ViewData["Title"] = "Bienvenido";
+    ViewData["Title"] = "Admin Panel";
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
-    var userName = User?.Identity?.Name ?? "invitado";
+    var userName = User?.Identity?.Name ?? "Guest";
 }
 
-<h1 class="mb-4">Bienvenido, @userName</h1>
-
-<div class="container py-5">
-
+<div class="container-fluid">
     @if (!isAuthenticated)
     {
-        <section class="row justify-content-center mb-5">
-            <div class="col-md-8">
-                <div class="p-4 bg-light rounded shadow-sm text-center">
-                    <h2 class="display-6">Bienvenido a Firmness</h2>
-                    <p class="lead text-muted">
-                        Por favor inicie sesión o regístrese para acceder al panel administrativo y funcionalidades completas.
-                    </p>
-                    <div class="mt-3">
-                        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary me-2">Iniciar sesión</a>
-                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-primary">Registrarse</a>
+        <div class="row justify-content-center py-5">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5 text-center">
+                        <div class="mb-4">
+                            <i class="bi bi-shield-lock text-primary" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="display-5 mb-3">Welcome to Firmness Admin</h2>
+                        <p class="lead text-muted mb-4">
+                            Please sign in or register to access the admin panel and all features.
+                        </p>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-box-arrow-in-right"></i> Sign In
+                            </a>
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-primary btn-lg px-5">
+                                <i class="bi bi-person-plus"></i> Register
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     }
+    else
+    {
+        <!-- Dashboard Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-1">
+                            <i class="bi bi-speedometer2 text-primary"></i> Admin Dashboard
+                        </h1>
+                        <p class="text-muted mb-0">Welcome back, <strong>@userName</strong>! Here's your business overview.</p>
+                    </div>
+                    <div class="text-muted">
+                        <i class="bi bi-calendar3"></i> @DateTime.Now.ToString("dddd, MMMM dd, yyyy")
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div class="row">
-        <aside class="col-md-2 d-none d-md-block bg-light vh-100 px-0">
-            @await Html.PartialAsync("_Sidebar")
-        </aside>
-
-        <main class="col-md-10">
-            <section class="row g-4 mt-3">
-                <div class="col-sm-6 col-md-4">
-                    <div class="card text-white bg-primary h-100">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Productos</h6>
-                            <div class="display-6">@Model.TotalProducts</div>
-                            <p class="card-text small text-white-50">Total de productos</p>
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Products Card -->
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-2 fw-semibold">Total Products</p>
+                                <h2 class="mb-0 fw-bold text-primary">@Model.TotalProducts</h2>
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="bi bi-box-seam"></i> Items in inventory
+                                </p>
+                            </div>
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-box-seam text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-sm btn-outline-primary w-100">
+                                <i class="bi bi-arrow-right"></i> View Products
+                            </a>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-sm-6 col-md-4">
-                    <div class="card text-white bg-success h-100">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Clientes</h6>
-                            <div class="display-6">@Model.TotalCustomers</div>
-                            <p class="card-text small text-white-50">Total de clientes</p>
+            <!-- Customers Card -->
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-2 fw-semibold">Total Customers</p>
+                                <h2 class="mb-0 fw-bold text-success">@Model.TotalCustomers</h2>
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="bi bi-people"></i> Active clients
+                                </p>
+                            </div>
+                            <div class="bg-success bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-people text-success" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a asp-controller="Customers" asp-action="Index" class="btn btn-sm btn-outline-success w-100">
+                                <i class="bi bi-arrow-right"></i> View Customers
+                            </a>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-sm-6 col-md-4">
-                    <div class="card text-white bg-info h-100">
-                        <div class="card-body text-center">
-                            <h6 class="card-title">Ventas</h6>
-                            <div class="display-6">@Model.TotalSales</div>
-                            <p class="card-text small text-white-50">Total de ventas</p>
+            <!-- Sales Card -->
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100 hover-lift">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted text-uppercase small mb-2 fw-semibold">Total Sales</p>
+                                <h2 class="mb-0 fw-bold text-info">@Model.TotalSales</h2>
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="bi bi-cart-check"></i> Completed transactions
+                                </p>
+                            </div>
+                            <div class="bg-info bg-opacity-10 p-3 rounded-3">
+                                <i class="bi bi-cart-check text-info" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <a asp-controller="Sales" asp-action="Index" class="btn btn-sm btn-outline-info w-100">
+                                <i class="bi bi-arrow-right"></i> View Sales
+                            </a>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
-    </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-lightning-charge-fill text-warning"></i> Quick Actions
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-3 col-sm-6">
+                                <a asp-controller="Sales" asp-action="Create" class="btn btn-primary w-100 py-3">
+                                    <i class="bi bi-plus-circle fs-4 d-block mb-2"></i>
+                                    <span class="fw-semibold">New Sale</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <a asp-controller="Products" asp-action="Create" class="btn btn-info w-100 py-3">
+                                    <i class="bi bi-box-seam fs-4 d-block mb-2"></i>
+                                    <span class="fw-semibold">Add Product</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <a asp-controller="Customers" asp-action="Create" class="btn btn-success w-100 py-3">
+                                    <i class="bi bi-person-plus fs-4 d-block mb-2"></i>
+                                    <span class="fw-semibold">Add Customer</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <a asp-controller="Categories" asp-action="Index" class="btn btn-warning w-100 py-3">
+                                    <i class="bi bi-tags fs-4 d-block mb-2"></i>
+                                    <span class="fw-semibold">Categories</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-download text-primary"></i> Export Reports
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="fw-semibold mb-3">
+                                        <i class="bi bi-box-seam text-primary"></i> Products
+                                    </h6>
+                                    <div class="d-grid gap-2">
+                                        <a asp-controller="Products" asp-action="ExportToExcel" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-file-excel"></i> Excel
+                                        </a>
+                                        <a asp-controller="Products" asp-action="ExportToPdf" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-pdf"></i> PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="fw-semibold mb-3">
+                                        <i class="bi bi-people text-success"></i> Customers
+                                    </h6>
+                                    <div class="d-grid gap-2">
+                                        <a asp-controller="Customers" asp-action="ExportToExcel" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-file-excel"></i> Excel
+                                        </a>
+                                        <a asp-controller="Customers" asp-action="ExportToPdf" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-pdf"></i> PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <h6 class="fw-semibold mb-3">
+                                        <i class="bi bi-cart-check text-info"></i> Sales
+                                    </h6>
+                                    <div class="d-grid gap-2">
+                                        <a asp-controller="Sales" asp-action="ExportToExcel" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-file-excel"></i> Excel
+                                        </a>
+                                        <a asp-controller="Sales" asp-action="ExportToPdf" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-file-pdf"></i> PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+@section Styles {
+    <style>
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+        .card {
+            border-radius: 0.75rem;
+        }
+        .btn {
+            border-radius: 0.5rem;
+        }
+    </style>
+}

@@ -1,42 +1,200 @@
-@model Firmness.Admin.Web.ViewModels.Sales.SaleFormViewModel
+@model Firmness.Web.ViewModels.Sales.SaleFormViewModel
+@using Firmness.Domain.Enums
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Sale";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
-
-<h4>Sale</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" method="post" class="row g-3">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="Model.Customers"></select>
-                <span asp-validation-for="CustomerId" class="text-danger"></span>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Sale</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        
+                        <div class="row">
+                            <!-- Customer Information -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-person"></i> Customer Information</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="CustomerId" class="form-label fw-bold"></label>
+                                            <select asp-for="CustomerId" class="form-select" asp-items="Model.Customers">
+                                                <option value="">-- Select Customer --</option>
+                                            </select>
+                                            <span asp-validation-for="CustomerId" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="CreatedAt" class="form-label fw-bold"></label>
+                                            <input asp-for="CreatedAt" type="date" class="form-control" />
+                                            <span asp-validation-for="CreatedAt" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="InvoiceNumber" class="form-label fw-bold"></label>
+                                            <input asp-for="InvoiceNumber" class="form-control" placeholder="INV-2024-001" />
+                                            <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment & Status -->
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-credit-card"></i> Payment & Status</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label asp-for="Status" class="form-label fw-bold"></label>
+                                            <select asp-for="Status" class="form-select">
+                                                <option value="@((int)SaleStatus.Pending)">Pending</option>
+                                                <option value="@((int)SaleStatus.Processing)">Processing</option>
+                                                <option value="@((int)SaleStatus.Completed)">Completed</option>
+                                                <option value="@((int)SaleStatus.Cancelled)">Cancelled</option>
+                                                <option value="@((int)SaleStatus.Refunded)">Refunded</option>
+                                            </select>
+                                            <span asp-validation-for="Status" class="text-danger"></span>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label asp-for="PaymentMethod" class="form-label fw-bold"></label>
+                                            <select asp-for="PaymentMethod" class="form-select">
+                                                <option value="@((int)PaymentMethod.Cash)">💵 Cash</option>
+                                                <option value="@((int)PaymentMethod.Card)">💳 Card</option>
+                                                <option value="@((int)PaymentMethod.BankTransfer)">🏦 Bank Transfer</option>
+                                                <option value="@((int)PaymentMethod.Electronic)">📱 Electronic</option>
+                                                <option value="@((int)PaymentMethod.Check)">📝 Check</option>
+                                                <option value="@((int)PaymentMethod.StoreCredit)">🎁 Store Credit</option>
+                                            </select>
+                                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Financial Details -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-calculator"></i> Financial Details</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label asp-for="Subtotal" class="form-label fw-bold"></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input asp-for="Subtotal" type="number" step="0.01" class="form-control" id="subtotal" />
+                                                </div>
+                                                <span asp-validation-for="Subtotal" class="text-danger"></span>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label asp-for="Tax" class="form-label fw-bold"></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input asp-for="Tax" type="number" step="0.01" class="form-control" id="tax" />
+                                                </div>
+                                                <span asp-validation-for="Tax" class="text-danger"></span>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label asp-for="Discount" class="form-label fw-bold"></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input asp-for="Discount" type="number" step="0.01" class="form-control" id="discount" />
+                                                </div>
+                                                <span asp-validation-for="Discount" class="text-danger"></span>
+                                            </div>
+                                            
+                                            <div class="col-md-3 mb-3">
+                                                <label asp-for="TotalAmount" class="form-label fw-bold"></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input asp-for="TotalAmount" type="number" step="0.01" class="form-control" id="total" />
+                                                </div>
+                                                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="calculateTotal()">
+                                                    <i class="bi bi-calculator"></i> Auto-Calculate Total
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0"><i class="bi bi-sticky"></i> Additional Notes</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Enter any additional notes or comments..."></textarea>
+                                        <span asp-validation-for="Notes" class="text-danger"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Index" class="btn btn-secondary">
+                                        <i class="bi bi-arrow-left"></i> Back to List
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-save"></i> Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label asp-for="TotalAmount" class="control-label"></label>
-                <input asp-for="TotalAmount" class="form-control" />
-                <span asp-validation-for="TotalAmount" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function calculateTotal() {
+            const subtotal = parseFloat(document.getElementById('subtotal').value) || 0;
+            const tax = parseFloat(document.getElementById('tax').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            
+            const total = subtotal + tax - discount;
+            document.getElementById('total').value = total.toFixed(2);
+        }
+        
+        // Auto-calculate when values change
+        document.getElementById('subtotal').addEventListener('input', calculateTotal);
+        document.getElementById('tax').addEventListener('input', calculateTotal);
+        document.getElementById('discount').addEventListener('input', calculateTotal);
+    </script>
 }
