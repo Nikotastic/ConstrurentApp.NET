@@ -1,9 +1,8 @@
 ﻿namespace Firmness.Domain.Entities;
 
 // class for products
-public class Product
+public class Product : BaseEntity
 {
-    public Guid Id { get; protected set; } = Guid.NewGuid();
     // SKU for stock keeping unit
     public string SKU { get; set; } = String.Empty;
     public string Name { get; set; } = String.Empty;
@@ -20,6 +19,7 @@ public class Product
     // navegation
     public Category? Category { get; set; }
     public ICollection<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
+    
     protected Product() { }
     
     // constructor with parameters
