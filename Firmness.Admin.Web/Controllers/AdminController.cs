@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Firmness.Admin.Web.Controllers;
+namespace Firmness.Web.Controllers;
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Firmness.Admin.Web.ViewModels.Sales;
+using Firmness.Web.ViewModels.Sales;
 using Firmness.Domain.Entities;
 
 namespace Firmness.Web.Mappings;

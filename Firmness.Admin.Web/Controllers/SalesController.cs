@@ -1,4 +1,4 @@
-using Firmness.Admin.Web.ViewModels.Sales;
+using Firmness.Web.ViewModels.Sales;
 using Firmness.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Firmness.Domain.Entities;
 using Firmness.Infrastructure.Data;
 
-namespace Firmness.Admin.Web.Controllers
+namespace Firmness.Web.Controllers
 {
     public class SalesController : Controller
     {
@@ -43,10 +43,56 @@ namespace Firmness.Admin.Web.Controllers
             return list;
         }
         // GET: Sales
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? q, int page = 1)
         {
-            var applicationDbContext = _context.Sales.Include(s => s.Customer);
-            return View(await applicationDbContext.ToListAsync());
+            const int pageSize = 10;
+            page = Math.Max(1, page);
+
+            try
+            {
+                var query = _context.Sales
+                    .Include(s => s.Customer)
+                    .AsQueryable();
+
+                // Apply search filter
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    var searchTerm = q.Trim().ToLower();
+                    query = query.Where(s =>
+                        (s.InvoiceNumber != null && s.InvoiceNumber.ToLower().Contains(searchTerm)) ||
+                        (s.Customer != null && 
+                            (s.Customer.FirstName.ToLower().Contains(searchTerm) ||
+                             s.Customer.LastName.ToLower().Contains(searchTerm) ||
+                             s.Customer.Email.ToLower().Contains(searchTerm))) ||
+                        (s.Notes != null && s.Notes.ToLower().Contains(searchTerm))
+                    );
+                }
+
+                var totalSales = await query.CountAsync();
+                var sales = await query
+                    .OrderByDescending(s => s.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                // Crear resultado paginado
+                var paginatedResult = new Firmness.Domain.Common.PaginatedResult<Sale>(
+                    sales,
+                    page,
+                    pageSize,
+                    totalSales
+                );
+
+                ViewData["Query"] = q;
+                return View(paginatedResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error to load sales");
+                TempData["Error"] = "Can't load sales.";
+                var empty = Firmness.Domain.Common.PaginatedResult<Sale>.Empty(page, pageSize);
+                return View(empty);
+            }
         }
 
         // GET: Sales/Details/5
@@ -66,17 +112,33 @@ namespace Firmness.Admin.Web.Controllers
         }
 
         // GET: Sales/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            var vm = new SaleFormViewModel
+            try
             {
-                Customers = _context.Customers
-                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Email })
-                    .ToList(),
-                CreatedAt = DateTime.Today,
-                TotalAmount = 0m 
-            };
-            return View(vm);
+                var vm = new SaleFormViewModel
+                {
+                    Customers = await _context.Customers
+                        .AsNoTracking()
+                        .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Email })
+                        .ToListAsync(),
+                    CreatedAt = DateTime.Today,
+                    TotalAmount = 0m 
+                };
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading customers for sale creation");
+                var vm = new SaleFormViewModel
+                {
+                    Customers = new List<SelectListItem>(),
+                    CreatedAt = DateTime.Today,
+                    TotalAmount = 0m 
+                };
+                TempData["Warning"] = "The clients could not be loaded. Please check your database connection..";
+                return View(vm);
+            }
         }
 
         // POST: Sales/Create
@@ -162,6 +224,13 @@ namespace Firmness.Admin.Web.Controllers
                 sale.CustomerId = vm.CustomerId;
                 sale.CreatedAt = vm.CreatedAt;
                 sale.TotalAmount = vm.TotalAmount;
+                sale.Status = vm.Status;
+                sale.PaymentMethod = vm.PaymentMethod;
+                sale.Subtotal = vm.Subtotal;
+                sale.Tax = vm.Tax;
+                sale.Discount = vm.Discount;
+                sale.Notes = vm.Notes;
+                sale.InvoiceNumber = vm.InvoiceNumber;
 
                 _context.Update(sale);
                 await _context.SaveChangesAsync();
@@ -278,6 +347,13 @@ namespace Firmness.Admin.Web.Controllers
             CustomerId = s.CustomerId,
             CreatedAt = s.CreatedAt,
             TotalAmount = s.TotalAmount,
+            Status = s.Status,
+            PaymentMethod = s.PaymentMethod,
+            Subtotal = s.Subtotal,
+            Tax = s.Tax,
+            Discount = s.Discount,
+            Notes = s.Notes,
+            InvoiceNumber = s.InvoiceNumber,
             CustomerName = s.Customer?.FullName,
             CustomerEmail = s.Customer?.Email
         };
@@ -286,7 +362,14 @@ namespace Firmness.Admin.Web.Controllers
         {
             CustomerId = vm.CustomerId,
             CreatedAt = vm.CreatedAt,
-            TotalAmount = vm.TotalAmount
+            TotalAmount = vm.TotalAmount,
+            Status = vm.Status,
+            PaymentMethod = vm.PaymentMethod,
+            Subtotal = vm.Subtotal,
+            Tax = vm.Tax,
+            Discount = vm.Discount,
+            Notes = vm.Notes,
+            InvoiceNumber = vm.InvoiceNumber
         };
     }
 }

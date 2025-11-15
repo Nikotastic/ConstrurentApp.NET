@@ -2,7 +2,7 @@
 using Firmness.Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace Firmness.Admin.Web.ViewModels.Sales;
+namespace Firmness.Web.ViewModels.Sales;
 
 public class SaleFormViewModel
 {
