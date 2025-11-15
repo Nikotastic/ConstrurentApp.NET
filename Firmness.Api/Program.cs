@@ -1,4 +1,5 @@
 using Firmness.Infrastructure.DependencyInjection;
+using Firmness.Application.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using ApplicationDbContext = Firmness.Infrastructure.Data.ApplicationDbContext;
 using Firmness.Infrastructure.Identity;
@@ -132,12 +133,13 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-    // Usar el rol 'Client' (consistente con SeedData and AuthController)
     options.AddPolicy("RequireClientRole", policy => policy.RequireRole("Client"));
 });
 
 // Add services to the container.
 builder.Services.AddControllers();
+// Add Application services (includes AutoMapper)
+builder.Services.AddApplicationServices();
 // Add infrastructure services (includes application services and repositories)
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
