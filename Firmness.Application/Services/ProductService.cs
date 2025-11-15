@@ -59,6 +59,21 @@ public class ProductService : IProductService
         }
     }
 
+    // Get paged products with category information and filters
+    public async Task<Result<PaginatedResult<Product>>> GetPagedWithCategoryAsync(int page, int pageSize, string? query = null, Guid? categoryId = null)
+    {
+        try
+        {
+            var (items, total) = await _productRepository.GetPagedWithCategoryAsync(page, pageSize, query, categoryId);
+            var paginated = new PaginatedResult<Product>(items, page, pageSize, total);
+            return Result<PaginatedResult<Product>>.Success(paginated);
+        }
+        catch (Exception)
+        {
+            return Result<PaginatedResult<Product>>.Failure("An error occurred while retrieving products.", ErrorCodes.ServerError);
+        }
+    }
+
     public async Task<Result> AddAsync(Product? product)
     {
         // Basic validations
