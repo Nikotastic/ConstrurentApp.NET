@@ -1,68 +1,63 @@
 ﻿services:
   postgres:
     image: postgres:15
+    container_name: construrentappnet-postgres-1
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "${PG_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - firmness-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   web:
-    build:
-      context: .
-      dockerfile: Firmness.Admin.Web/Dockerfile
-    working_dir: /app
-    env_file:
-      - .env
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: construrentappnet-web-1
+    restart: unless-stopped
     environment:
-      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - ConnectionStrings__DefaultConnection=${CONN_STR}
+      - CONN_STR=Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Development}
+      - DOTNET_RUNNING_IN_CONTAINER=true
     ports:
       - "${WEB_PORT:-5000}:5000"
-    volumes:
-      - ./:/app:cached
-      - nuget_cache:/root/.nuget/packages:cached
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      /bin/bash -lc "
-      dotnet tool install --global dotnet-ef &&
-      export PATH=$PATH:/root/.dotnet/tools &&
-      cd /app/Firmness.Admin.Web &&
-      dotnet restore &&
-      dotnet ef database update --project ../Firmness.Infrastructure/Firmness.Infrastructure.csproj --startup-project . --context Firmness.Infrastructure.Data.ApplicationDbContext &&
-      dotnet watch run --urls http://0.0.0.0:5000"
+    networks:
+      - firmness-network
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: /bin/bash -lc "cd /app/Firmness.Admin.Web && dotnet restore && dotnet run"
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: construrentappnet-pgadmin-1
     restart: unless-stopped
-
-  migrator:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    env_file:
-      - .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "8080:80"
     depends_on:
       postgres:
         condition: service_healthy
-    working_dir: /src
-    volumes:
-      - ./:/src:cached
-      - nuget_cache:/root/.nuget/packages:cached
-    command: >
-      /bin/bash -lc "
-      dotnet tool install --global dotnet-ef || true &&
-      export PATH=\$PATH:/root/.dotnet/tools &&
-      tail -f /dev/null
-      "
+    networks:
+      - firmness-network
 
+volumes:
+  postgres_data:
+    driver: local
 
-
+networks:
+  firmness-network:
+    driver: bridge
