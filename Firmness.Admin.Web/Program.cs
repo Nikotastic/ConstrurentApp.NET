@@ -14,71 +14,97 @@ var env = builder.Environment;
 // Configure EPPlus for non-commercial use (free)
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-// Load the main .env file (for Docker)
-var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
-if (!File.Exists(envPath))
+// Better detection: Check if we're actually running inside a Docker container FIRST
+// Docker sets the /.dockerenv file or DOTNET_RUNNING_IN_CONTAINER is set by docker-compose
+var dockerEnvFile = File.Exists("/.dockerenv");
+var inContainer = dockerEnvFile || (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux) && 
+                  string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase));
+
+if (inContainer)
 {
-    var dir = new DirectoryInfo(AppContext.BaseDirectory);
-    while (dir != null)
+    // In Docker: Only load .env file, NOT .env.local
+    var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
+    if (!File.Exists(envPath))
     {
-        var candidate = Path.Combine(dir.FullName, ".env");
-        if (File.Exists(candidate))
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
         {
-            envPath = candidate;
-            break;
+            var candidate = Path.Combine(dir.FullName, ".env");
+            if (File.Exists(candidate))
+            {
+                envPath = candidate;
+                break;
+            }
+            dir = dir.Parent;
         }
-        dir = dir.Parent;
+    }
+    
+    if (File.Exists(envPath))
+    {
+        DotNetEnv.Env.Load(envPath);
+        Console.WriteLine("[INFO] Loaded .env for Docker environment");
     }
 }
-
-// Prefer .env.local if exists (for local development)
-var envLocalPath = Path.Combine(builder.Environment.ContentRootPath, ".env.local");
-if (!File.Exists(envLocalPath))
+else
 {
-    var dir = new DirectoryInfo(AppContext.BaseDirectory);
-    while (dir != null)
+    // Local development: Load .env.local first (higher priority), then .env
+    var envLocalPath = Path.Combine(builder.Environment.ContentRootPath, ".env.local");
+    if (!File.Exists(envLocalPath))
     {
-        var candidate = Path.Combine(dir.FullName, ".env.local");
-        if (File.Exists(candidate))
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
         {
-            envLocalPath = candidate;
-            break;
+            var candidate = Path.Combine(dir.FullName, ".env.local");
+            if (File.Exists(candidate))
+            {
+                envLocalPath = candidate;
+                break;
+            }
+            dir = dir.Parent;
         }
-        dir = dir.Parent;
     }
-}
-
-// Load .env.local first (higher priority), then .env
-if (File.Exists(envLocalPath))
-{
-    DotNetEnv.Env.Load(envLocalPath);
-    Console.WriteLine("[INFO] Loaded .env.local for local development");
-}
-else if (File.Exists(envPath))
-{
-    DotNetEnv.Env.Load(envPath);
-    Console.WriteLine("[INFO] Loaded .env for Docker environment");
+    
+    var envPath = Path.Combine(builder.Environment.ContentRootPath, ".env");
+    if (!File.Exists(envPath))
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(dir.FullName, ".env");
+            if (File.Exists(candidate))
+            {
+                envPath = candidate;
+                break;
+            }
+            dir = dir.Parent;
+        }
+    }
+    
+    if (File.Exists(envLocalPath))
+    {
+        DotNetEnv.Env.Load(envLocalPath);
+        Console.WriteLine("[INFO] Loaded .env.local for local development");
+    }
+    else if (File.Exists(envPath))
+    {
+        DotNetEnv.Env.Load(envPath);
+        Console.WriteLine("[INFO] Loaded .env file");
+    }
 }
 
 // Resolve connection string from environment variables or appsettings
 var configuration = builder.Configuration;
 
-// Get CONN_STR from environment (loaded from .env or .env.local)
+// Get CONN_STR from environment (loaded from .env or .env.local, or set by docker-compose)
 var connStrFromEnv = Environment.GetEnvironmentVariable("CONN_STR");
-
-// Better detection: Check if we're actually running inside a Docker container
-// Docker sets the /.dockerenv file or DOTNET_RUNNING_IN_CONTAINER is set by docker-compose (not .env file)
-var dockerEnvFile = File.Exists("/.dockerenv");
-var inContainer = dockerEnvFile || (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux) && 
-                  string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase));
 
 string? defaultConn = null;
 
 if (inContainer)
 {
-    // Running in Docker: use CONN_STR from environment (docker-compose)
+    // Running in Docker: use CONN_STR from environment (docker-compose sets this)
     defaultConn = connStrFromEnv;
-    Console.WriteLine("[INFO] Running in Docker container - using CONN_STR from environment");
+    Console.WriteLine("[INFO] Running in Docker container - using CONN_STR from docker-compose");
 }
 else
 {
