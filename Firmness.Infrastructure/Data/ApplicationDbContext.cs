@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
     public DbSet<Sale> Sales { get; set; } = null!;
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
+    public DbSet<Category> Categories { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -28,6 +29,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
 
         // Treat Person as non-entity (ignore it). User and Customer will be independent entities.
         modelBuilder.Ignore<Person>();
+
+        // Categories
+        modelBuilder.Entity<Category>(b =>
+        {
+            b.ToTable("Category");
+            b.HasKey(c => c.Id);
+            b.Property(c => c.Name).HasMaxLength(100).IsRequired();
+            b.Property(c => c.Description).HasMaxLength(500);
+            b.Property(c => c.IsActive).IsRequired();
+            b.HasIndex(c => c.Name).IsUnique();
+        });
 
         // Productos
         modelBuilder.Entity<Product>(b =>
@@ -40,6 +52,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
             b.Property(p => p.Stock).IsRequired();
             b.Property(p => p.ImageUrl).HasMaxLength(200).IsRequired();
             b.Property(p => p.Description).HasMaxLength(500).IsRequired();
+            
+            // Nuevas propiedades
+            b.Property(p => p.IsActive).IsRequired();
+            b.Property(p => p.MinStock).HasColumnType("decimal(18,2)");
+            b.Property(p => p.Cost).HasColumnType("decimal(18,2)");
+            b.Property(p => p.Barcode).HasMaxLength(50);
+            
+            // Relación con Category
+            b.HasOne(p => p.Category)
+             .WithMany(c => c.Products)
+             .HasForeignKey(p => p.CategoryId)
+             .OnDelete(DeleteBehavior.SetNull);
+            
+            b.HasIndex(p => p.SKU).IsUnique();
+            b.HasIndex(p => p.Barcode).IsUnique(false);
         });
 
         // Users (domain) mapped to table "User"
@@ -84,7 +111,17 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
             b.ToTable("Sale");
             b.HasKey(s => s.Id);
             b.Property(s => s.TotalAmount).HasColumnType("decimal(18,2)").IsRequired();
+            
+            // Propiedades con ENUMs (se guardan como strings en BD)
+            b.Property(s => s.Subtotal).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(s => s.Tax).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(s => s.Discount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(s => s.Notes).HasMaxLength(1000);
+            b.Property(s => s.InvoiceNumber).HasMaxLength(50);
+            
             b.HasOne(s => s.Customer).WithMany(c => c.Sales).HasForeignKey(s => s.CustomerId);
+            b.HasIndex(s => s.InvoiceNumber).IsUnique(false);
+            b.HasIndex(s => s.Status);
         });
 
         // SaleItems

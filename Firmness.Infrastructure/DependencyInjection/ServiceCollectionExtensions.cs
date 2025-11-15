@@ -12,25 +12,15 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Registro de repositorios (adapters)
+        // Repositories (adapters)
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ISaleRepository, SaleRepository>();
-        services.AddScoped<ISaleItemRepository, SaleItemRepository>();  
+        services.AddScoped<ISaleItemRepository, SaleItemRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
 
-        // Registrar UnitOfWork para que los application services lo consuman
+        // UnitOfWork for application services to consume
         services.AddScoped<IUnitOfWork, ApplicationDbContext>();
-
-        // Registro de application services (si tus servicios están en Application project,
-        // puedes registrarlos aquí o desde Application; registrar aquí es práctico)
-        services.AddScoped<IProductService, ProductService>();
-        services.AddScoped<ICustomerService, CustomerService>();
-        services.AddScoped<ISaleService, SaleService>();
-        services.AddScoped<IBulkImportService, BulkImportService>();
-        services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
-
-        // añadir otros infra services (email, storage, etc.) aquí
-
         return services;
     }
 }

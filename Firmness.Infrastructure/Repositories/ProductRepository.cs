@@ -65,6 +65,75 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
         return (items, total);
     }
 
+    // Get all products with category
+    public async Task<IEnumerable<Product>> GetAllWithCategoryAsync()
+    {
+        return await db.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .OrderBy(p => p.Category != null ? p.Category.Name : "")
+            .ThenBy(p => p.Name)
+            .ToListAsync();
+    }
+
+    // Get all products with category filtered by categoryId
+    public async Task<IEnumerable<Product>> GetAllWithCategoryAsync(Guid? categoryId)
+    {
+        var query = db.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(p => p.CategoryId == categoryId.Value);
+        }
+
+        return await query
+            .OrderBy(p => p.Category != null ? p.Category.Name : "")
+            .ThenBy(p => p.Name)
+            .ToListAsync();
+    }
+
+    // Paged with category filter and includes
+    public async Task<(IEnumerable<Product> Items, long Total)> GetPagedWithCategoryAsync(int page, int pageSize, string? query = null, Guid? categoryId = null)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+
+        var q = db.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .AsQueryable();
+
+        // Apply search filter
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var searchTerm = query.Trim().ToLower();
+            q = q.Where(p => 
+                p.SKU.ToLower().Contains(searchTerm) ||
+                p.Name.ToLower().Contains(searchTerm) ||
+                (p.Description != null && p.Description.ToLower().Contains(searchTerm)) ||
+                (p.Barcode != null && p.Barcode.ToLower().Contains(searchTerm))
+            );
+        }
+
+        // Apply category filter
+        if (categoryId.HasValue)
+        {
+            q = q.Where(p => p.CategoryId == categoryId.Value);
+        }
+
+        var total = await q.LongCountAsync();
+        var items = await q
+            .OrderBy(p => p.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, total);
+    }
+
     public async Task<long> CountAsync(CancellationToken cancellationToken = default)
         => await db.Products.LongCountAsync(cancellationToken);
 }

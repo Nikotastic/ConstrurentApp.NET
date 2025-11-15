@@ -50,6 +50,18 @@ public class SaleRepository : ISaleRepository
             .ToListAsync();
     }
     
+    // Get all sales with full details
+    public async Task<IEnumerable<Sale>> GetAllWithDetailsAsync()
+    {
+        return await _db.Sales
+            .AsNoTracking()
+            .Include(s => s.Customer)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
+    }
+    
     // Get a sale by id
     public async Task<Sale?> GetByIdAsync(Guid id)
     {
@@ -57,6 +69,17 @@ public class SaleRepository : ISaleRepository
             .AsNoTracking()
             .Include(s => s.Items)
             .Include(s => s.Customer)
+            .FirstOrDefaultAsync(s => s.Id == id);
+    }
+    
+    // Get a sale by id with full details
+    public async Task<Sale?> GetByIdWithDetailsAsync(Guid id)
+    {
+        return await _db.Sales
+            .AsNoTracking()
+            .Include(s => s.Customer)
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
     
