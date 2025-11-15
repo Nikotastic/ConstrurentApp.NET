@@ -26,6 +26,9 @@ namespace Firmness.Web.Controllers
         // q = query; categoryId = filter by category
         public async Task<IActionResult> Index(string? q, Guid? categoryId, int page = 1, int pageSize = 20)
         {
+            _logger.LogInformation("=== INDEX PRODUCTS: page={Page}, pageSize={PageSize}, query={Query}, categoryId={CategoryId}", 
+                page, pageSize, q, categoryId);
+            
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 200);
 
@@ -100,8 +103,13 @@ namespace Firmness.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductFormViewModel vm)
         {
+            _logger.LogInformation("=== CREATE PRODUCT: Started ===");
+            _logger.LogInformation("ModelState Valid: {IsValid}", ModelState.IsValid);
+            
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
+                    string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
                 var categories = await _categoryService.GetActiveAsync();
                 vm.Categories = categories
                     .OrderBy(c => c.Name)
@@ -112,6 +120,8 @@ namespace Firmness.Web.Controllers
 
             try
             {
+                _logger.LogInformation("Creating product entity with SKU: {SKU}, Name: {Name}", vm.SKU, vm.Name);
+                
                 var entity = new Product(vm.SKU, vm.Name, vm.Description ?? string.Empty, 
                     vm.Price ?? 0m, vm.ImageUrl ?? string.Empty, vm.Stock ?? 0m)
                 {
@@ -122,7 +132,14 @@ namespace Firmness.Web.Controllers
                     IsActive = vm.IsActive
                 };
 
+                _logger.LogInformation("Product entity created with Id: {ProductId}", entity.Id);
+                _logger.LogInformation("Calling ProductService.AddAsync...");
+                
                 var result = await _productService.AddAsync(entity);
+                
+                _logger.LogInformation("ProductService.AddAsync returned. IsSuccess: {IsSuccess}, ErrorMessage: {ErrorMessage}", 
+                    result.IsSuccess, result.ErrorMessage);
+                
                 if (!result.IsSuccess)
                 {
                     _logger.LogWarning("Create product failed: {Message}", result.ErrorMessage);
@@ -135,6 +152,7 @@ namespace Firmness.Web.Controllers
                     return View(vm);
                 }
 
+                _logger.LogInformation("Product created successfully! Setting TempData and redirecting to Index");
                 TempData["Success"] = "Producto creado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
