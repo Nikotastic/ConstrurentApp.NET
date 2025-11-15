@@ -1,4 +1,4 @@
-﻿namespace Firmness.Admin.Web.ViewModels.Product;
+﻿namespace Firmness.Web.ViewModels.Product;
 
 public class ProductListItemViewModel
 {

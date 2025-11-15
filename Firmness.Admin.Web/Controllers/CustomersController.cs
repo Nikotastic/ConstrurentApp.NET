@@ -1,45 +1,72 @@
-using Firmness.Admin.Web.ViewModels.Customer;
+using Firmness.Web.ViewModels.Customer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Firmness.Application.Interfaces;
 using Firmness.Domain.Entities;
+using AutoMapper;
 
-namespace Firmness.Admin.Web.Controllers
+namespace Firmness.Web.Controllers
 {
     [Authorize(Roles="Admin")] 
     public class CustomersController : Controller
     {
         private readonly ICustomerService _service;
+        private readonly IMapper _mapper;
         private readonly ILogger<CustomersController> _logger;
 
-        public CustomersController(ICustomerService service, ILogger<CustomersController> logger)
+        public CustomersController(ICustomerService service, IMapper mapper, ILogger<CustomersController> logger)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
 
         // GET: /Customers
-        public async Task<IActionResult> Index(string? q)
+        public async Task<IActionResult> Index(string? q, int page = 1)
         {
-            var customers = await _service.GetAllAsync();
+            const int pageSize = 10; 
+            page = Math.Max(1, page);
 
-            if (!string.IsNullOrWhiteSpace(q))
+            try
             {
-                var term = q.Trim();
-                customers = customers
-                    .Where(c =>
-                        (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(c.LastName)  && c.LastName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(c.Email)     && c.Email.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(c.Phone)     && c.Phone.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
-                        (!string.IsNullOrWhiteSpace(c.Document)  && c.Document.Contains(term, StringComparison.OrdinalIgnoreCase))
-                    )
-                    .ToList();
+                if (!string.IsNullOrWhiteSpace(q))
+                {
+                    var allCustomers = await _service.GetAllAsync();
+                    var term = q.Trim();
+                    var filtered = allCustomers
+                        .Where(c =>
+                            (!string.IsNullOrWhiteSpace(c.FirstName) && c.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrWhiteSpace(c.LastName)  && c.LastName.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrWhiteSpace(c.Email)     && c.Email.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrWhiteSpace(c.Phone)     && c.Phone.Contains(term, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrWhiteSpace(c.Document)  && c.Document.Contains(term, StringComparison.OrdinalIgnoreCase))
+                        )
+                        .ToList();
+                    
+                    ViewData["Query"] = q;
+                    
+                    // Create paginated result
+                    var pagedFiltered = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                    var paginatedResult = new Firmness.Domain.Common.PaginatedResult<Customer>(
+                        pagedFiltered, 
+                        page, 
+                        pageSize, 
+                        filtered.Count);
+                    
+                    return View(paginatedResult);
+                }
+                var paginatedCustomers = await _service.GetAllAsync(page, pageSize);
+                ViewData["Query"] = q;
+                return View(paginatedCustomers);
             }
-
-            ViewData["q"] = q;
-            return View(customers);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading customers");
+                TempData["Error"] = "Can't load customers.";
+                var empty = Firmness.Domain.Common.PaginatedResult<Customer>.Empty(page, pageSize);
+                return View(empty);
+            }
         }
         
         
@@ -48,14 +75,16 @@ namespace Firmness.Admin.Web.Controllers
         {
             var customer = await _service.GetByIdAsync(id);
             if (customer == null) return NotFound();
-            return View(MapToVm(customer));
+            
+            // Map entity to view model
+            var viewModel = _mapper.Map<CustomerFormViewModel>(customer);
+            return View(viewModel);
         }
 
         // GET: /Customers/Create
         public IActionResult Create() => View(new CustomerFormViewModel());
 
         // POST: /Customers/Create
-        // csharp
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CustomerFormViewModel vm)
@@ -64,41 +93,17 @@ namespace Firmness.Admin.Web.Controllers
 
             try
             {
-                var firstName = vm.FirstName?.Trim() ?? string.Empty;
-                var lastName  = vm.LastName?.Trim()  ?? string.Empty;
-                var email     = vm.Email?.Trim()     ?? string.Empty;
-                var document  = vm.Document?.Trim()  ?? string.Empty;
-                var phone     = vm.Phone?.Trim()     ?? string.Empty;
-                var address   = vm.Address?.Trim()   ?? string.Empty;
-
-               
-                if (string.IsNullOrWhiteSpace(firstName))
-                {
-                    ModelState.AddModelError(nameof(vm.FirstName), "First name is required.");
-                    return View(vm);
-                }
-                if (string.IsNullOrWhiteSpace(email))
-                {
-                    ModelState.AddModelError(nameof(vm.Email), "Email is required.");
-                    return View(vm);
-                }
-                if (!IsValidDocument(document))
+                if (!IsValidDocument(vm.Document))
                 {
                     ModelState.AddModelError(nameof(vm.Document), "The document does not have a valid format.");
                     return View(vm);
                 }
 
-                var entity = new Customer(firstName, lastName, email)
-                {
-                    Document = document,
-                    Phone = string.IsNullOrEmpty(phone) ? string.Empty : phone,
-                    Address = string.IsNullOrEmpty(address) ? string.Empty : address,
-                    IsActive = vm.IsActive
-                };
-
+                // Map view model to entity
+                var entity = _mapper.Map<Customer>(vm);
+                
                 await _service.AddAsync(entity);
 
-               
                 TempData["Success"] = $"Client created successfully. Id: {entity.Id}";
                 return RedirectToAction(nameof(Index));
             }
@@ -122,7 +127,8 @@ namespace Firmness.Admin.Web.Controllers
         {
             var customer = await _service.GetByIdAsync(id);
             if (customer == null) return NotFound();
-            return View(MapToVm(customer));
+            var viewModel = _mapper.Map<CustomerFormViewModel>(customer);
+            return View(viewModel);
         }
 
         // POST: /Customers/Edit/{id}
@@ -144,13 +150,8 @@ namespace Firmness.Admin.Web.Controllers
                 var customer = await _service.GetByIdAsync(id);
                 if (customer == null) return NotFound();
 
-                customer.FirstName = vm.FirstName.Trim();
-                customer.LastName = vm.LastName.Trim();
-                customer.Email = vm.Email.Trim();
-                customer.Document = vm.Document.Trim();
-                customer.Phone = vm.Phone?.Trim() ?? string.Empty;
-                customer.Address = vm.Address?.Trim() ?? string.Empty;
-                customer.IsActive = vm.IsActive;
+                // Map view model to entity
+                _mapper.Map(vm, customer);      
 
                 await _service.UpdateAsync(customer);
                 TempData["Success"] = "Client update correctly.";
@@ -169,7 +170,8 @@ namespace Firmness.Admin.Web.Controllers
         {
             var customer = await _service.GetByIdAsync(id);
             if (customer == null) return NotFound();
-            return View(MapToVm(customer));
+            var viewModel = _mapper.Map<CustomerFormViewModel>(customer);
+            return View(viewModel);
         }
 
         // POST: /Customers/Delete/{id}
@@ -198,12 +200,12 @@ namespace Firmness.Admin.Web.Controllers
             {
                 var excelBytes = await exportService.ExportCustomersToExcelAsync();
                 return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-                    $"clientes_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
+                    $"Clients_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting customers to Excel");
-                TempData["Error"] = "No se pudo exportar a Excel.";
+                TempData["Error"] = "Could not export to Excel.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -214,27 +216,16 @@ namespace Firmness.Admin.Web.Controllers
             try
             {
                 var pdfBytes = await exportService.ExportCustomersToPdfAsync();
-                return File(pdfBytes, "application/pdf", $"clientes_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
+                return File(pdfBytes, "application/pdf", $"Clients_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting customers to PDF");
-                TempData["Error"] = "No se pudo exportar a PDF.";
+                TempData["Error"] = "Could not export to Excel.";
                 return RedirectToAction(nameof(Index));
             }
         }
 
-        private static CustomerFormViewModel MapToVm(Customer c) => new CustomerFormViewModel
-        {
-            Id = c.Id,
-            FirstName = c.FirstName ?? string.Empty,
-            LastName = c.LastName ?? string.Empty,
-            Email = c.Email ?? string.Empty,
-            Document = c.Document ?? string.Empty,
-            Phone = string.IsNullOrWhiteSpace(c.Phone) ? null : c.Phone,
-            Address = string.IsNullOrWhiteSpace(c.Address) ? null : c.Address,
-            IsActive = c.IsActive
-        };
 
         private static bool IsValidDocument(string? doc)
         {

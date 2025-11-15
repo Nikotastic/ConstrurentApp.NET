@@ -1,6 +1,5 @@
 ﻿using Firmness.Application.Interfaces;
-using Firmness.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using Firmness.Domain.Interfaces;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -9,36 +8,32 @@ namespace Firmness.Web.Services;
 
 public class ReceiptService : IReceiptService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ISaleRepository _saleRepository;
     private readonly IWebHostEnvironment _environment;
     private const decimal IVA_RATE = 0.19m; // 19% IVA
 
-    public ReceiptService(ApplicationDbContext context, IWebHostEnvironment environment)
+    public ReceiptService(ISaleRepository saleRepository, IWebHostEnvironment environment)
     {
-        _context = context;
+        _saleRepository = saleRepository;
         _environment = environment;
         QuestPDF.Settings.License = LicenseType.Community;
     }
 
     public async Task<string> GenerateReceiptAsync(Guid saleId)
     {
-        var sale = await _context.Sales
-            .Include(s => s.Customer)
-            .Include(s => s.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(s => s.Id == saleId);
+        var sale = await _saleRepository.GetByIdWithDetailsAsync(saleId);
 
         if (sale == null)
             throw new InvalidOperationException($"Sale with ID {saleId} not found.");
 
-        // Crear directorio si no existe
-        var receiptsPath = Path.Combine(_environment.WebRootPath, "recibos");
+        
+        var receiptsPath = Path.Combine(_environment.WebRootPath, "receipts");
         if (!Directory.Exists(receiptsPath))
         {
             Directory.CreateDirectory(receiptsPath);
         }
 
-        var fileName = $"recibo_{saleId}.pdf";
+        var fileName = $"receipts_{saleId}.pdf";
         var filePath = Path.Combine(receiptsPath, fileName);
 
         // Generar PDF
@@ -50,11 +45,7 @@ public class ReceiptService : IReceiptService
 
     public async Task<byte[]> GetReceiptBytesAsync(Guid saleId)
     {
-        var sale = await _context.Sales
-            .Include(s => s.Customer)
-            .Include(s => s.Items)
-                .ThenInclude(i => i.Product)
-            .FirstOrDefaultAsync(s => s.Id == saleId);
+        var sale = await _saleRepository.GetByIdWithDetailsAsync(saleId);
 
         if (sale == null)
             throw new InvalidOperationException($"Sale with ID {saleId} not found.");
@@ -65,16 +56,16 @@ public class ReceiptService : IReceiptService
 
     public bool ReceiptExists(Guid saleId)
     {
-        var receiptsPath = Path.Combine(_environment.WebRootPath, "recibos");
-        var fileName = $"recibo_{saleId}.pdf";
+        var receiptsPath = Path.Combine(_environment.WebRootPath, "receipts");
+        var fileName = $"receipts_{saleId}.pdf";
         var filePath = Path.Combine(receiptsPath, fileName);
         return File.Exists(filePath);
     }
 
     public string GetReceiptPath(Guid saleId)
     {
-        var receiptsPath = Path.Combine(_environment.WebRootPath, "recibos");
-        var fileName = $"recibo_{saleId}.pdf";
+        var receiptsPath = Path.Combine(_environment.WebRootPath, "receipts");
+        var fileName = $"receipts_{saleId}.pdf";
         return Path.Combine(receiptsPath, fileName);
     }
 
@@ -96,7 +87,7 @@ public class ReceiptService : IReceiptService
                 page.Content().Element(content => ComposeContent(content, sale, subtotal, iva, total));
                 page.Footer().AlignCenter().Text(text =>
                 {
-                    text.Span("Generado el: ");
+                    text.Span("Generated on: ");
                     text.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm")).SemiBold();
                 });
             });
@@ -111,8 +102,8 @@ public class ReceiptService : IReceiptService
             {
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().Text("RECIBO DE VENTA").FontSize(24).SemiBold().FontColor(Colors.Blue.Darken2);
-                    col.Item().Text("Firmness - Sistema de Gestión").FontSize(12).FontColor(Colors.Grey.Darken1);
+                    col.Item().Text("SALES RECEIPT").FontSize(24).SemiBold().FontColor(Colors.Blue.Darken2);
+                    col.Item().Text("Firmness - Management System").FontSize(12).FontColor(Colors.Grey.Darken1);
                 });
             });
 
@@ -124,139 +115,108 @@ public class ReceiptService : IReceiptService
     {
         container.PaddingVertical(20).Column(column =>
         {
-            // Información del recibo
+            // Receipt information
             column.Item().Row(row =>
             {
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().Text("INFORMACIÓN DEL RECIBO").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
+                    col.Item().Text("RECEIPT INFORMATION").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
                     col.Item().PaddingTop(5).Text(text =>
                     {
-                        text.Span("Número de Venta: ").SemiBold();
+                        text.Span("Sales Number: ").SemiBold();
                         text.Span(sale.Id.ToString().Substring(0, 8).ToUpper());
                     });
                     col.Item().Text(text =>
                     {
-                        text.Span("Fecha: ").SemiBold();
+                        text.Span("Date: ").SemiBold();
                         text.Span(sale.CreatedAt.ToString("dd/MM/yyyy HH:mm"));
                     });
                 });
 
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().Text("DATOS DEL CLIENTE").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
+                    col.Item().Text("CUSTOMER DATAE").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
                     col.Item().PaddingTop(5).Text(text =>
                     {
-                        text.Span("Cliente: ").SemiBold();
+                        text.Span("Customer: ").SemiBold();
                         text.Span(sale.Customer?.FullName ?? "N/A");
                     });
-                    col.Item().Text(text =>
-                    {
-                        text.Span("Email: ").SemiBold();
-                        text.Span(sale.Customer?.Email ?? "N/A");
-                    });
-                    if (!string.IsNullOrEmpty(sale.Customer?.Document))
+                    if (!string.IsNullOrEmpty(sale.Customer?.Email))
                     {
                         col.Item().Text(text =>
                         {
-                            text.Span("Documento: ").SemiBold();
-                            text.Span(sale.Customer.Document);
+                            text.Span("Email: ").SemiBold();
+                            text.Span(sale.Customer.Email);
                         });
                     }
                     if (!string.IsNullOrEmpty(sale.Customer?.Phone))
                     {
                         col.Item().Text(text =>
                         {
-                            text.Span("Teléfono: ").SemiBold();
+                            text.Span("Phone: ").SemiBold();
                             text.Span(sale.Customer.Phone);
                         });
                     }
                 });
             });
+            column.Item().PaddingVertical(15);
 
-            column.Item().PaddingVertical(20).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-            // Tabla de productos
-            column.Item().Text("DETALLE DE PRODUCTOS").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
-            
-            column.Item().PaddingTop(10).Table(table =>
+            // Product table
+            column.Item().Text("PRODUCT DETAILS").SemiBold().FontSize(12).FontColor(Colors.Blue.Medium);
+            column.Item().PaddingTop(5).Table(table =>
             {
                 table.ColumnsDefinition(columns =>
                 {
-                    columns.ConstantColumn(40);  // Cantidad
-                    columns.RelativeColumn(3);    // Producto
-                    columns.RelativeColumn(4);    // Descripción
-                    columns.RelativeColumn(2);    // Precio Unit
-                    columns.RelativeColumn(2);    // Total
+                    columns.RelativeColumn(3); // Product
+                    columns.RelativeColumn(1); //Amount
+                    columns.RelativeColumn(1); // Unit Price
+                    columns.RelativeColumn(1); // Total
                 });
 
-                // Encabezado
+                // Header
                 table.Header(header =>
                 {
-                    header.Cell().Element(HeaderCellStyle).Text("Cant.");
-                    header.Cell().Element(HeaderCellStyle).Text("Producto");
-                    header.Cell().Element(HeaderCellStyle).Text("Descripción");
-                    header.Cell().Element(HeaderCellStyle).AlignRight().Text("Precio Unit.");
-                    header.Cell().Element(HeaderCellStyle).AlignRight().Text("Total");
-
-                    static IContainer HeaderCellStyle(IContainer container)
-                    {
-                        return container.DefaultTextStyle(x => x.SemiBold())
-                            .Background(Colors.Grey.Lighten3)
-                            .BorderBottom(1)
-                            .BorderColor(Colors.Black)
-                            .Padding(5);
-                    }
+                    header.Cell().Background(Colors.Blue.Lighten3).Padding(5).Text("Product").SemiBold();
+                    header.Cell().Background(Colors.Blue.Lighten3).Padding(5).Text("Amount").SemiBold();
+                    header.Cell().Background(Colors.Blue.Lighten3).Padding(5).Text("Unit Price").SemiBold();
+                    header.Cell().Background(Colors.Blue.Lighten3).Padding(5).Text("Total").SemiBold();
                 });
 
-                // Filas de productos
-                if (sale.Items != null && sale.Items.Any())
+                // Items
+                if (sale.Items != null)
                 {
                     foreach (var item in sale.Items)
                     {
-                        table.Cell().Element(CellStyle).Text(item.Quantity.ToString());
-                        table.Cell().Element(CellStyle).Text(item.Product?.Name ?? "N/A");
-                        table.Cell().Element(CellStyle).Text(item.Product?.Description ?? "");
-                        table.Cell().Element(CellStyle).AlignRight().Text($"${item.UnitPrice:N2}");
-                        table.Cell().Element(CellStyle).AlignRight().Text($"${item.LineaTotal:N2}");
+                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Text(item.Product?.Name ?? "Unknown product");
+                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Text(item.Quantity.ToString("N2"));
+                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5);
+                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5)
+                            .Text($"${item.LineaTotal:N2}");
                     }
                 }
-
-                static IContainer CellStyle(IContainer container)
-                {
-                    return container.BorderBottom(1)
-                        .BorderColor(Colors.Grey.Lighten2)
-                        .Padding(5);
-                }
             });
 
-            column.Item().PaddingTop(20);
-
-            // Totales
-            column.Item().AlignRight().Column(totalsColumn =>
+            // Totals
+            column.Item().PaddingTop(15).AlignRight().Column(col =>
             {
-                totalsColumn.Item().Row(row =>
+                col.Item().Text(text =>
                 {
-                    row.ConstantItem(150).Text("Subtotal:").SemiBold();
-                    row.ConstantItem(100).AlignRight().Text($"${subtotal:N2}");
+                    text.Span("Subtotal: ").SemiBold();
+                    text.Span($"${subtotal:N2}");
                 });
-
-                totalsColumn.Item().Row(row =>
+                col.Item().Text(text =>
                 {
-                    row.ConstantItem(150).Text($"IVA ({IVA_RATE:P0}):").SemiBold();
-                    row.ConstantItem(100).AlignRight().Text($"${iva:N2}");
+                    text.Span("IVA (19%): ").SemiBold();
+                    text.Span($"${iva:N2}");
                 });
-
-                totalsColumn.Item().PaddingTop(5).BorderTop(2).BorderColor(Colors.Blue.Medium).PaddingTop(5).Row(row =>
+                col.Item().PaddingTop(5).Text(text =>
                 {
-                    row.ConstantItem(150).Text("TOTAL:").FontSize(14).SemiBold().FontColor(Colors.Blue.Darken2);
-                    row.ConstantItem(100).AlignRight().Text($"${total:N2}").FontSize(14).SemiBold().FontColor(Colors.Blue.Darken2);
+                    text.Span("TOTAL: ").SemiBold().FontSize(14).FontColor(Colors.Blue.Darken2);
+                    text.Span($"${total:N2}").FontSize(14).FontColor(Colors.Blue.Darken2);
                 });
             });
-
-            column.Item().PaddingTop(30).BorderTop(1).BorderColor(Colors.Grey.Lighten1).PaddingTop(10)
-                .Text("Gracias por su compra").FontSize(10).Italic().FontColor(Colors.Grey.Darken1).AlignCenter();
         });
     }
 }
-

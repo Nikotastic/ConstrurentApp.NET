@@ -1,4 +1,5 @@
 using Firmness.Application.Interfaces;
+using Firmness.Application.DependencyInjection;
 using Firmness.Infrastructure.DependencyInjection;
 using Firmness.Infrastructure.Identity;
 using Firmness.Web.Services;
@@ -10,8 +11,7 @@ using OfficeOpenXml;
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
 
-// Configurar EPPlus para usar licencia no comercial (gratis)
-// Para EPPlus 5.x usamos ExcelPackage.LicenseContext
+// Configure EPPlus for non-commercial use (free)
 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Load the main .env file (for Docker)
@@ -30,24 +30,70 @@ if (!File.Exists(envPath))
         dir = dir.Parent;
     }
 }
-if (File.Exists(envPath)) DotNetEnv.Env.Load(envPath);
+
+// Prefer .env.local if exists (for local development)
+var envLocalPath = Path.Combine(builder.Environment.ContentRootPath, ".env.local");
+if (!File.Exists(envLocalPath))
+{
+    var dir = new DirectoryInfo(AppContext.BaseDirectory);
+    while (dir != null)
+    {
+        var candidate = Path.Combine(dir.FullName, ".env.local");
+        if (File.Exists(candidate))
+        {
+            envLocalPath = candidate;
+            break;
+        }
+        dir = dir.Parent;
+    }
+}
+
+// Load .env.local first (higher priority), then .env
+if (File.Exists(envLocalPath))
+{
+    DotNetEnv.Env.Load(envLocalPath);
+    Console.WriteLine("[INFO] Loaded .env.local for local development");
+}
+else if (File.Exists(envPath))
+{
+    DotNetEnv.Env.Load(envPath);
+    Console.WriteLine("[INFO] Loaded .env for Docker environment");
+}
 
 // Resolve connection string from environment variables or appsettings
 var configuration = builder.Configuration;
-var defaultConn = Environment.GetEnvironmentVariable("CONN_STR")
-                  ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-                  ?? configuration.GetConnectionString("DefaultConnection");
+
+// Get CONN_STR from environment (loaded from .env or .env.local)
+var connStrFromEnv = Environment.GetEnvironmentVariable("CONN_STR");
+
+// Better detection: Check if we're actually running inside a Docker container
+// Docker sets the /.dockerenv file or DOTNET_RUNNING_IN_CONTAINER is set by docker-compose (not .env file)
+var dockerEnvFile = File.Exists("/.dockerenv");
+var inContainer = dockerEnvFile || (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux) && 
+                  string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase));
+
+string? defaultConn = null;
+
+if (inContainer)
+{
+    // Running in Docker: use CONN_STR from environment (docker-compose)
+    defaultConn = connStrFromEnv;
+    Console.WriteLine("[INFO] Running in Docker container - using CONN_STR from environment");
+}
+else
+{
+    // Running locally: use CONN_STR from .env.local or appsettings
+    defaultConn = connStrFromEnv 
+                  ?? configuration.GetConnectionString("DefaultConnection") 
+                  ?? configuration.GetConnectionString("ApplicationDbContextConnection");
+    
+    Console.WriteLine("[INFO] Running locally - using CONN_STR from .env.local");
+}
 
 if (string.IsNullOrWhiteSpace(defaultConn))
-    throw new InvalidOperationException("Connection string not configured. Se buscó: CONN_STR, ConnectionStrings__DefaultConnection, appsettings.");
+    throw new InvalidOperationException("Connection string not configured. Make sure CONN_STR is set in .env.local (for local) or .env (for Docker)");
 
-// If we are not running inside a container, replace host 'postgres' with 'localhost'
-var inContainer = string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase);
-if (!inContainer && defaultConn.IndexOf("Host=postgres", StringComparison.OrdinalIgnoreCase) >= 0)
-{
-    Console.WriteLine("Info: replacing Host=postgres with Host=localhost for local execution.");
-    defaultConn = defaultConn.Replace("Host=postgres", "Host=localhost", StringComparison.OrdinalIgnoreCase);
-}
+Console.WriteLine($"[DEBUG] Final connection string: {defaultConn}");
 
 // Register DbContext using the final string
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -91,6 +137,10 @@ builder.Services.AddRazorPages(options =>
 });
 
 // ---------- Application DI registrations (keep your existing registrations) ----------
+// Add Application services (includes AutoMapper for DTOs)
+builder.Services.AddApplicationServices();
+// Add AutoMapper for ViewModels (Web layer)
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // Identity adapter
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 // Export and Receipt services

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Firmness.Admin.Web.ViewModels;
+namespace Firmness.Web.ViewModels.Product;
 
 public class ProductViewModel
 {
