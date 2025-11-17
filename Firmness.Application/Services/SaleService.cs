@@ -1,4 +1,4 @@
-﻿using Firmness.Application.Interfaces;
+﻿﻿using Firmness.Application.Interfaces;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
 using Firmness.Domain.Common;
@@ -69,6 +69,29 @@ public class SaleService : ISaleService
     public Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         => _saleRepo.GetByIdAsync(id);
 
+    public Task<Sale?> GetByIdWithDetailsAsync(Guid id, CancellationToken cancellationToken = default)
+        => _saleRepo.GetByIdWithDetailsAsync(id);
+
+    public Task<IEnumerable<Sale>> GetAllAsync(CancellationToken cancellationToken = default)
+        => _saleRepo.GetAllAsync();
+
+    public Task<IEnumerable<Sale>> GetAllWithDetailsAsync(CancellationToken cancellationToken = default)
+        => _saleRepo.GetAllWithDetailsAsync();
+
+    public Task<IEnumerable<Sale>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
+        => _saleRepo.GetByCustomerIdAsync(customerId);
+
+    public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
+    {
+        if (sale == null) throw new ArgumentNullException(nameof(sale));
+        await _saleRepo.UpdateAsync(sale);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await _saleRepo.DeleteAsync(id);
+    }
+
     public async Task<Result<long>> CountAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -81,7 +104,4 @@ public class SaleService : ISaleService
             return Result<long>.Failure("An error occurred while counting sales.");
         }
     }
-
-    public Task<IEnumerable<Sale>> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default)
-        => _saleRepo.GetByCustomerIdAsync(customerId);
 }
