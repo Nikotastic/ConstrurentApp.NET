@@ -1,4 +1,6 @@
-﻿namespace Firmness.Domain.DTOs;
+﻿using Firmness.Domain.Enums;
+
+namespace Firmness.Domain.DTOs;
 
 
 // DTO for reading sales - API
@@ -38,7 +40,7 @@ public class CreateSaleDto
 {
     public Guid CustomerId { get; set; }
     public List<CreateSaleItemDto> Items { get; set; } = new();
-    public string PaymentMethod { get; set; } = "CASH";
+    public PaymentMethod PaymentMethod { get; set; }
     public decimal Discount { get; set; } = 0;
     public decimal Tax { get; set; } = 0;
     public string? Notes { get; set; }
