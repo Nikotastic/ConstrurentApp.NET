@@ -1,112 +1,199 @@
-﻿using AutoMapper;
-using Firmness.Domain.DTOs;
+﻿﻿using AutoMapper;
+ using Firmness.Application.Interfaces;
+ using Firmness.Domain.DTOs;
 using Firmness.Domain.Entities;
-using Firmness.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Firmness.Api.Controllers;
 
 
-// API Controller for Customers - DTOs
+// RESTful controller for customer management
+// Implements complete CRUD operations using DTOs and AutoMapper
+
 [ApiController]
 [Route("api/[controller]")]
 public class CustomersApiController : ControllerBase
 {
-    private readonly ICustomerRepository _customerRepository;
+    private readonly ICustomerService _customerService;
     private readonly IMapper _mapper;
     private readonly ILogger<CustomersApiController> _logger;
 
     public CustomersApiController(
-        ICustomerRepository customerRepository,
+        ICustomerService customerService,
         IMapper mapper,
         ILogger<CustomersApiController> logger)
     {
-        _customerRepository = customerRepository;
+        _customerService = customerService;
         _mapper = mapper;
         _logger = logger;
     }
 
 
-    // Get all customers - Information limit
-    // Public access
+    // GET: api/customers
+    // It obtains all customers (information limited for security reasons)
+
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<CustomerDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CustomerDto>>> GetAll()
     {
-        var customers = await _customerRepository.GetAllAsync();
-        // Use CustomerDto that does not expose Document, Address, IdentityUserId
-        var customerDtos = _mapper.Map<List<CustomerDto>>(customers);
-        return Ok(customerDtos);
+        try
+        {
+            var customers = await _customerService.GetAllAsync();
+            // Use CustomerDto which does not expose Document, Address, IdentityUserId
+            var customerDtos = _mapper.Map<List<CustomerDto>>(customers);
+            return Ok(new { isSuccess = true, data = customerDtos });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error obtaining clients");
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
     }
-    
-    // Get Customer by ID - Limit information
 
-    [HttpGet("{id}")]
+
+    // GET: api/customers/{id}
+    // Obtains a client by ID (limited information)
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CustomerDto>> GetById(Guid id)
     {
-        var customer = await _customerRepository.GetByIdAsync(id);
-        if (customer == null)
-            return NotFound();
+        try
+        {
+            var customer = await _customerService.GetByIdAsync(id);
+            if (customer == null)
+                return NotFound(new { message = $"Client with ID {id} not found" });
 
-        var customerDto = _mapper.Map<CustomerDto>(customer);
-        return Ok(customerDto);
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            return Ok(new { isSuccess = true, data = customerDto });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error obtaining client {CustomerId}", id);
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
     }
-    
-    //Get all information - Just Admin
-    // Admin access only - Full information
-    [HttpGet("{id}/details")]
+
+
+    // GET: api/customers/{id}/details
+    // Obtains complete customer information (Administrators only)
+
+    [HttpGet("{id:guid}/details")]
     [Authorize(Policy = "RequireAdminRole")]
+    [ProducesResponseType(typeof(CustomerDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CustomerDetailDto>> GetDetailsById(Guid id)
     {
-        var customer = await _customerRepository.GetByIdAsync(id);
-        if (customer == null)
-            return NotFound();
-
-        // Use CustomerDetailDto that includes Document, Address, IdentityUserId
-        var customerDetailDto = _mapper.Map<CustomerDetailDto>(customer);
-        return Ok(customerDetailDto);
+        try
+        {
+            var customer = await _customerService.GetByIdAsync(id);
+            if (customer == null)
+                return NotFound(new { message = $"Client with ID {{id}} not found" });
+            
+            var customerDetailDto = _mapper.Map<CustomerDetailDto>(customer);
+            return Ok(new { isSuccess = true, data = customerDetailDto });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving customer details {CustomerId}", id);
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
     }
-    
-    // Create customer
+
+  
+    // POST: api/customers
+    // Create a new client
+
     [HttpPost]
-    public async Task<ActionResult<CustomerDto>> Create(CreateCustomerDto createDto)
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CustomerDto>> Create([FromBody] CreateCustomerDto createDto)
     {
-        var customer = _mapper.Map<Customer>(createDto);
-        await _customerRepository.AddAsync(customer);
-        
-        // Use CustomerDto that does not expose Document, Address, IdentityUserId
-        var customerDto = _mapper.Map<CustomerDto>(customer);
-        return CreatedAtAction(nameof(GetById), new { id = customer.Id }, customerDto);
-    }
-    
-    // Update customer
-    [HttpPut("{id}")]
-    [Authorize] // Customer must be authenticated
-    public async Task<ActionResult<CustomerDto>> Update(Guid id, UpdateCustomerDto updateDto)
-    {
-        var customer = await _customerRepository.GetByIdAsync(id);
-        if (customer == null)
-            return NotFound();
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        // Map updateDto to customer
-        _mapper.Map(updateDto, customer);
-        await _customerRepository.UpdateAsync(customer);
-        
-        var customerDto = _mapper.Map<CustomerDto>(customer);
-        return Ok(customerDto);
+            // Map DTO to entity
+            var customer = _mapper.Map<Customer>(createDto);
+            await _customerService.AddAsync(customer);
+
+            // Return CustomerDto that does not expose sensitive information
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            _logger.LogInformation("Client successfully created: {CustomerId} - {CustomerName}", customer.Id, customer.FullName);
+
+            return CreatedAtAction(nameof(GetById), new { id = customer.Id }, new { isSuccess = true, data = customerDto });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating client");
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
+    }
+
+
+    // PUT: api/customers/{id}
+    // Update an existing client (authentication required)
+
+    [HttpPut("{id:guid}")]
+    [Authorize] // Client must be authenticated
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CustomerDto>> Update(Guid id, [FromBody] UpdateCustomerDto updateDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var customer = await _customerService.GetByIdAsync(id);
+            if (customer == null)
+                return NotFound(new { message = $"Client with ID {id} not found" });
+
+            // Map updateDto to customer (non-null properties only)
+            _mapper.Map(updateDto, customer);
+            await _customerService.UpdateAsync(customer);
+
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            _logger.LogInformation("Client successfully updated: {CustomerId}", id);
+
+            return Ok(new { isSuccess = true, data = customerDto, message = "Client successfully updated" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating cliente {CustomerId}", id);
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
     }
     
-    // Delete customer - Just Admin
-    [HttpDelete("{id}")]
+    // DELETE: api/customers/{id}
+    // Delete a client (Administrators only)
+  
+    [HttpDelete("{id:guid}")]
     [Authorize(Policy = "RequireAdminRole")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Delete(Guid id)
     {
-        var customer = await _customerRepository.GetByIdAsync(id);
-        if (customer == null)
-            return NotFound();
+        try
+        {
+            var customer = await _customerService.GetByIdAsync(id);
+            if (customer == null)
+                return NotFound(new { message = $"Client with ID {id} not found"});
 
-        await _customerRepository.DeleteAsync(id);
-        return NoContent();
+            await _customerService.DeleteAsync(id);
+            _logger.LogInformation("Client successfully removed: {CustomerId}", id);
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting client {CustomerId}", id);
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
     }
 }
 
