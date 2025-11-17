@@ -8,14 +8,18 @@ using Firmness.Infrastructure.Data;
 
 namespace Firmness.Web.Controllers
 {
+
+    // Sales Controller - Web Admin
     public class SalesController : Controller
     {
-        
         private readonly ApplicationDbContext _context;
         private readonly ILogger<SalesController> _logger;
         private readonly IReceiptService _receiptService;
 
-        public SalesController(ApplicationDbContext context, ILogger<SalesController> logger, IReceiptService receiptService)
+        public SalesController(
+            ApplicationDbContext context,
+            ILogger<SalesController> logger,
+            IReceiptService receiptService)
         {
             _context = context;
             _logger = logger;
@@ -75,7 +79,7 @@ namespace Firmness.Web.Controllers
                     .Take(pageSize)
                     .ToListAsync();
 
-                // Crear resultado paginado
+                // Create paginated result
                 var paginatedResult = new Firmness.Domain.Common.PaginatedResult<Sale>(
                     sales,
                     page,
@@ -160,15 +164,15 @@ namespace Firmness.Web.Controllers
                 _context.Add(sale);
                 await _context.SaveChangesAsync();
                 
-                // Generar recibo PDF automáticamente
+                // Automatically generate PDF receipt
                 try
                 {
                     await _receiptService.GenerateReceiptAsync(sale.Id);
-                    _logger.LogInformation("Recibo generado para la venta {SaleId}", sale.Id);
+                    _logger.LogInformation("Receipt generated for the sale {SaleId}", sale.Id);
                 }
                 catch (Exception exReceipt)
                 {
-                    _logger.LogWarning(exReceipt, "No se pudo generar el recibo para la venta {SaleId}", sale.Id);
+                    _logger.LogWarning(exReceipt, "The sales receipt could not be generated {SaleId}", sale.Id);
                     // No fallar la venta si el recibo falla
                 }
 
@@ -297,12 +301,12 @@ namespace Firmness.Web.Controllers
             try
             {
                 var pdfBytes = await _receiptService.GetReceiptBytesAsync(id.Value);
-                return File(pdfBytes, "application/pdf", $"recibo_{id.Value.ToString().Substring(0, 8)}.pdf");
+                return File(pdfBytes, "application/pdf", $"receipt_{id.Value.ToString().Substring(0, 8)}.pdf");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading receipt for sale {SaleId}", id);
-                TempData["Error"] = "No se pudo descargar el recibo.";
+                TempData["Error"] = "The receipt could not be downloaded..";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -314,12 +318,12 @@ namespace Firmness.Web.Controllers
             {
                 var excelBytes = await exportService.ExportSalesToExcelAsync();
                 return File(excelBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-                    $"ventas_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
+                    $"sales_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx", enableRangeProcessing: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting sales to Excel");
-                TempData["Error"] = "No se pudo exportar a Excel.";
+                TempData["Error"] = "Could not export to Excel.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -330,12 +334,12 @@ namespace Firmness.Web.Controllers
             try
             {
                 var pdfBytes = await exportService.ExportSalesToPdfAsync();
-                return File(pdfBytes, "application/pdf", $"ventas_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
+                return File(pdfBytes, "application/pdf", $"sales_{DateTime.Now:yyyyMMdd_HHmmss}.pdf", enableRangeProcessing: false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting sales to PDF");
-                TempData["Error"] = "No se pudo exportar a PDF.";
+                TempData["Error"] = "Could not be exported to PDF.";
                 return RedirectToAction(nameof(Index));
             }
         }
