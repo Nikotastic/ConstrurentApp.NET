@@ -27,39 +27,30 @@ public class DashboardService : IDashboardService
 
     public async Task<DashboardDto> GetDashboardDataAsync(CancellationToken cancellationToken = default)
     {
-        var totalProductsTask = GetTotalProductsAsync(cancellationToken);
-        var totalCustomersTask = GetTotalCustomersAsync(cancellationToken);
-        var totalSalesTask = GetTotalSalesAsync(cancellationToken);
-        var totalRevenueTask = GetTotalRevenueAsync(cancellationToken);
-        var recentSalesTask = GetRecentSalesAsync(cancellationToken);
-        var lowStockProductsTask = GetLowStockProductsAsync(cancellationToken);
-        var topCustomersTask = GetTopCustomersAsync(cancellationToken);
-        var pendingSalesTask = GetPendingSalesCountAsync(cancellationToken);
-        var completedSalesTask = GetCompletedSalesCountAsync(cancellationToken);
-
-        await Task.WhenAll(
-            totalProductsTask,
-            totalCustomersTask,
-            totalSalesTask,
-            totalRevenueTask,
-            recentSalesTask,
-            lowStockProductsTask,
-            topCustomersTask,
-            pendingSalesTask,
-            completedSalesTask
-        );
+        // Execute sequentially to avoid DbContext concurrency issues
+        // DbContext is not thread-safe, so we can't run multiple queries in parallel
+        
+        var totalProducts = await GetTotalProductsAsync(cancellationToken);
+        var totalCustomers = await GetTotalCustomersAsync(cancellationToken);
+        var totalSales = await GetTotalSalesAsync(cancellationToken);
+        var totalRevenue = await GetTotalRevenueAsync(cancellationToken);
+        var recentSales = await GetRecentSalesAsync(cancellationToken);
+        var lowStockProducts = await GetLowStockProductsAsync(cancellationToken);
+        var topCustomers = await GetTopCustomersAsync(cancellationToken);
+        var pendingSales = await GetPendingSalesCountAsync(cancellationToken);
+        var completedSales = await GetCompletedSalesCountAsync(cancellationToken);
 
         return new DashboardDto
         {
-            TotalProducts = await totalProductsTask,
-            TotalCustomers = await totalCustomersTask,
-            TotalSales = await totalSalesTask,
-            TotalRevenue = await totalRevenueTask,
-            RecentSales = await recentSalesTask,
-            LowStockProducts = await lowStockProductsTask,
-            TopCustomers = await topCustomersTask,
-            PendingSales = await pendingSalesTask,
-            CompletedSales = await completedSalesTask
+            TotalProducts = totalProducts,
+            TotalCustomers = totalCustomers,
+            TotalSales = totalSales,
+            TotalRevenue = totalRevenue,
+            RecentSales = recentSales,
+            LowStockProducts = lowStockProducts,
+            TopCustomers = topCustomers,
+            PendingSales = pendingSales,
+            CompletedSales = completedSales
         };
     }
 

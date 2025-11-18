@@ -1,21 +1,24 @@
-﻿namespace Firmness.Application.Interfaces;
+﻿﻿namespace Firmness.Application.Interfaces;
 
 public interface IExportService
 {
-
-    // Export a product list to Excel
-
+    // Products
     Task<byte[]> ExportProductsToExcelAsync(Guid? categoryId = null);
-    Task<byte[]> ExportCustomersToExcelAsync();
-    Task<byte[]> ExportSalesToExcelAsync();
     Task<byte[]> ExportProductsToPdfAsync(Guid? categoryId = null);
     
-
-    // Export clients to PDF
-
+    // Customers
+    Task<byte[]> ExportCustomersToExcelAsync();
     Task<byte[]> ExportCustomersToPdfAsync();
     
-    // Export sales to PDF
-  
+    // Sales
+    Task<byte[]> ExportSalesToExcelAsync();
     Task<byte[]> ExportSalesToPdfAsync();
+    
+    // Vehicles
+    Task<byte[]> ExportVehiclesToExcelAsync();
+    Task<byte[]> ExportVehiclesToPdfAsync();
+    
+    // Vehicle Rentals
+    Task<byte[]> ExportVehicleRentalsToExcelAsync();
+    Task<byte[]> ExportVehicleRentalsToPdfAsync();
 }

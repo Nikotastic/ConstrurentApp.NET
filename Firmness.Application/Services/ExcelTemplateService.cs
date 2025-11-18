@@ -205,6 +205,286 @@ public class ExcelTemplateService : IExcelTemplateService
         return package.GetAsByteArray();
     }
 
+    // Generate Excel with massive Vehicles data
+    public byte[] GenerateVehiclesSampleData()
+    {
+        using var package = new ExcelPackage();
+        
+        // Vehicles Sheet
+        var vehiclesSheet = package.Workbook.Worksheets.Add("Vehicles");
+        
+        // Headers
+        var headers = new[]
+        {
+            "Brand", "Model", "Year", "License Plate", "Vehicle Type", "Serial Number",
+            "Hourly Rate", "Daily Rate", "Weekly Rate", "Monthly Rate",
+            "Current Hours", "Current Mileage", "Maintenance Hours Interval",
+            "Specifications", "Image URL", "Notes", "Is Active"
+        };
+
+        for (int i = 0; i < headers.Length; i++)
+        {
+            vehiclesSheet.Cells[1, i + 1].Value = headers[i];
+        }
+
+        // Style headers
+        using (var range = vehiclesSheet.Cells[1, 1, 1, headers.Length])
+        {
+            range.Style.Font.Bold = true;
+            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 127, 80)); // Coral
+            range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+            range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        }
+
+        int row = 2;
+
+        // Excavators (20 units)
+        for (int i = 1; i <= 20; i++)
+        {
+            var brands = new[] { "Caterpillar", "Komatsu", "JCB", "Volvo", "Hitachi" };
+            var models = new[] { "320GC", "PC210", "JS220", "EC210", "ZX210" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2018 + (i % 6), $"EXC-{i:D3}", "Excavator", $"SN-EXC-{i:D6}",
+                45.00m, 350.00m, 2100.00m, 7500.00m,
+                1500 + (i * 50), 0, 500,
+                $"{brand} {model} - 21 ton excavator with GPS and air conditioning",
+                $"https://example.com/excavator_{i}.jpg",
+                $"Excellent condition, recently serviced", true);
+        }
+
+        // Forklifts (25 units)
+        for (int i = 1; i <= 25; i++)
+        {
+            var brands = new[] { "Toyota", "Hyster", "Yale", "Crown", "Nissan" };
+            var models = new[] { "8FD25", "H2.5FT", "GDP25", "FC5200", "CPJ02" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2019 + (i % 5), $"FLT-{i:D3}", "Forklift", $"SN-FLT-{i:D6}",
+                25.00m, 180.00m, 1050.00m, 3800.00m,
+                800 + (i * 30), 0, 250,
+                $"{brand} {model} - 2.5 ton electric/LPG forklift",
+                $"https://example.com/forklift_{i}.jpg",
+                "Perfect for warehouses and distribution centers", true);
+        }
+
+        // Dump Trucks (15 units)
+        for (int i = 1; i <= 15; i++)
+        {
+            var brands = new[] { "Volvo", "Mercedes-Benz", "Scania", "MAN", "Iveco" };
+            var models = new[] { "FM440", "Actros 2644", "R440", "TGS 35.440", "Trakker 410" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2017 + (i % 7), $"DMT-{i:D3}", "DumpTruck", $"SN-DMT-{i:D6}",
+                55.00m, 420.00m, 2520.00m, 9200.00m,
+                0, 45000 + (i * 5000), 500,
+                $"{brand} {model} - 14 cubic meter dump truck",
+                $"https://example.com/dumptruck_{i}.jpg",
+                "Great for material transport", true);
+        }
+
+        // Cranes (10 units)
+        for (int i = 1; i <= 10; i++)
+        {
+            var brands = new[] { "Liebherr", "Terex", "Grove", "Tadano", "Manitowoc" };
+            var models = new[] { "LTM1100", "AC100", "GMK5100", "ATF100", "MLC100" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2016 + (i % 8), $"CRN-{i:D3}", "Crane", $"SN-CRN-{i:D6}",
+                80.00m, 650.00m, 3900.00m, 14500.00m,
+                0, 25000 + (i * 3000), 300,
+                $"{brand} {model} - 100 ton mobile crane",
+                $"https://example.com/crane_{i}.jpg",
+                "Certified operator included", true);
+        }
+
+        // Backhoes (18 units)
+        for (int i = 1; i <= 18; i++)
+        {
+            var brands = new[] { "Caterpillar", "JCB", "Case", "John Deere", "Terex" };
+            var models = new[] { "420F", "3CX", "580N", "310L", "TX760" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2018 + (i % 6), $"BCK-{i:D3}", "Backhoe", $"SN-BCK-{i:D6}",
+                35.00m, 280.00m, 1680.00m, 6000.00m,
+                1200 + (i * 40), 0, 400,
+                $"{brand} {model} - Loader backhoe with extendable arm",
+                $"https://example.com/backhoe_{i}.jpg",
+                "Versatile for excavation and loading", true);
+        }
+
+        // Front Loaders (12 units)
+        for (int i = 1; i <= 12; i++)
+        {
+            var brands = new[] { "Caterpillar", "Komatsu", "Volvo", "JCB", "Case" };
+            var models = new[] { "950GC", "WA200", "L90", "456", "621F" };
+            var brand = brands[(i - 1) % brands.Length];
+            var model = models[(i - 1) % models.Length];
+            
+            AddVehicleRow(vehiclesSheet, row++, 
+                brand, model, 2019 + (i % 5), $"LDR-{i:D3}", "FrontLoader", $"SN-LDR-{i:D6}",
+                40.00m, 320.00m, 1920.00m, 7000.00m,
+                900 + (i * 35), 0, 350,
+                $"{brand} {model} - Wheel loader 3 cubic yards",
+                $"https://example.com/loader_{i}.jpg",
+                "Ideal for material handling", true);
+        }
+
+        // Auto-fit columns
+        vehiclesSheet.Cells.AutoFitColumns();
+        vehiclesSheet.Column(1).Width = 15;  // Brand
+        vehiclesSheet.Column(2).Width = 15;  // Model
+        vehiclesSheet.Column(14).Width = 50; // Specifications
+        vehiclesSheet.Column(16).Width = 35; // Notes
+
+        // Add Instructions Sheet
+        AddVehiclesInstructionsSheet(package);
+        
+        // Add Vehicle Types Reference
+        AddVehicleTypesSheet(package);
+        
+        return package.GetAsByteArray();
+    }
+
+    private void AddVehicleRow(ExcelWorksheet sheet, int row, 
+        string brand, string model, int year, string licensePlate, string vehicleType, string serialNumber,
+        decimal hourlyRate, decimal dailyRate, decimal weeklyRate, decimal monthlyRate,
+        decimal currentHours, decimal currentMileage, decimal maintenanceInterval,
+        string specifications, string imageUrl, string notes, bool isActive)
+    {
+        sheet.Cells[row, 1].Value = brand;
+        sheet.Cells[row, 2].Value = model;
+        sheet.Cells[row, 3].Value = year;
+        sheet.Cells[row, 4].Value = licensePlate;
+        sheet.Cells[row, 5].Value = vehicleType;
+        sheet.Cells[row, 6].Value = serialNumber;
+        sheet.Cells[row, 7].Value = hourlyRate;
+        sheet.Cells[row, 8].Value = dailyRate;
+        sheet.Cells[row, 9].Value = weeklyRate;
+        sheet.Cells[row, 10].Value = monthlyRate;
+        sheet.Cells[row, 11].Value = currentHours;
+        sheet.Cells[row, 12].Value = currentMileage;
+        sheet.Cells[row, 13].Value = maintenanceInterval;
+        sheet.Cells[row, 14].Value = specifications;
+        sheet.Cells[row, 15].Value = imageUrl;
+        sheet.Cells[row, 16].Value = notes;
+        sheet.Cells[row, 17].Value = isActive ? "Yes" : "No";
+
+        // Format currency columns
+        sheet.Cells[row, 7].Style.Numberformat.Format = "$#,##0.00";
+        sheet.Cells[row, 8].Style.Numberformat.Format = "$#,##0.00";
+        sheet.Cells[row, 9].Style.Numberformat.Format = "$#,##0.00";
+        sheet.Cells[row, 10].Style.Numberformat.Format = "$#,##0.00";
+    }
+
+    private void AddVehiclesInstructionsSheet(ExcelPackage package)
+    {
+        var instrSheet = package.Workbook.Worksheets.Add("Instructions");
+        
+        instrSheet.Cells["A1"].Value = "VEHICLES BULK IMPORT - INSTRUCTIONS";
+        instrSheet.Cells["A1"].Style.Font.Bold = true;
+        instrSheet.Cells["A1"].Style.Font.Size = 16;
+        instrSheet.Cells["A1"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        
+        int row = 3;
+        instrSheet.Cells[row++, 1].Value = "HOW TO USE THIS FILE:";
+        instrSheet.Cells[row - 1, 1].Style.Font.Bold = true;
+        
+        instrSheet.Cells[row++, 1].Value = "1. Review the 'Vehicles' sheet with 100 sample records";
+        instrSheet.Cells[row++, 1].Value = "2. Modify the data as needed or add new records";
+        instrSheet.Cells[row++, 1].Value = "3. Save the file and upload it to the Bulk Import section";
+        instrSheet.Cells[row++, 1].Value = "4. The system will create/update vehicles automatically";
+        
+        row++;
+        instrSheet.Cells[row++, 1].Value = "REQUIRED FIELDS:";
+        instrSheet.Cells[row - 1, 1].Style.Font.Bold = true;
+        instrSheet.Cells[row++, 1].Value = "• Brand (e.g., Caterpillar, Toyota, Volvo)";
+        instrSheet.Cells[row++, 1].Value = "• Model (e.g., 320GC, 8FD25, FM440)";
+        instrSheet.Cells[row++, 1].Value = "• Year (e.g., 2020)";
+        instrSheet.Cells[row++, 1].Value = "• License Plate (unique identifier)";
+        instrSheet.Cells[row++, 1].Value = "• Vehicle Type (see 'Vehicle Types' sheet)";
+        instrSheet.Cells[row++, 1].Value = "• At least one rate (Hourly, Daily, Weekly, or Monthly)";
+        
+        row++;
+        instrSheet.Cells[row++, 1].Value = "VEHICLE TYPES AVAILABLE:";
+        instrSheet.Cells[row - 1, 1].Style.Font.Bold = true;
+        instrSheet.Cells[row++, 1].Value = "Excavator, Forklift, DumpTruck, Crane, Backhoe, FrontLoader,";
+        instrSheet.Cells[row++, 1].Value = "Compactor, ConcreteMixer, Generator, AirCompressor, Scaffolding,";
+        instrSheet.Cells[row++, 1].Value = "TelephoneHoist, BoomLift, ScisorLift, Other";
+        
+        row++;
+        instrSheet.Cells[row++, 1].Value = "TIPS:";
+        instrSheet.Cells[row - 1, 1].Style.Font.Bold = true;
+        instrSheet.Cells[row++, 1].Value = "• License Plate must be unique - duplicates will update existing vehicles";
+        instrSheet.Cells[row++, 1].Value = "• Rates are in USD - use format: 150.00";
+        instrSheet.Cells[row++, 1].Value = "• Is Active: 'Yes' or 'No' (default: Yes)";
+        instrSheet.Cells[row++, 1].Value = "• Leave fields empty if not applicable";
+        
+        instrSheet.Cells.AutoFitColumns();
+        instrSheet.Column(1).Width = 70;
+    }
+
+    private void AddVehicleTypesSheet(ExcelPackage package)
+    {
+        var typesSheet = package.Workbook.Worksheets.Add("Vehicle Types");
+        
+        typesSheet.Cells["A1"].Value = "VEHICLE TYPES REFERENCE";
+        typesSheet.Cells["A1"].Style.Font.Bold = true;
+        typesSheet.Cells["A1"].Style.Font.Size = 14;
+        
+        typesSheet.Cells["A3"].Value = "Type Code";
+        typesSheet.Cells["B3"].Value = "Description";
+        typesSheet.Cells["C3"].Value = "Typical Use";
+        
+        using (var range = typesSheet.Cells["A3:C3"])
+        {
+            range.Style.Font.Bold = true;
+            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+        }
+        
+        int row = 4;
+        var types = new[]
+        {
+            ("Excavator", "Track or wheel excavators", "Excavation, demolition, earthmoving"),
+            ("Forklift", "Electric or combustion forklifts", "Material handling, warehouses"),
+            ("DumpTruck", "Dump trucks various capacities", "Material transport"),
+            ("Crane", "Mobile or tower cranes", "Heavy lifting, construction"),
+            ("Backhoe", "Loader backhoes", "Excavation and loading"),
+            ("FrontLoader", "Wheel loaders", "Material loading and transport"),
+            ("Compactor", "Vibratory or static compactors", "Soil and asphalt compaction"),
+            ("ConcreteMixer", "Concrete mixers", "Concrete preparation"),
+            ("Generator", "Electric generators", "Temporary power supply"),
+            ("AirCompressor", "Portable compressors", "Pneumatic tools"),
+            ("Scaffolding", "Modular scaffolding", "Work at height"),
+            ("TelephoneHoist", "Material hoists", "Vertical material transport"),
+            ("BoomLift", "Articulated or telescopic lifts", "Elevated work"),
+            ("ScisorLift", "Scissor lifts", "Stable elevated work"),
+            ("Other", "Other equipment", "Various uses")
+        };
+        
+        foreach (var (type, desc, use) in types)
+        {
+            typesSheet.Cells[row, 1].Value = type;
+            typesSheet.Cells[row, 2].Value = desc;
+            typesSheet.Cells[row, 3].Value = use;
+            row++;
+        }
+        
+        typesSheet.Cells.AutoFitColumns();
+    }
+
     private void AddCategoriesSheet(ExcelPackage package)
     {
         var catSheet = package.Workbook.Worksheets.Add("Categorías Disponibles");

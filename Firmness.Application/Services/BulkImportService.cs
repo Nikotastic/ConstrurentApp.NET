@@ -12,17 +12,20 @@ public class BulkImportService : IBulkImportService
     private readonly ICustomerRepository _customerRepo;
     private readonly ISaleRepository _saleRepo;
     private readonly ISaleItemRepository _saleItemRepo;
+    private readonly IVehicleRepository _vehicleRepo;
 
     public BulkImportService(
         IProductRepository productRepo,
         ICustomerRepository customerRepo,
         ISaleRepository saleRepo,
-        ISaleItemRepository saleItemRepo)
+        ISaleItemRepository saleItemRepo,
+        IVehicleRepository vehicleRepo)
     {
         _productRepo = productRepo;
         _customerRepo = customerRepo;
         _saleRepo = saleRepo;
         _saleItemRepo = saleItemRepo;
+        _vehicleRepo = vehicleRepo;
     }
 
     public async Task<BulkImportResult> ImportFromExcelAsync(Stream fileStream, CancellationToken cancellationToken = default)
@@ -123,6 +126,15 @@ public class BulkImportService : IBulkImportService
 
     private string IdentifyDataType(Dictionary<string, int> headers)
     {
+        var hasVehicleFields = headers.Keys.Any(h => 
+            h.Contains("Brand", StringComparison.OrdinalIgnoreCase) ||
+            h.Contains("Marca", StringComparison.OrdinalIgnoreCase) ||
+            h.Contains("License Plate", StringComparison.OrdinalIgnoreCase) ||
+            h.Contains("Placa", StringComparison.OrdinalIgnoreCase) ||
+            h.Contains("Vehicle Type", StringComparison.OrdinalIgnoreCase) ||
+            (h.Contains("Model", StringComparison.OrdinalIgnoreCase) && 
+             h.Contains("Year", StringComparison.OrdinalIgnoreCase)));
+
         var hasProductFields = headers.Keys.Any(h => 
             h.Contains("SKU", StringComparison.OrdinalIgnoreCase) ||
             h.Contains("Producto", StringComparison.OrdinalIgnoreCase) ||
@@ -141,6 +153,9 @@ public class BulkImportService : IBulkImportService
             h.Contains("Cantidad", StringComparison.OrdinalIgnoreCase) ||
             h.Contains("Quantity", StringComparison.OrdinalIgnoreCase));
 
+        if (hasVehicleFields)
+            return "vehicle";
+            
         if (hasProductFields && hasCustomerFields && hasSaleFields)
             return "mixed";
         
@@ -157,7 +172,11 @@ public class BulkImportService : IBulkImportService
         string dataType, BulkImportResult result, int rowNumber,
         List<Product> existingProducts, List<Customer> existingCustomers)
     {
-        if (dataType == "mixed")
+        if (dataType == "vehicle")
+        {
+            await ProcessVehicleRow(rowData, result, rowNumber);
+        }
+        else if (dataType == "mixed")
         {
             await ProcessMixedRow(rowData, result, rowNumber, existingProducts, existingCustomers);
         }
@@ -446,6 +465,172 @@ public class BulkImportService : IBulkImportService
             await _customerRepo.AddAsync(customer);
             existingCustomers.Add(customer);
             result.CustomersCreated++;
+        }
+    }
+
+    private async Task ProcessVehicleRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber)
+    {
+        try
+        {
+            var brand = GetStringValue(rowData, "Brand", "Marca");
+            var model = GetStringValue(rowData, "Model", "Modelo");
+            var licensePlate = GetStringValue(rowData, "License Plate", "Placa", "LicensePlate");
+            var vehicleTypeStr = GetStringValue(rowData, "Vehicle Type", "VehicleType", "Tipo", "Type");
+            var year = GetIntValue(rowData, "Year", "Año", "Anno");
+
+            // Validaciones básicas
+            if (string.IsNullOrWhiteSpace(brand))
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "Brand",
+                    ErrorMessage = "Brand is required"
+                });
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(model))
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "Model",
+                    ErrorMessage = "Model is required"
+                });
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(licensePlate))
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "License Plate",
+                    ErrorMessage = "License Plate is required"
+                });
+                return;
+            }
+
+            if (year < 1900 || year > DateTime.Now.Year + 1)
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "Year",
+                    ErrorMessage = $"Invalid year: {year}"
+                });
+                return;
+            }
+
+            // Parse VehicleType
+            if (!Enum.TryParse<Domain.Enums.VehicleType>(vehicleTypeStr, true, out var vehicleType))
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "Vehicle Type",
+                    ErrorMessage = $"Invalid vehicle type: {vehicleTypeStr}. Valid types: Excavator, Forklift, DumpTruck, Crane, Backhoe, FrontLoader, etc."
+                });
+                return;
+            }
+
+            // Leer otros campos
+            var serialNumber = GetStringValue(rowData, "Serial Number", "SerialNumber", "NumeroSerie");
+            var hourlyRate = GetDecimalValue(rowData, "Hourly Rate", "HourlyRate", "TarifaPorHora");
+            var dailyRate = GetDecimalValue(rowData, "Daily Rate", "DailyRate", "TarifaDiaria");
+            var weeklyRate = GetDecimalValue(rowData, "Weekly Rate", "WeeklyRate", "TarifaSemanal");
+            var monthlyRate = GetDecimalValue(rowData, "Monthly Rate", "MonthlyRate", "TarifaMensual");
+            var currentHours = GetDecimalValue(rowData, "Current Hours", "CurrentHours", "HorasActuales");
+            var currentMileage = GetDecimalValue(rowData, "Current Mileage", "CurrentMileage", "KilometrajeActual");
+            var maintenanceInterval = GetDecimalValue(rowData, "Maintenance Hours Interval", "MaintenanceHoursInterval", "IntervaloMantenimiento");
+            var specifications = GetStringValue(rowData, "Specifications", "Especificaciones");
+            var imageUrl = GetStringValue(rowData, "Image URL", "ImageUrl", "ImagenUrl");
+            var documentsUrl = GetStringValue(rowData, "Documents URL", "DocumentsUrl");
+            var notes = GetStringValue(rowData, "Notes", "Notas");
+            var isActiveStr = GetStringValue(rowData, "Is Active", "IsActive", "Activo");
+            var isActive = string.IsNullOrWhiteSpace(isActiveStr) || 
+                           isActiveStr.Equals("Yes", StringComparison.OrdinalIgnoreCase) ||
+                           isActiveStr.Equals("Si", StringComparison.OrdinalIgnoreCase) ||
+                           isActiveStr.Equals("True", StringComparison.OrdinalIgnoreCase);
+
+            // Validar que al menos tenga una tarifa
+            if (hourlyRate <= 0 && dailyRate <= 0 && weeklyRate <= 0 && monthlyRate <= 0)
+            {
+                result.Errors.Add(new ImportError
+                {
+                    RowNumber = rowNumber,
+                    Field = "Rates",
+                    ErrorMessage = "At least one rate (Hourly, Daily, Weekly, or Monthly) must be greater than 0"
+                });
+                return;
+            }
+
+            // Buscar si existe el vehículo por placa
+            var existingVehicles = await _vehicleRepo.GetAllAsync();
+            var existingVehicle = existingVehicles.FirstOrDefault(v => 
+                v.LicensePlate.Equals(licensePlate, StringComparison.OrdinalIgnoreCase));
+
+            if (existingVehicle != null)
+            {
+                // Actualizar vehículo existente
+                existingVehicle.Brand = brand;
+                existingVehicle.Model = model;
+                existingVehicle.Year = year;
+                existingVehicle.VehicleType = vehicleType;
+                existingVehicle.SerialNumber = serialNumber;
+                existingVehicle.HourlyRate = hourlyRate;
+                existingVehicle.DailyRate = dailyRate;
+                existingVehicle.WeeklyRate = weeklyRate;
+                existingVehicle.MonthlyRate = monthlyRate;
+                existingVehicle.CurrentHours = currentHours;
+                existingVehicle.CurrentMileage = currentMileage;
+                existingVehicle.MaintenanceHoursInterval = maintenanceInterval;
+                existingVehicle.Specifications = specifications;
+                existingVehicle.ImageUrl = imageUrl;
+                existingVehicle.DocumentsUrl = documentsUrl;
+                existingVehicle.Notes = notes;
+                existingVehicle.IsActive = isActive;
+                existingVehicle.UpdatedAt = DateTime.UtcNow;
+
+                await _vehicleRepo.UpdateAsync(existingVehicle);
+                result.ProductsUpdated++; // Usamos el contador de productos para vehículos por ahora
+            }
+            else
+            {
+                // Crear nuevo vehículo usando el constructor público
+                var newVehicle = new Vehicle(brand, model, year, licensePlate, vehicleType)
+                {
+                    SerialNumber = serialNumber,
+                    HourlyRate = hourlyRate,
+                    DailyRate = dailyRate,
+                    WeeklyRate = weeklyRate,
+                    MonthlyRate = monthlyRate,
+                    CurrentHours = currentHours,
+                    CurrentMileage = currentMileage,
+                    MaintenanceHoursInterval = maintenanceInterval,
+                    Specifications = specifications,
+                    ImageUrl = imageUrl,
+                    DocumentsUrl = documentsUrl,
+                    Notes = notes,
+                    Status = Domain.Enums.VehicleStatus.Available,
+                    IsActive = isActive,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await _vehicleRepo.AddAsync(newVehicle);
+                result.ProductsCreated++; // Usamos el contador de productos para vehículos por ahora
+            }
+        }
+        catch (Exception ex)
+        {
+            result.Errors.Add(new ImportError
+            {
+                RowNumber = rowNumber,
+                Field = "General",
+                ErrorMessage = $"Error processing vehicle: {ex.Message}"
+            });
         }
     }
 

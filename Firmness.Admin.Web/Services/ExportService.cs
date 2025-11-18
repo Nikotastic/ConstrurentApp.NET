@@ -1,6 +1,9 @@
 ﻿using Firmness.Application.Interfaces;
 using Firmness.Domain.Interfaces;
 using OfficeOpenXml;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace Firmness.Web.Services;
 
@@ -9,16 +12,23 @@ public class ExportService : IExportService
     private readonly IProductRepository _productRepository;
     private readonly ICustomerRepository _customerRepository;
     private readonly ISaleRepository _saleRepository;
+    private readonly IVehicleRepository _vehicleRepository;
+    private readonly IVehicleRentalRepository _rentalRepository;
     
     public ExportService(
         IProductRepository productRepository,
         ICustomerRepository customerRepository,
-        ISaleRepository saleRepository)
+        ISaleRepository saleRepository,
+        IVehicleRepository vehicleRepository,
+        IVehicleRentalRepository rentalRepository)
     {
         _productRepository = productRepository;
         _customerRepository = customerRepository;
         _saleRepository = saleRepository;
+        _vehicleRepository = vehicleRepository;
+        _rentalRepository = rentalRepository;
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+        QuestPDF.Settings.License = LicenseType.Community;
     }
     
     // Export products to Excel
@@ -159,24 +169,495 @@ public class ExportService : IExportService
         return package.GetAsByteArray();
     }
 
-    // Export products to PDF - Placeholder (to be implemented)
-    public Task<byte[]> ExportProductsToPdfAsync(Guid? categoryId = null)
+    // Export products to PDF
+    public async Task<byte[]> ExportProductsToPdfAsync(Guid? categoryId = null)
     {
-        // TODO: Implement PDF export using QuestPDF with repositories
-        throw new NotImplementedException("PDF export for products will be implemented using repositories");
+        var products = await _productRepository.GetAllWithCategoryAsync(categoryId);
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(2, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header()
+                    .Text("Products Report")
+                    .SemiBold().FontSize(20).FontColor(Colors.Blue.Medium);
+
+                page.Content()
+                    .PaddingVertical(1, Unit.Centimetre)
+                    .Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.ConstantColumn(80);
+                            columns.RelativeColumn();
+                            columns.ConstantColumn(100);
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(60);
+                            columns.ConstantColumn(60);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("SKU");
+                            header.Cell().Element(CellStyle).Text("Name");
+                            header.Cell().Element(CellStyle).Text("Category");
+                            header.Cell().Element(CellStyle).Text("Price");
+                            header.Cell().Element(CellStyle).Text("Stock");
+                            header.Cell().Element(CellStyle).Text("Status");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.DefaultTextStyle(x => x.SemiBold())
+                                    .PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
+                            }
+                        });
+
+                        foreach (var product in products)
+                        {
+                            table.Cell().Element(CellStyle).Text(product.SKU);
+                            table.Cell().Element(CellStyle).Text(product.Name);
+                            table.Cell().Element(CellStyle).Text(product.Category?.Name ?? "N/A");
+                            table.Cell().Element(CellStyle).Text($"${product.Price:N2}");
+                            table.Cell().Element(CellStyle).Text(product.Stock.ToString());
+                            table.Cell().Element(CellStyle).Text(product.IsActive ? "Active" : "Inactive");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(5);
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 
-    // Export customers to PDF - Placeholder (to be implemented)
-    public Task<byte[]> ExportCustomersToPdfAsync()
+    // Export customers to PDF
+    public async Task<byte[]> ExportCustomersToPdfAsync()
     {
-        // TODO: Implement PDF export using QuestPDF with repositories
-        throw new NotImplementedException("PDF export for customers will be implemented using repositories");
+        var customers = await _customerRepository.GetAllAsync();
+        var orderedCustomers = customers.OrderBy(c => c.LastName).ThenBy(c => c.FirstName).ToList();
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(2, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header()
+                    .Text("Customers Report")
+                    .SemiBold().FontSize(20).FontColor(Colors.Green.Medium);
+
+                page.Content()
+                    .PaddingVertical(1, Unit.Centimetre)
+                    .Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.RelativeColumn(2);
+                            columns.ConstantColumn(100);
+                            columns.ConstantColumn(100);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("First Name");
+                            header.Cell().Element(CellStyle).Text("Last Name");
+                            header.Cell().Element(CellStyle).Text("Email");
+                            header.Cell().Element(CellStyle).Text("Document");
+                            header.Cell().Element(CellStyle).Text("Phone");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.DefaultTextStyle(x => x.SemiBold())
+                                    .PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
+                            }
+                        });
+
+                        foreach (var customer in orderedCustomers)
+                        {
+                            table.Cell().Element(CellStyle).Text(customer.FirstName);
+                            table.Cell().Element(CellStyle).Text(customer.LastName);
+                            table.Cell().Element(CellStyle).Text(customer.Email ?? "N/A");
+                            table.Cell().Element(CellStyle).Text(customer.Document ?? "N/A");
+                            table.Cell().Element(CellStyle).Text(customer.Phone ?? "N/A");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(5);
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 
-    // Export sales to PDF - Placeholder (to be implemented)
-    public Task<byte[]> ExportSalesToPdfAsync()
+    // Export sales to PDF
+    public async Task<byte[]> ExportSalesToPdfAsync()
     {
-        // TODO: Implement PDF export using QuestPDF with repositories
-        throw new NotImplementedException("PDF export for sales will be implemented using repositories");
+        var sales = await _saleRepository.GetAllWithDetailsAsync();
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(2, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header()
+                    .Text("Sales Report")
+                    .SemiBold().FontSize(20).FontColor(Colors.Red.Medium);
+
+                page.Content()
+                    .PaddingVertical(1, Unit.Centimetre)
+                    .Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.ConstantColumn(100);
+                            columns.ConstantColumn(80);
+                            columns.RelativeColumn();
+                            columns.ConstantColumn(80);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("Date");
+                            header.Cell().Element(CellStyle).Text("Invoice");
+                            header.Cell().Element(CellStyle).Text("Customer");
+                            header.Cell().Element(CellStyle).Text("Total");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.DefaultTextStyle(x => x.SemiBold())
+                                    .PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
+                            }
+                        });
+
+                        foreach (var sale in sales)
+                        {
+                            table.Cell().Element(CellStyle).Text(sale.CreatedAt.ToString("dd/MM/yyyy"));
+                            table.Cell().Element(CellStyle).Text(sale.InvoiceNumber ?? "N/A");
+                            table.Cell().Element(CellStyle).Text(sale.Customer?.FullName ?? "N/A");
+                            table.Cell().Element(CellStyle).Text($"${sale.TotalAmount:N2}");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(5);
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+
+    // Export vehicles to Excel
+    public async Task<byte[]> ExportVehiclesToExcelAsync()
+    {
+        var vehicles = await _vehicleRepository.GetAllAsync();
+
+        using var package = new ExcelPackage();
+        var worksheet = package.Workbook.Worksheets.Add("Vehicles");
+
+        // Headers
+        worksheet.Cells[1, 1].Value = "Brand";
+        worksheet.Cells[1, 2].Value = "Model";
+        worksheet.Cells[1, 3].Value = "Year";
+        worksheet.Cells[1, 4].Value = "License Plate";
+        worksheet.Cells[1, 5].Value = "Type";
+        worksheet.Cells[1, 6].Value = "Daily Rate";
+        worksheet.Cells[1, 7].Value = "Status";
+        worksheet.Cells[1, 8].Value = "Hours";
+
+        // Style headers
+        using (var range = worksheet.Cells[1, 1, 1, 8])
+        {
+            range.Style.Font.Bold = true;
+            range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightCoral);
+        }
+
+        // Data
+        int row = 2;
+        foreach (var vehicle in vehicles)
+        {
+            worksheet.Cells[row, 1].Value = vehicle.Brand;
+            worksheet.Cells[row, 2].Value = vehicle.Model;
+            worksheet.Cells[row, 3].Value = vehicle.Year;
+            worksheet.Cells[row, 4].Value = vehicle.LicensePlate;
+            worksheet.Cells[row, 5].Value = vehicle.VehicleType.ToString();
+            worksheet.Cells[row, 6].Value = vehicle.DailyRate;
+            worksheet.Cells[row, 6].Style.Numberformat.Format = "$#,##0.00";
+            worksheet.Cells[row, 7].Value = vehicle.Status.ToString();
+            worksheet.Cells[row, 8].Value = vehicle.CurrentHours;
+            row++;
+        }
+
+        worksheet.Cells.AutoFitColumns();
+        return package.GetAsByteArray();
+    }
+
+    // Export vehicles to PDF
+    public async Task<byte[]> ExportVehiclesToPdfAsync()
+    {
+        var vehicles = await _vehicleRepository.GetAllAsync();
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(2, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header()
+                    .Text("Vehicles Report")
+                    .SemiBold().FontSize(20).FontColor(Colors.Orange.Medium);
+
+                page.Content()
+                    .PaddingVertical(1, Unit.Centimetre)
+                    .Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.ConstantColumn(60);
+                            columns.ConstantColumn(100);
+                            columns.ConstantColumn(100);
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(80);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("Brand");
+                            header.Cell().Element(CellStyle).Text("Model");
+                            header.Cell().Element(CellStyle).Text("Year");
+                            header.Cell().Element(CellStyle).Text("License Plate");
+                            header.Cell().Element(CellStyle).Text("Type");
+                            header.Cell().Element(CellStyle).Text("Daily Rate");
+                            header.Cell().Element(CellStyle).Text("Status");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.DefaultTextStyle(x => x.SemiBold())
+                                    .PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
+                            }
+                        });
+
+                        foreach (var vehicle in vehicles)
+                        {
+                            table.Cell().Element(CellStyle).Text(vehicle.Brand);
+                            table.Cell().Element(CellStyle).Text(vehicle.Model);
+                            table.Cell().Element(CellStyle).Text(vehicle.Year.ToString());
+                            table.Cell().Element(CellStyle).Text(vehicle.LicensePlate);
+                            table.Cell().Element(CellStyle).Text(vehicle.VehicleType.ToString());
+                            table.Cell().Element(CellStyle).Text($"${vehicle.DailyRate:N2}");
+                            table.Cell().Element(CellStyle).Text(vehicle.Status.ToString());
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(5);
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+
+    // Export vehicle rentals to Excel
+    public async Task<byte[]> ExportVehicleRentalsToExcelAsync()
+    {
+        var rentals = await _rentalRepository.GetAllWithDetailsAsync();
+
+        using var package = new ExcelPackage();
+        var worksheet = package.Workbook.Worksheets.Add("Vehicle Rentals");
+
+        // Headers
+        worksheet.Cells[1, 1].Value = "Customer";
+        worksheet.Cells[1, 2].Value = "Vehicle";
+        worksheet.Cells[1, 3].Value = "Start Date";
+        worksheet.Cells[1, 4].Value = "Return Date";
+        worksheet.Cells[1, 5].Value = "Status";
+        worksheet.Cells[1, 6].Value = "Total Amount";
+        worksheet.Cells[1, 7].Value = "Paid";
+        worksheet.Cells[1, 8].Value = "Pending";
+
+        // Style headers
+        using (var range = worksheet.Cells[1, 1, 1, 8])
+        {
+            range.Style.Font.Bold = true;
+            range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightSkyBlue);
+        }
+
+        // Data
+        int row = 2;
+        foreach (var rental in rentals)
+        {
+            worksheet.Cells[row, 1].Value = rental.Customer?.FullName ?? "N/A";
+            worksheet.Cells[row, 2].Value = rental.Vehicle?.DisplayName ?? "N/A";
+            worksheet.Cells[row, 3].Value = rental.StartDate.ToString("dd/MM/yyyy");
+            worksheet.Cells[row, 4].Value = (rental.ActualReturnDate ?? rental.EstimatedReturnDate).ToString("dd/MM/yyyy");
+            worksheet.Cells[row, 5].Value = rental.Status.ToString();
+            worksheet.Cells[row, 6].Value = rental.TotalAmount;
+            worksheet.Cells[row, 6].Style.Numberformat.Format = "$#,##0.00";
+            worksheet.Cells[row, 7].Value = rental.PaidAmount;
+            worksheet.Cells[row, 7].Style.Numberformat.Format = "$#,##0.00";
+            worksheet.Cells[row, 8].Value = rental.PendingAmount;
+            worksheet.Cells[row, 8].Style.Numberformat.Format = "$#,##0.00";
+            row++;
+        }
+
+        worksheet.Cells.AutoFitColumns();
+        return package.GetAsByteArray();
+    }
+
+    // Export vehicle rentals to PDF
+    public async Task<byte[]> ExportVehicleRentalsToPdfAsync()
+    {
+        var rentals = await _rentalRepository.GetAllWithDetailsAsync();
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(2, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(9));
+
+                page.Header()
+                    .Text("Vehicle Rentals Report")
+                    .SemiBold().FontSize(20).FontColor(Colors.Indigo.Medium);
+
+                page.Content()
+                    .PaddingVertical(1, Unit.Centimetre)
+                    .Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(70);
+                            columns.ConstantColumn(80);
+                            columns.ConstantColumn(80);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(CellStyle).Text("Customer");
+                            header.Cell().Element(CellStyle).Text("Vehicle");
+                            header.Cell().Element(CellStyle).Text("Start Date");
+                            header.Cell().Element(CellStyle).Text("Return Date");
+                            header.Cell().Element(CellStyle).Text("Status");
+                            header.Cell().Element(CellStyle).Text("Total");
+                            header.Cell().Element(CellStyle).Text("Pending");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.DefaultTextStyle(x => x.SemiBold())
+                                    .PaddingVertical(5).BorderBottom(1).BorderColor(Colors.Black);
+                            }
+                        });
+
+                        foreach (var rental in rentals)
+                        {
+                            table.Cell().Element(CellStyle).Text(rental.Customer?.FullName ?? "N/A");
+                            table.Cell().Element(CellStyle).Text(rental.Vehicle?.DisplayName ?? "N/A");
+                            table.Cell().Element(CellStyle).Text(rental.StartDate.ToString("dd/MM/yy"));
+                            table.Cell().Element(CellStyle).Text((rental.ActualReturnDate ?? rental.EstimatedReturnDate).ToString("dd/MM/yy"));
+                            table.Cell().Element(CellStyle).Text(rental.Status.ToString());
+                            table.Cell().Element(CellStyle).Text($"${rental.TotalAmount:N2}");
+                            table.Cell().Element(CellStyle).Text($"${rental.PendingAmount:N2}");
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.BorderBottom(1).BorderColor(Colors.Grey.Lighten2)
+                                    .PaddingVertical(5);
+                            }
+                        }
+                    });
+
+                page.Footer()
+                    .AlignCenter()
+                    .Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+            });
+        });
+
+        return document.GeneratePdf();
     }
 }
