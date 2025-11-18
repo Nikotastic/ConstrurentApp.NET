@@ -1,4 +1,4 @@
-﻿﻿using Firmness.Application.Interfaces;
+﻿using Firmness.Application.Interfaces;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
 using Firmness.Web.ViewModels.Vehicle;
@@ -177,62 +177,62 @@ public class VehiclesController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> Create(VehicleFormViewModel model)
+    public async Task<IActionResult> Create(VehicleFormViewModel viewModel)
     {
         if (!ModelState.IsValid)
         {
-            model.VehicleTypes = GetVehicleTypeSelectList();
-            return View(model);
+            viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            return View(viewModel);
         }
 
         try
         {
             var vehicle = new Domain.Entities.Vehicle(
-                model.Brand,
-                model.Model,
-                model.Year,
-                model.LicensePlate,
-                (VehicleType)model.VehicleType
+                viewModel.Brand,
+                viewModel.Model,
+                viewModel.Year,
+                viewModel.LicensePlate,
+                (VehicleType)viewModel.VehicleType
             )
             {
-                HourlyRate = model.HourlyRate,
-                DailyRate = model.DailyRate,
-                WeeklyRate = model.WeeklyRate,
-                MonthlyRate = model.MonthlyRate,
-                CurrentHours = model.CurrentHours,
-                CurrentMileage = model.CurrentMileage,
-                Specifications = model.Specifications,
-                SerialNumber = model.SerialNumber,
-                MaintenanceHoursInterval = model.MaintenanceHoursInterval,
-                LastMaintenanceDate = model.LastMaintenanceDate,
-                NextMaintenanceDate = model.NextMaintenanceDate,
-                ImageUrl = model.ImageUrl,
-                DocumentsUrl = model.DocumentsUrl,
-                Notes = model.Notes,
-                IsActive = model.IsActive
+                HourlyRate = viewModel.HourlyRate,
+                DailyRate = viewModel.DailyRate,
+                WeeklyRate = viewModel.WeeklyRate,
+                MonthlyRate = viewModel.MonthlyRate,
+                CurrentHours = viewModel.CurrentHours,
+                CurrentMileage = viewModel.CurrentMileage,
+                Specifications = viewModel.Specifications,
+                SerialNumber = viewModel.SerialNumber,
+                MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
+                LastMaintenanceDate = viewModel.LastMaintenanceDate,
+                NextMaintenanceDate = viewModel.NextMaintenanceDate,
+                ImageUrl = viewModel.ImageUrl,
+                DocumentsUrl = viewModel.DocumentsUrl,
+                Notes = viewModel.Notes,
+                IsActive = viewModel.IsActive
             };
 
             // Note: You'll need to add a method in IVehicleService to accept Vehicle entity
             // For now, we'll use a workaround
             var createDto = new Domain.DTOs.Vehicle.CreateVehicleDto
             {
-                Brand = model.Brand,
-                Model = model.Model,
-                Year = model.Year,
-                LicensePlate = model.LicensePlate,
-                VehicleType = (VehicleType)model.VehicleType,
-                HourlyRate = model.HourlyRate,
-                DailyRate = model.DailyRate,
-                WeeklyRate = model.WeeklyRate,
-                MonthlyRate = model.MonthlyRate,
-                CurrentHours = model.CurrentHours,
-                CurrentMileage = model.CurrentMileage,
-                Specifications = model.Specifications,
-                SerialNumber = model.SerialNumber,
-                MaintenanceHoursInterval = model.MaintenanceHoursInterval,
-                ImageUrl = model.ImageUrl,
-                DocumentsUrl = model.DocumentsUrl,
-                Notes = model.Notes
+                Brand = viewModel.Brand,
+                Model = viewModel.Model,
+                Year = viewModel.Year,
+                LicensePlate = viewModel.LicensePlate,
+                VehicleType = (VehicleType)viewModel.VehicleType,
+                HourlyRate = viewModel.HourlyRate,
+                DailyRate = viewModel.DailyRate,
+                WeeklyRate = viewModel.WeeklyRate,
+                MonthlyRate = viewModel.MonthlyRate,
+                CurrentHours = viewModel.CurrentHours,
+                CurrentMileage = viewModel.CurrentMileage,
+                Specifications = viewModel.Specifications,
+                SerialNumber = viewModel.SerialNumber,
+                MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
+                ImageUrl = viewModel.ImageUrl,
+                DocumentsUrl = viewModel.DocumentsUrl,
+                Notes = viewModel.Notes
             };
 
             var result = await _vehicleService.CreateVehicleAsync(createDto);
@@ -240,19 +240,19 @@ public class VehiclesController : Controller
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                model.VehicleTypes = GetVehicleTypeSelectList();
-                return View(model);
+                viewModel.VehicleTypes = GetVehicleTypeSelectList();
+                return View(viewModel);
             }
 
-            TempData["Success"] = $"Vehicle {result.Value.DisplayName} created successfully!";
+            TempData["Success"] = $"Vehicle {result.Value?.DisplayName ?? "Unknown"} created successfully!";
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating vehicle");
             TempData["Error"] = "An error occurred while creating the vehicle.";
-            model.VehicleTypes = GetVehicleTypeSelectList();
-            return View(model);
+            viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            return View(viewModel);
         }
     }
 
@@ -284,43 +284,43 @@ public class VehiclesController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> Edit(Guid id, VehicleFormViewModel model)
+    public async Task<IActionResult> Edit(Guid id, VehicleFormViewModel viewModel)
     {
-        if (id != model.Id)
+        if (id != viewModel.Id)
         {
             return NotFound();
         }
 
         if (!ModelState.IsValid)
         {
-            model.VehicleTypes = GetVehicleTypeSelectList();
-            return View(model);
+            viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            return View(viewModel);
         }
 
         try
         {
             var updateDto = new Domain.DTOs.Vehicle.UpdateVehicleDto
             {
-                Brand = model.Brand,
-                Model = model.Model,
-                Year = model.Year,
-                LicensePlate = model.LicensePlate,
-                VehicleType = (VehicleType)model.VehicleType,
-                HourlyRate = model.HourlyRate,
-                DailyRate = model.DailyRate,
-                WeeklyRate = model.WeeklyRate,
-                MonthlyRate = model.MonthlyRate,
-                CurrentHours = model.CurrentHours,
-                CurrentMileage = model.CurrentMileage,
-                Specifications = model.Specifications,
-                SerialNumber = model.SerialNumber,
-                MaintenanceHoursInterval = model.MaintenanceHoursInterval,
-                LastMaintenanceDate = model.LastMaintenanceDate,
-                NextMaintenanceDate = model.NextMaintenanceDate,
-                ImageUrl = model.ImageUrl,
-                DocumentsUrl = model.DocumentsUrl,
-                Notes = model.Notes,
-                IsActive = model.IsActive
+                Brand = viewModel.Brand,
+                Model = viewModel.Model,
+                Year = viewModel.Year,
+                LicensePlate = viewModel.LicensePlate,
+                VehicleType = (VehicleType)viewModel.VehicleType,
+                HourlyRate = viewModel.HourlyRate,
+                DailyRate = viewModel.DailyRate,
+                WeeklyRate = viewModel.WeeklyRate,
+                MonthlyRate = viewModel.MonthlyRate,
+                CurrentHours = viewModel.CurrentHours,
+                CurrentMileage = viewModel.CurrentMileage,
+                Specifications = viewModel.Specifications,
+                SerialNumber = viewModel.SerialNumber,
+                MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
+                LastMaintenanceDate = viewModel.LastMaintenanceDate,
+                NextMaintenanceDate = viewModel.NextMaintenanceDate,
+                ImageUrl = viewModel.ImageUrl,
+                DocumentsUrl = viewModel.DocumentsUrl,
+                Notes = viewModel.Notes,
+                IsActive = viewModel.IsActive
             };
 
             var result = await _vehicleService.UpdateVehicleAsync(id, updateDto);
@@ -328,8 +328,8 @@ public class VehiclesController : Controller
             if (!result.IsSuccess)
             {
                 TempData["Error"] = result.ErrorMessage;
-                model.VehicleTypes = GetVehicleTypeSelectList();
-                return View(model);
+                viewModel.VehicleTypes = GetVehicleTypeSelectList();
+                return View(viewModel);
             }
 
             TempData["Success"] = "Vehicle updated successfully!";
@@ -339,8 +339,8 @@ public class VehiclesController : Controller
         {
             _logger.LogError(ex, "Error updating vehicle {VehicleId}", id);
             TempData["Error"] = "An error occurred while updating the vehicle.";
-            model.VehicleTypes = GetVehicleTypeSelectList();
-            return View(model);
+            viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            return View(viewModel);
         }
     }
 
