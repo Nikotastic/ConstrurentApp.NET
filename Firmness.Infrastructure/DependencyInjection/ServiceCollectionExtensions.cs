@@ -1,4 +1,4 @@
-﻿using Firmness.Application.Interfaces;
+﻿﻿using Firmness.Application.Interfaces;
 using Firmness.Application.Services;
 using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Repositories;
@@ -18,6 +18,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleItemRepository, SaleItemRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IVehicleRepository, VehicleRepository>();
+        services.AddScoped<IVehicleRentalRepository, VehicleRentalRepository>();
 
         // UnitOfWork for application services to consume
         services.AddScoped<IUnitOfWork, ApplicationDbContext>();

@@ -21,6 +21,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
     public DbSet<SaleItem> SaleItems { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
+    public DbSet<Vehicle> Vehicles { get; set; } = null!;
+    public DbSet<VehicleRental> VehicleRentals { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -133,6 +135,89 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
             b.Property(si => si.UnitPrice).HasColumnType("decimal(18,2)").IsRequired();
             b.HasOne(si => si.Sale).WithMany(s => s.Items).HasForeignKey(si => si.SaleId);
             b.HasOne(si => si.Product).WithMany(p => p.SaleItems).HasForeignKey(si => si.ProductId);
+        });
+        
+        // Vehicles
+        modelBuilder.Entity<Vehicle>(b =>
+        {
+            b.ToTable("Vehicle");
+            b.HasKey(v => v.Id);
+            b.Property(v => v.Brand).HasMaxLength(100).IsRequired();
+            b.Property(v => v.Model).HasMaxLength(100).IsRequired();
+            b.Property(v => v.Year).IsRequired();
+            b.Property(v => v.LicensePlate).HasMaxLength(20).IsRequired();
+            b.Property(v => v.VehicleType).IsRequired();
+            b.Property(v => v.HourlyRate).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(v => v.DailyRate).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(v => v.WeeklyRate).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(v => v.MonthlyRate).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(v => v.Status).IsRequired();
+            b.Property(v => v.IsActive).IsRequired();
+            b.Property(v => v.CurrentHours).HasColumnType("decimal(18,2)");
+            b.Property(v => v.CurrentMileage).HasColumnType("decimal(18,2)");
+            b.Property(v => v.Specifications).HasMaxLength(2000);
+            b.Property(v => v.SerialNumber).HasMaxLength(100);
+            b.Property(v => v.MaintenanceHoursInterval).HasColumnType("decimal(18,2)");
+            b.Property(v => v.ImageUrl).HasMaxLength(500);
+            b.Property(v => v.DocumentsUrl).HasMaxLength(500);
+            b.Property(v => v.Notes).HasMaxLength(1000);
+            
+            b.HasIndex(v => v.LicensePlate).IsUnique();
+            b.HasIndex(v => v.Status);
+            b.HasIndex(v => v.VehicleType);
+            b.HasIndex(v => v.IsActive);
+        });
+        
+        // VehicleRentals
+        modelBuilder.Entity<VehicleRental>(b =>
+        {
+            b.ToTable("VehicleRental");
+            b.HasKey(vr => vr.Id);
+            b.Property(vr => vr.StartDate).IsRequired();
+            b.Property(vr => vr.EstimatedReturnDate).IsRequired();
+            b.Property(vr => vr.Status).IsRequired();
+            b.Property(vr => vr.RentalRate).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.RentalPeriodType).HasMaxLength(20).IsRequired();
+            b.Property(vr => vr.Deposit).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.Subtotal).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.Tax).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.Discount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.TotalAmount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.PaidAmount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.PendingAmount).HasColumnType("decimal(18,2)").IsRequired();
+            b.Property(vr => vr.PaymentMethod).IsRequired();
+            b.Property(vr => vr.DepositReturned).IsRequired();
+            b.Property(vr => vr.PickupLocation).HasMaxLength(200);
+            b.Property(vr => vr.ReturnLocation).HasMaxLength(200);
+            b.Property(vr => vr.ContractUrl).HasMaxLength(500);
+            b.Property(vr => vr.InvoiceNumber).HasMaxLength(50);
+            b.Property(vr => vr.InitialHours).HasColumnType("decimal(18,2)");
+            b.Property(vr => vr.FinalHours).HasColumnType("decimal(18,2)");
+            b.Property(vr => vr.InitialMileage).HasColumnType("decimal(18,2)");
+            b.Property(vr => vr.FinalMileage).HasColumnType("decimal(18,2)");
+            b.Property(vr => vr.InitialCondition).HasMaxLength(2000);
+            b.Property(vr => vr.FinalCondition).HasMaxLength(2000);
+            b.Property(vr => vr.Notes).HasMaxLength(1000);
+            b.Property(vr => vr.CancellationReason).HasMaxLength(500);
+            
+            // Relationships
+            b.HasOne(vr => vr.Customer)
+             .WithMany()
+             .HasForeignKey(vr => vr.CustomerId)
+             .OnDelete(DeleteBehavior.Restrict);
+            
+            b.HasOne(vr => vr.Vehicle)
+             .WithMany(v => v.Rentals)
+             .HasForeignKey(vr => vr.VehicleId)
+             .OnDelete(DeleteBehavior.Restrict);
+            
+            // Indexes
+            b.HasIndex(vr => vr.CustomerId);
+            b.HasIndex(vr => vr.VehicleId);
+            b.HasIndex(vr => vr.Status);
+            b.HasIndex(vr => vr.StartDate);
+            b.HasIndex(vr => vr.EstimatedReturnDate);
+            b.HasIndex(vr => vr.InvoiceNumber);
         });
     }
     
