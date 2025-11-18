@@ -39,11 +39,23 @@ if ($Env -eq 'local') {
         exit 1
     }
     
+    Write-Host "Checking if dotnet-ef is installed in container..." -ForegroundColor Gray
+    
+    # Check if dotnet-ef is installed, if not, install it
+    $efCheck = docker exec construrentappnet-web-1 dotnet ef --version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Installing dotnet-ef tool in container..." -ForegroundColor Yellow
+        docker exec construrentappnet-web-1 dotnet tool install --global dotnet-ef
+        
+        # Update PATH to include global tools
+        docker exec construrentappnet-web-1 bash -c "export PATH=$PATH:/root/.dotnet/tools"
+    }
+    
     Write-Host "Running migration inside the container..." -ForegroundColor Gray
     Write-Host ""
     
-    # Run migration inside the container
-    docker exec construrentappnet-web-1 dotnet ef database update --project /app/Firmness.Infrastructure --startup-project /app/Firmness.Admin.Web
+    # Run migration inside the container using full path to dotnet-ef
+    docker exec construrentappnet-web-1 bash -c "export PATH=$PATH:/root/.dotnet/tools && dotnet ef database update --project /app/Firmness.Infrastructure --startup-project /app/Firmness.Admin.Web"
 }
 
 Write-Host ""

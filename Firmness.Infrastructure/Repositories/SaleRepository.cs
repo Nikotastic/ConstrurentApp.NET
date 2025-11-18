@@ -44,6 +44,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _db.Sales
             .AsNoTracking()
+            .AsSplitQuery() // Fix concurrency issue
             .Include(s => s.Items)
             .Include(s => s.Customer)
             .OrderByDescending(s => s.CreatedAt)
@@ -99,6 +100,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _db.Sales
             .AsNoTracking()
+            .AsSplitQuery() // Fix concurrency issue
             .Where(s => s.CreatedAt >= from && s.CreatedAt <= to)
             .Include(s => s.Items)
             .Include(s => s.Customer)
