@@ -68,8 +68,8 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -78,8 +78,8 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Document")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -92,7 +92,8 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<string>("IdentityUserId")
-                        .HasColumnType("text");
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -106,14 +107,16 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("PhotoFile")
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("PhotoUrl")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -123,8 +126,12 @@ namespace Firmness.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Document");
+
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("IdentityUserId");
 
                     b.ToTable("Customer", (string)null);
                 });
@@ -808,6 +815,14 @@ namespace Firmness.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("Firmness.Domain.Entities.Customer", b =>
+                {
+                    b.HasOne("Firmness.Infrastructure.Identity.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("Firmness.Domain.Entities.Customer", "IdentityUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Firmness.Domain.Entities.Product", b =>

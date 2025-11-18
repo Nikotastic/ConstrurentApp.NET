@@ -100,11 +100,34 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IUnitOfW
         modelBuilder.Entity<Customer>(c =>
         {
             c.ToTable("Customer");
-            c.HasKey(cu => cu.Id); // now allowed because Person is ignored
+            c.HasKey(cu => cu.Id);
+            
+            // Person inherited properties
             c.Property(cu => cu.FirstName).HasMaxLength(50).IsRequired();
             c.Property(cu => cu.LastName).HasMaxLength(50).IsRequired();
             c.Property(cu => cu.Email).HasMaxLength(200).IsRequired();
+            
+            // Customer specific properties
+            c.Property(cu => cu.Document).HasMaxLength(50).IsRequired(false);
+            c.Property(cu => cu.Phone).HasMaxLength(20).IsRequired(false);
+            c.Property(cu => cu.Address).HasMaxLength(500).IsRequired(false);
+            c.Property(cu => cu.IsActive).IsRequired();
+            c.Property(cu => cu.PhotoFile).HasMaxLength(255).IsRequired(false);
+            c.Property(cu => cu.PhotoUrl).HasMaxLength(500).IsRequired(false);
+            c.Property(cu => cu.IdentityUserId).HasMaxLength(450).IsRequired(false);
+            c.Property(cu => cu.LastPasswordChangeDate).IsRequired(false);
+            
+            // Indexes
             c.HasIndex(cu => cu.Email).IsUnique();
+            c.HasIndex(cu => cu.Document).IsUnique(false);
+            c.HasIndex(cu => cu.IdentityUserId).IsUnique(false);
+            
+            // Relationship with Identity
+            c.HasOne<ApplicationUser>()
+             .WithOne()
+             .HasForeignKey<Customer>(cu => cu.IdentityUserId)
+             .IsRequired(false)
+             .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Sales
