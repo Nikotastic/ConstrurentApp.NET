@@ -1,7 +1,6 @@
-﻿﻿using Firmness.Application.Interfaces;
-using Firmness.Application.Services;
-using Firmness.Domain.Interfaces;
+﻿using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Repositories;
+using Firmness.Infrastructure.Email;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Firmness.Infrastructure.Data;
@@ -23,6 +22,23 @@ public static class ServiceCollectionExtensions
 
         // UnitOfWork for application services to consume
         services.AddScoped<IUnitOfWork, ApplicationDbContext>();
+        
+        // Email Service Configuration (adapter)
+        // The configuration determines which implementation is used (Gmail or Enterprise)
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        
+        // Register the email service based on the configuration
+        var emailProvider = configuration.GetValue<string>("EmailSettings:Provider") ?? "Gmail";
+        
+        if (emailProvider.Equals("Enterprise", StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddScoped<IEmailService, EnterpriseEmailService>();
+        }
+        else
+        {
+            services.AddScoped<IEmailService, GmailEmailService>();
+        }
+        
         return services;
     }
 }
