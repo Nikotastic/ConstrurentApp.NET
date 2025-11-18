@@ -65,6 +65,25 @@
             </li>
         </ul>
 
+        <!-- Rentals Section -->
+        <div class="nav-section">Rentals</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(controller == "Vehicles" ? "active" : "")" 
+                   asp-controller="Vehicles" asp-action="Index">
+                    <i class="bi bi-truck"></i>
+                    <span class="nav-text">Vehicles</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(controller == "VehicleRentals" ? "active" : "")" 
+                   asp-controller="VehicleRentals" asp-action="Index">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span class="nav-text">Vehicle Rentals</span>
+                </a>
+            </li>
+        </ul>
+
         <!-- Tools Section -->
         <div class="nav-section">Tools</div>
         <ul class="nav flex-column">
