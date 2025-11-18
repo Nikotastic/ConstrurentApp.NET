@@ -1,4 +1,4 @@
-﻿﻿using Firmness.Application.Interfaces;
+﻿﻿﻿using Firmness.Application.Interfaces;
 using Firmness.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,6 +19,8 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IBulkImportService, BulkImportService>();
         services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
         services.AddScoped<IDashboardService, DashboardService>();
+        services.AddScoped<IVehicleService, VehicleService>();
+        services.AddScoped<IVehicleRentalService, VehicleRentalService>();
         return services;
     }
 }
