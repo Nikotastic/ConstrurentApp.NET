@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
-namespace Firmness.Admin.Web.Controllers;
+namespace Firmness.Web.Controllers;
 
 [Authorize]
 public class BulkImportController : Controller
@@ -110,6 +110,24 @@ public class BulkImportController : Controller
         {
             _logger.LogError(ex, "Error generating sample data");
             TempData["Error"] = "Error al crear el archivo de ejemplo";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // GET: BulkImport/DownloadVehiclesSample
+    public IActionResult DownloadVehiclesSample()
+    {
+        try
+        {
+            var fileBytes = _excelTemplateService.GenerateVehiclesSampleData();
+            var fileName = $"Vehicles_BulkImport_Sample_{DateTime.Now:yyyyMMdd}.xlsx";
+            
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating vehicles sample data");
+            TempData["Error"] = "Error al crear el archivo de ejemplo de vehículos";
             return RedirectToAction(nameof(Index));
         }
     }

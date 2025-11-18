@@ -21,7 +21,22 @@ public class HomeController : Controller
         try
         {
             var dashboardData = await _dashboardService.GetDashboardDataAsync();
-            return View(dashboardData);
+            
+            // Map DashboardDto to DashboardViewModel
+            var viewModel = new DashboardViewModel
+            {
+                TotalProducts = dashboardData.TotalProducts,
+                TotalCustomers = dashboardData.TotalCustomers,
+                TotalSales = dashboardData.TotalSales,
+                TotalRevenue = dashboardData.TotalRevenue,
+                PendingSales = dashboardData.PendingSales,
+                CompletedSales = dashboardData.CompletedSales,
+                RecentSales = dashboardData.RecentSales,
+                LowStockProducts = dashboardData.LowStockProducts,
+                TopCustomers = dashboardData.TopCustomers
+            };
+            
+            return View(viewModel);
         }
         catch (Exception ex)
         {

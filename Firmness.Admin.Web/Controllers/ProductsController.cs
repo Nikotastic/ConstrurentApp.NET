@@ -10,15 +10,18 @@ namespace Firmness.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly IExportService _exportService;
         private readonly ILogger<ProductsController> _logger;
         
         public ProductsController(
             IProductService productService, 
             ICategoryService categoryService,
+            IExportService exportService,
             ILogger<ProductsController> logger)
         {
             _productService = productService ?? throw new ArgumentNullException(nameof(productService));
             _categoryService = categoryService ?? throw new ArgumentNullException(nameof(categoryService));
+            _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
             _logger = logger;
         }
 
@@ -32,6 +35,26 @@ namespace Firmness.Web.Controllers
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 200);
 
+            // Get categories for dropdown - always set this
+            try
+            {
+                var categories = await _categoryService.GetActiveAsync();
+                ViewBag.Categories = categories
+                    .OrderBy(c => c.Name)
+                    .Select(c => new SelectListItem 
+                    { 
+                        Value = c.Id.ToString(), 
+                        Text = c.Name,
+                        Selected = categoryId.HasValue && c.Id == categoryId.Value
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error loading categories for dropdown");
+                ViewBag.Categories = new List<SelectListItem>();
+            }
+
             try
             {
                 // Use service method instead of direct DbContext access
@@ -44,18 +67,6 @@ namespace Firmness.Web.Controllers
                     var empty = new Firmness.Domain.Common.PaginatedResult<Product>(Enumerable.Empty<Product>(), page, pageSize, 0);
                     return View(empty);
                 }
-
-                // Get categories for dropdown
-                var categories = await _categoryService.GetActiveAsync();
-                ViewBag.Categories = categories
-                    .OrderBy(c => c.Name)
-                    .Select(c => new SelectListItem 
-                    { 
-                        Value = c.Id.ToString(), 
-                        Text = c.Name,
-                        Selected = categoryId.HasValue && c.Id == categoryId.Value
-                    })
-                    .ToList();
 
                 ViewData["Query"] = q;
                 ViewData["CategoryId"] = categoryId;
@@ -285,6 +296,38 @@ namespace Firmness.Web.Controllers
             {
                 _logger.LogError(ex, "Error deleting product.");
                 TempData["Error"] = "Ocurrió un error al eliminar el producto. Intenta nuevamente.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: Products/ExportToExcel
+        public async Task<IActionResult> ExportToExcel(Guid? categoryId = null)
+        {
+            try
+            {
+                var excelData = await _exportService.ExportProductsToExcelAsync(categoryId);
+                return File(excelData, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Products_{DateTime.Now:yyyyMMdd}.xlsx");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting products to Excel");
+                TempData["Error"] = "Error al exportar productos a Excel.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: Products/ExportToPdf
+        public async Task<IActionResult> ExportToPdf(Guid? categoryId = null)
+        {
+            try
+            {
+                var pdfData = await _exportService.ExportProductsToPdfAsync(categoryId);
+                return File(pdfData, "application/pdf", $"Products_{DateTime.Now:yyyyMMdd}.pdf");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting products to PDF");
+                TempData["Error"] = "Error al exportar productos a PDF.";
                 return RedirectToAction(nameof(Index));
             }
         }
