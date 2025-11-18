@@ -6,6 +6,8 @@
 # dotenv files
 .env
 .env.local
+migrate.ps1
+test-auth.ps1
 
 # User-specific files
 *.rsuser
