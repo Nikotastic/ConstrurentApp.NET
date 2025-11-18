@@ -13,24 +13,28 @@ public class BulkImportService : IBulkImportService
     private readonly ISaleRepository _saleRepo;
     private readonly ISaleItemRepository _saleItemRepo;
     private readonly IVehicleRepository _vehicleRepo;
+    private readonly INotificationService _notificationService;
 
     public BulkImportService(
         IProductRepository productRepo,
         ICustomerRepository customerRepo,
         ISaleRepository saleRepo,
         ISaleItemRepository saleItemRepo,
-        IVehicleRepository vehicleRepo)
+        IVehicleRepository vehicleRepo,
+        INotificationService notificationService)
     {
         _productRepo = productRepo;
         _customerRepo = customerRepo;
         _saleRepo = saleRepo;
         _saleItemRepo = saleItemRepo;
         _vehicleRepo = vehicleRepo;
+        _notificationService = notificationService;
     }
 
     public async Task<BulkImportResult> ImportFromExcelAsync(Stream fileStream, CancellationToken cancellationToken = default)
     {
         var result = new BulkImportResult();
+        var newCustomers = new List<Customer>();
 
         try
         {
@@ -66,7 +70,7 @@ public class BulkImportService : IBulkImportService
                     if (IsEmptyRow(rowData))
                         continue;
 
-                    await ProcessRow(rowData, dataType, result, row, existingProducts, existingCustomers);
+                    await ProcessRow(rowData, dataType, result, row, existingProducts, existingCustomers, newCustomers);
                     result.SuccessfulRows++;
                 }
                 catch (Exception ex)
@@ -79,6 +83,19 @@ public class BulkImportService : IBulkImportService
                         ErrorMessage = ex.Message,
                         RowData = GetRowDataAsString(worksheet, row, headers)
                     });
+                }
+            }
+
+            // Enviar correos de bienvenida masivos a los nuevos clientes
+            if (newCustomers.Any())
+            {
+                try
+                {
+                    await _notificationService.SendBulkWelcomeEmailsAsync(newCustomers, cancellationToken);
+                }
+                catch (Exception)
+                {
+                  
                 }
             }
 
@@ -170,7 +187,7 @@ public class BulkImportService : IBulkImportService
 
     private async Task ProcessRow(Dictionary<string, object?> rowData, 
         string dataType, BulkImportResult result, int rowNumber,
-        List<Product> existingProducts, List<Customer> existingCustomers)
+        List<Product> existingProducts, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
         if (dataType == "vehicle")
         {
@@ -178,7 +195,7 @@ public class BulkImportService : IBulkImportService
         }
         else if (dataType == "mixed")
         {
-            await ProcessMixedRow(rowData, result, rowNumber, existingProducts, existingCustomers);
+            await ProcessMixedRow(rowData, result, rowNumber, existingProducts, existingCustomers, newCustomers);
         }
         else if (dataType == "product")
         {
@@ -186,12 +203,12 @@ public class BulkImportService : IBulkImportService
         }
         else if (dataType == "customer")
         {
-            await ProcessCustomerRow(rowData, result, existingCustomers);
+            await ProcessCustomerRow(rowData, result, existingCustomers, newCustomers);
         }
     }
 
     private async Task ProcessMixedRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber,
-        List<Product> existingProducts, List<Customer> existingCustomers)
+        List<Product> existingProducts, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
         var productSku = GetStringValue(rowData, "SKU", "ProductSKU", "ProductoSKU", "Codigo", "Code");
         var productName = GetStringValue(rowData, "Product", "ProductName", "Producto", "NombreProducto", "Name");
@@ -308,6 +325,7 @@ public class BulkImportService : IBulkImportService
                     
                     await _customerRepo.AddAsync(customer);
                     existingCustomers.Add(customer);
+                    newCustomers.Add(customer);
                     result.CustomersCreated++;
                     customerId = customer.Id;
                 }
@@ -422,7 +440,7 @@ public class BulkImportService : IBulkImportService
         }
     }
 
-    private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Customer> existingCustomers)
+    private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
         var firstName = GetStringValue(rowData, "FirstName", "Nombre", "Name");
         var lastName = GetStringValue(rowData, "LastName", "Apellido", "Surname");
@@ -464,6 +482,7 @@ public class BulkImportService : IBulkImportService
             
             await _customerRepo.AddAsync(customer);
             existingCustomers.Add(customer);
+            newCustomers.Add(customer);
             result.CustomersCreated++;
         }
     }

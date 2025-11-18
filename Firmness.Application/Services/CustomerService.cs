@@ -2,14 +2,25 @@
 using Firmness.Domain.Common;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Firmness.Application.Services;
 
-// Services for customers in Application ()
 public class CustomerService : ICustomerService
 {
     private readonly ICustomerRepository _customerRepo;
-    public CustomerService(ICustomerRepository customerRepo) => _customerRepo = customerRepo;
+    private readonly INotificationService _notificationService;
+    private readonly ILogger<CustomerService> _logger;
+
+    public CustomerService(
+        ICustomerRepository customerRepo,
+        INotificationService notificationService,
+        ILogger<CustomerService> logger)
+    {
+        _customerRepo = customerRepo;
+        _notificationService = notificationService;
+        _logger = logger;
+    }
     
     // CRUD operations
     public Task<Customer?> GetByIdAsync(Guid id) => _customerRepo.GetByIdAsync(id);
@@ -23,11 +34,33 @@ public class CustomerService : ICustomerService
         return _customerRepo.GetAllAsync(page, pageSize);
     }
 
-    public Task AddAsync(Customer customer)
+    public async Task AddAsync(Customer customer)
     {
         if (customer is null) throw new ArgumentNullException(nameof(customer));
-        if (string.IsNullOrWhiteSpace(customer.Email)) throw new ArgumentException("Email required", nameof(customer.Email));
-        return _customerRepo.AddAsync(customer);
+        if (string.IsNullOrWhiteSpace(customer.Email)) 
+            throw new ArgumentException("Email required", nameof(customer.Email));
+        
+        // Add the client
+        await _customerRepo.AddAsync(customer);
+        
+        // Send welcome email
+        try
+        {
+            await _notificationService.SendWelcomeEmailAsync(customer);
+            
+            _logger.LogInformation(
+                "Welcome email sent to {CustomerName} ({Email})",
+                customer.FullName,
+                customer.Email);
+        }
+        catch (Exception ex)
+        {
+            // Log but the operation doesn't fail if the email fails
+            _logger.LogError(
+                ex,
+                "Error sending welcome email to {Email}",
+                customer.Email);
+        }
     }
 
     public Task UpdateAsync(Customer customer)
@@ -50,6 +83,4 @@ public class CustomerService : ICustomerService
             return Result<long>.Failure("An error occurred while counting customers.");
         }
     }
-
-  
 }

@@ -1,4 +1,4 @@
-﻿﻿﻿using Firmness.Application.Interfaces;
+﻿using Firmness.Application.Interfaces;
 using Firmness.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,6 +21,8 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IVehicleService, VehicleService>();
         services.AddScoped<IVehicleRentalService, VehicleRentalService>();
+        services.AddScoped<INotificationService, NotificationService>();
+        
         return services;
     }
 }
