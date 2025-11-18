@@ -31,7 +31,7 @@
                 <option value="">All categories</option>
                 @if (ViewBag.Categories != null)
                 {
-                    @foreach (var cat in ViewBag.Categories as IEnumerable<SelectListItem>)
+                    @foreach (var cat in (ViewBag.Categories as IEnumerable<SelectListItem>) ?? Enumerable.Empty<SelectListItem>())
                     {
                         <option value="@cat.Value" selected="@cat.Selected">@cat.Text</option>
                     }

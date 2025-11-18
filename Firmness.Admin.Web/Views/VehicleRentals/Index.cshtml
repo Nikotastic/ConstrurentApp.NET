@@ -34,7 +34,7 @@
                 <option value="">All Statuses</option>
                 @if (ViewBag.Statuses != null)
                 {
-                    @foreach (var st in ViewBag.Statuses as IEnumerable<SelectListItem>)
+                    @foreach (var st in (ViewBag.Statuses as IEnumerable<SelectListItem>) ?? Enumerable.Empty<SelectListItem>())
                     {
                         <option value="@st.Value" selected="@(st.Value == Model.Status)">@st.Text</option>
                     }

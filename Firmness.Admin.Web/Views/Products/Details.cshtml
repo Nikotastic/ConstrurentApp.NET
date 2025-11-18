@@ -191,7 +191,7 @@
                         {
                             <div class="progress" style="height: 25px;">
                                 @{
-                                    var stockPercentage = Model.MinStock.Value > 0 
+                                    var stockPercentage = Model.MinStock.HasValue && Model.MinStock.Value > 0 
                                         ? Math.Min((double)(Model.Stock / Model.MinStock.Value) * 100, 100) 
                                         : 100;
                                     var progressClass = stockPercentage > 50 ? "bg-success" : (stockPercentage > 25 ? "bg-warning" : "bg-danger");
