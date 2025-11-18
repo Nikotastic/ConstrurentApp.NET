@@ -44,15 +44,16 @@
                     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Instructions</h5>
                 </div>
                 <div class="card-body">
-                    <h6 class="fw-bold">What can you import?</h6>
-                    <p>This system allows you to import data from:</p>
+                    <h6 class="fw-bold">What can you import? / ¿Qué puedes importar?</h6>
+                    <p>This system allows you to import data from: / Este sistema permite importar datos de:</p>
                     <ul>
-                        <li><strong>Products:</strong> SKU, name, description, price, cost, stock, category</li>
-                        <li><strong>Customers:</strong> name, lastname, email, phone, address, document</li>
-                        <li><strong>Sales:</strong> product, customer, quantity, unit price</li>
+                        <li><strong>📦 Construction Materials / Insumos de Construcción:</strong> SKU, name, description, price, cost, stock, category (Cemento, Varilla, Azulejos, etc.)</li>
+                        <li><strong>👥 Customers / Clientes:</strong> name, lastname, email, phone, address, document (Contractors, construction companies / Contratistas, constructoras)</li>
+                        <li><strong>🛒 Sales / Ventas:</strong> product, customer, quantity, unit price (Material sales / Ventas de materiales)</li>
+                        <li><strong>🚚 Industrial Vehicles / Vehículos Industriales:</strong> brand, model, year, license plate, vehicle type, rates (Excavators, forklifts, dump trucks, cranes / Excavadoras, montacargas, volteos, grúas)</li>
                     </ul>
 
-                    <h6 class="fw-bold mt-3">System features:</h6>
+                    <h6 class="fw-bold mt-3">System features / Características del sistema:</h6>
                     <ul class="mb-0">
                         <li>✅ Automatically normalizes data</li>
                         <li>✅ Identifies and links products, customers, and sales</li>
@@ -74,19 +75,20 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseProducts">
-                                    <i class="bi bi-box me-2"></i> Products
+                                    <i class="bi bi-box me-2"></i> Construction Materials / Insumos de Construcción
                                 </button>
                             </h2>
                             <div id="collapseProducts" class="accordion-collapse collapse show" data-bs-parent="#accordionColumns">
                                 <div class="accordion-body">
                                     <small>
-                                        • <strong>SKU:</strong> SKU / Code<br>
-                                        •<strong>Name:</strong> Product / Product Name / Product Name<br>
-                                        •<strong>Description:</strong> Description / Description / Description<br>
-                                        •<strong>Price:</strong> Price / Unit Price / Unit Price<br>
-                                        •<strong>Cost:</strong> Cost / Cost<br>
-                                        •<strong>Stock:</strong> Stock / Inventory / Quantity<br>
-                                        •<strong>Category:</strong> Category / Category Name
+                                        • <strong>SKU/Código:</strong> SKU / Code / Codigo<br>
+                                        • <strong>Name/Nombre:</strong> Product / Producto / Product Name / Nombre Producto<br>
+                                        • <strong>Description/Descripción:</strong> Description / Descripcion / Desc<br>
+                                        • <strong>Price/Precio:</strong> Price / Precio / Unit Price / Precio Unitario<br>
+                                        • <strong>Cost/Costo:</strong> Cost / Costo<br>
+                                        • <strong>Stock/Inventario:</strong> Stock / Existencia / Inventory / Cantidad<br>
+                                        • <strong>Category/Categoría:</strong> Category / Categoria / Category Name<br>
+                                        <span class="badge bg-info mt-2">Examples: Cement, Rebar, Tiles / Cemento, Varilla, Azulejos</span>
                                     </small>
                                 </div>
                             </div>
@@ -94,19 +96,19 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomers">
-                                    <i class="bi bi-person me-2"></i> Customers
+                                    <i class="bi bi-person me-2"></i> Customers / Clientes
                                 </button>
                             </h2>
                             <div id="collapseCustomers" class="accordion-collapse collapse" data-bs-parent="#accordionColumns">
                                 <div class="accordion-body">
                                     <small>
-                                        • <strong>First Name:</strong>
-                                        • <strong>Lastname:</strong>
-                                        • <strong>Email:</strong>
-                                        • <strong>Phone:</strong>
-                                        • <strong>Address:</strong>
-                                        • <strong>Document:</strong>
-                                        • <strong>ID:</strong>
+                                        • <strong>First Name/Nombre:</strong> FirstName / Nombre / Name<br>
+                                        • <strong>Last Name/Apellido:</strong> LastName / Apellido / Surname<br>
+                                        • <strong>Email/Correo:</strong> Email / Correo / Mail<br>
+                                        • <strong>Phone/Teléfono:</strong> Phone / Telefono / Tel / Celular<br>
+                                        • <strong>Address/Dirección:</strong> Address / Direccion / Dir<br>
+                                        • <strong>Document/Documento:</strong> Document / Documento / DNI / ID<br>
+                                        <span class="badge bg-success mt-2">For contractors, companies / Para contratistas, empresas</span>
                                     </small>
                                 </div>
                             </div>
@@ -114,15 +116,48 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSales">
-                                    <i class="bi bi-cart me-2"></i> Sales
+                                    <i class="bi bi-cart me-2"></i> Sales / Ventas
                                 </button>
                             </h2>
                             <div id="collapseSales" class="accordion-collapse collapse" data-bs-parent="#accordionColumns">
                                 <div class="accordion-body">
                                     <small>
-                                        • <strong>Quantity:</strong> Quantity / Quantity / Qty<br>
-                                        • <strong>Customer:</strong> Customer / Client / CustomerName<br>
-                                        • <strong>Product:</strong> Product / Producto / ProductName
+                                        • <strong>Quantity/Cantidad:</strong> Quantity / Cantidad / Qty<br>
+                                        • <strong>Customer/Cliente:</strong> Customer / Cliente / Client / CustomerName<br>
+                                        • <strong>Product/Producto:</strong> Product / Producto / ProductName
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vehicles / Vehículos Industriales -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVehicles">
+                                    <i class="bi bi-truck me-2"></i> Vehicles / Vehículos Industriales
+                                </button>
+                            </h2>
+                            <div id="collapseVehicles" class="accordion-collapse collapse" data-bs-parent="#accordionColumns">
+                                <div class="accordion-body bg-warning bg-opacity-10">
+                                    <small>
+                                        • <strong>Brand/Marca:</strong> Brand / Marca<br>
+                                        • <strong>Model/Modelo:</strong> Model / Modelo<br>
+                                        • <strong>Year/Año:</strong> Year / Año / Anno<br>
+                                        • <strong>License Plate/Placa:</strong> License Plate / Placa / LicensePlate<br>
+                                        • <strong>Vehicle Type/Tipo:</strong> Vehicle Type / VehicleType / Tipo / Type<br>
+                                        • <strong>Serial Number/Serie:</strong> Serial Number / SerialNumber / NumeroSerie<br>
+                                        • <strong>Hourly Rate/Tarifa Hora:</strong> Hourly Rate / HourlyRate / TarifaPorHora<br>
+                                        • <strong>Daily Rate/Tarifa Día:</strong> Daily Rate / DailyRate / TarifaDiaria<br>
+                                        • <strong>Weekly Rate/Tarifa Semana:</strong> Weekly Rate / WeeklyRate / TarifaSemanal<br>
+                                        • <strong>Monthly Rate/Tarifa Mes:</strong> Monthly Rate / MonthlyRate / TarifaMensual<br>
+                                        • <strong>Current Hours/Horas:</strong> Current Hours / CurrentHours / HorasActuales<br>
+                                        • <strong>Current Mileage/Kilometraje:</strong> Current Mileage / CurrentMileage / KilometrajeActual<br>
+                                        • <strong>Specifications/Especificaciones:</strong> Specifications / Especificaciones<br>
+                                        • <strong>Notes/Notas:</strong> Notes / Notas<br>
+                                        • <strong>Is Active/Activo:</strong> Is Active / IsActive / Activo<br>
+                                        <span class="badge bg-warning text-dark mt-2">
+                                            Vehicle Types: Excavator, Forklift, DumpTruck, Crane, Backhoe, FrontLoader, Compactor, ConcreteMixer, Generator, AirCompressor
+                                        </span>
                                     </small>
                                 </div>
                             </div>
@@ -175,7 +210,9 @@
                 </div>
                 <div class="card-body">
                     <p class="mb-3">Download a template to make importing easier:</p>
-                    <div class="d-grid gap-2">
+                    
+                    <h6 class="text-muted mb-2">Products, Customers & Sales</h6>
+                    <div class="d-grid gap-2 mb-3">
                         <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
                             <i class="bi bi-file-earmark-spreadsheet me-2"></i>Download Empty Template
                         </a>
@@ -183,18 +220,49 @@
                             <i class="bi bi-file-earmark-excel me-2"></i>Download Sample with Data
                         </a>
                     </div>
+
+                    <hr />
+
+                    <h6 class="text-warning mb-2">🚚 Vehicles - Massive Data (NEW)</h6>
+                    <div class="alert alert-warning py-2 mb-2">
+                        <small><i class="bi bi-info-circle me-1"></i> Contains 100 sample vehicle records ready to import!</small>
+                    </div>
+                    <div class="d-grid">
+                        <a asp-action="DownloadVehiclesSample" class="btn btn-warning">
+                            <i class="bi bi-truck me-2"></i>Download Vehicles Bulk Sample (100 records)
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="alert alert-info">
-                <h6 class="alert-heading"><i class="bi bi-lightbulb me-2"></i>Tips</h6>
-                <ul class="mb-0 small">
-                    <li>The first row must contain the column headers</li>
-                    <li>Column names are flexible (English/Spanish)</li>
-                    <li>The SKU must be unique for each product</li>
-                    <li>The document must be unique for each customer</li>
-                    <li>Empty fields are filled with default values</li>
-                </ul>
+            <div class="alert alert-info border-info">
+                <h6 class="alert-heading">
+                    <i class="bi bi-lightbulb-fill me-2"></i>
+                    Important Tips / Consejos Importantes
+                </h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="mb-0 small">
+                            <li>✓ First row = Column headers</li>
+                            <li>✓ Bilingual column names (EN/ES)</li>
+                            <li>✓ SKU must be unique per product</li>
+                            <li>✓ License Plate unique per vehicle</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="mb-0 small">
+                            <li>✓ Document ID unique per customer</li>
+                            <li>✓ Empty fields use defaults</li>
+                            <li>✓ Max file size: 10 MB</li>
+                            <li>✓ Formats: .xlsx, .xls</li>
+                        </ul>
+                    </div>
+                </div>
+                <hr class="my-2">
+                <small class="text-muted">
+                    <i class="bi bi-gear-fill"></i> 
+                    <strong>Auto-detection:</strong> The system automatically identifies if you're importing construction materials, vehicles, customers, or sales.
+                </small>
             </div>
         </div>
     </div>

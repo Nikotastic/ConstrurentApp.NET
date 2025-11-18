@@ -29,9 +29,12 @@
         <div class="col-md-4">
             <select name="categoryId" class="form-select" onchange="this.form.submit()">
                 <option value="">All categories</option>
-                @foreach (var cat in ViewBag.Categories as IEnumerable<SelectListItem>)
+                @if (ViewBag.Categories != null)
                 {
-                    <option value="@cat.Value" selected="@cat.Selected">@cat.Text</option>
+                    @foreach (var cat in ViewBag.Categories as IEnumerable<SelectListItem>)
+                    {
+                        <option value="@cat.Value" selected="@cat.Selected">@cat.Text</option>
+                    }
                 }
             </select>
         </div>
@@ -154,8 +157,9 @@
                 
                 for (int i = startPage; i <= endPage; i++)
                 {
-                    <li class="page-item @(i == Model.Page ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-q="@q" asp-route-categoryId="@categoryId">@i</a>
+                    var pageNumber = i;
+                    <li class="page-item @(pageNumber == Model.Page ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@pageNumber" asp-route-q="@q" asp-route-categoryId="@categoryId">@pageNumber</a>
                     </li>
                 }
                 
