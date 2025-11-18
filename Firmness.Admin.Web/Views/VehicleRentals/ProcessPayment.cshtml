@@ -1,0 +1,186 @@
+﻿@model Firmness.Web.ViewModels.VehicleRental.ProcessPaymentViewModel
+@{
+    ViewData["Title"] = "Process Payment";
+}
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-cash"></i> Process Payment
+            </h1>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.RentalId">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Payment Summary Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Payment Summary</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Customer:</strong> @Model.CustomerName</p>
+                <p><strong>Vehicle:</strong> @Model.VehicleDisplayName</p>
+                <hr />
+                <table class="table table-sm mb-0">
+                    <tr>
+                        <td><strong>Total Amount:</strong></td>
+                        <td class="text-end"><h5 class="mb-0">$@Model.TotalAmount.ToString("N2")</h5></td>
+                    </tr>
+                    <tr class="table-success">
+                        <td>Already Paid:</td>
+                        <td class="text-end">$@Model.PaidAmount.ToString("N2")</td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td><strong>Pending Payment:</strong></td>
+                        <td class="text-end"><h4 class="mb-0 text-danger">$@Model.PendingAmount.ToString("N2")</h4></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment Form Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Payment Details</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ProcessPayment" asp-route-id="@Model.RentalId" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Amount" class="form-label"></label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" max="@Model.PendingAmount" id="paymentAmount" />
+                        </div>
+                        <span asp-validation-for="Amount" class="text-danger"></span>
+                        <small class="form-text text-muted">Maximum: $@Model.PendingAmount.ToString("N2")</small>
+                    </div>
+
+                    <!-- Quick Amount Buttons -->
+                    <div class="mb-3">
+                        <label class="form-label">Quick Select:</label>
+                        <div class="btn-group w-100" role="group">
+                            @if (Model.PendingAmount >= 100)
+                            {
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(100)">$100</button>
+                            }
+                            @if (Model.PendingAmount >= 500)
+                            {
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(500)">$500</button>
+                            }
+                            @if (Model.PendingAmount >= 1000)
+                            {
+                                <button type="button" class="btn btn-outline-primary" onclick="setAmount(1000)">$1,000</button>
+                            }
+                            <button type="button" class="btn btn-outline-success" onclick="setAmount(@Model.PendingAmount)">
+                                Full Amount ($@Model.PendingAmount.ToString("N2"))
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Payment reference, transaction ID, etc..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Payment Preview -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">After this payment:</h6>
+                            <div class="d-flex justify-content-between">
+                                <span>Paid Amount:</span>
+                                <strong id="newPaidAmount">$@Model.PaidAmount.ToString("N2")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Remaining Pending:</span>
+                                <strong id="newPendingAmount" class="text-danger">$@Model.PendingAmount.ToString("N2")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert for full payment -->
+                    <div id="fullPaymentAlert" class="alert alert-success d-none">
+                        <i class="bi bi-check-circle"></i> <strong>Full Payment!</strong> This payment will complete the total amount due.
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary" asp-action="Details" asp-route-id="@Model.RentalId">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cash"></i> Process Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Instructions Card -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Payment Instructions</h6>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 small">
+                    <li>Enter the payment amount received from the customer</li>
+                    <li>The payment will be added to the total paid amount</li>
+                    <li>Remaining balance will be updated automatically</li>
+                    <li>You can process multiple partial payments</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const totalAmount = @Model.TotalAmount;
+        const currentPaid = @Model.PaidAmount;
+        const pendingAmount = @Model.PendingAmount;
+
+        function setAmount(amount) {
+            document.getElementById('paymentAmount').value = amount.toFixed(2);
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const paymentInput = document.getElementById('paymentAmount');
+            const payment = parseFloat(paymentInput.value) || 0;
+            
+            const newPaid = currentPaid + payment;
+            const newPending = totalAmount - newPaid;
+
+            document.getElementById('newPaidAmount').textContent = '$' + newPaid.toFixed(2);
+            document.getElementById('newPendingAmount').textContent = '$' + newPending.toFixed(2);
+
+            const fullPaymentAlert = document.getElementById('fullPaymentAlert');
+            if (newPending <= 0.01) {
+                fullPaymentAlert.classList.remove('d-none');
+            } else {
+                fullPaymentAlert.classList.add('d-none');
+            }
+
+            // Validation
+            if (payment > pendingAmount) {
+                paymentInput.setCustomValidity('Payment cannot exceed pending amount');
+            } else if (payment <= 0) {
+                paymentInput.setCustomValidity('Payment must be greater than zero');
+            } else {
+                paymentInput.setCustomValidity('');
+            }
+        }
+
+        document.getElementById('paymentAmount').addEventListener('input', updatePreview);
+        
+        // Initialize
+        updatePreview();
+    </script>
+}
+

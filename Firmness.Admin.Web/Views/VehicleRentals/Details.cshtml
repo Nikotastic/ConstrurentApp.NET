@@ -1,0 +1,377 @@
+﻿@model Firmness.Web.ViewModels.VehicleRental.VehicleRentalDetailsViewModel
+@{
+    ViewData["Title"] = "Rental Details";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-clipboard-check"></i> Rental Details
+            </h1>
+            <div class="btn-group">
+                <a class="btn btn-outline-secondary" asp-action="Index">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <!-- Main Information -->
+            <div class="col-md-8">
+                <!-- Status Card -->
+                <div class="card mb-3">
+                    <div class="card-header 
+                        @(Model.Status == "Active" ? "bg-primary text-white" : 
+                          Model.Status == "Completed" ? "bg-success text-white" : 
+                          Model.Status == "Cancelled" ? "bg-secondary text-white" : "bg-warning")">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle"></i> Rental #@Model.Id.ToString().Substring(0, 8).ToUpper()
+                            </h5>
+                            <span class="badge bg-light text-dark">@Model.Status</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Customer Information</h6>
+                                <p class="mb-1"><strong>Name:</strong> @Model.CustomerName</p>
+                                @if (!string.IsNullOrEmpty(Model.CustomerEmail))
+                                {
+                                    <p class="mb-1"><strong>Email:</strong> @Model.CustomerEmail</p>
+                                }
+                                @if (!string.IsNullOrEmpty(Model.CustomerPhone))
+                                {
+                                    <p class="mb-1"><strong>Phone:</strong> @Model.CustomerPhone</p>
+                                }
+                                <a asp-controller="Customers" asp-action="Details" asp-route-id="@Model.CustomerId" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="bi bi-person"></i> View Customer
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Vehicle Information</h6>
+                                <p class="mb-1"><strong>@Model.VehicleDisplayName</strong></p>
+                                <p class="mb-1">Brand: @Model.VehicleBrand</p>
+                                <p class="mb-1">Model: @Model.VehicleModel</p>
+                                <p class="mb-1">Plate: <code>@Model.VehicleLicensePlate</code></p>
+                                <a asp-controller="Vehicles" asp-action="Details" asp-route-id="@Model.VehicleId" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="bi bi-truck"></i> View Vehicle
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rental Period Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Rental Period</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="text-muted mb-0">Start Date</p>
+                                <h5>@Model.StartDate.ToString("MMM dd, yyyy HH:mm")</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-0">Estimated Return</p>
+                                <h5>@Model.EstimatedReturnDate.ToString("MMM dd, yyyy HH:mm")</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="text-muted mb-0">Actual Return</p>
+                                <h5>@(Model.ActualReturnDate?.ToString("MMM dd, yyyy HH:mm") ?? "Not returned yet")</h5>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Duration:</strong> @Model.DurationInDays days</p>
+                                <p><strong>Period Type:</strong> @Model.RentalPeriodType</p>
+                                <p><strong>Rate:</strong> $@Model.RentalRate.ToString("N2") / @Model.RentalPeriodType</p>
+                            </div>
+                            <div class="col-md-6">
+                                @if (Model.IsOverdue && Model.Status == "Active")
+                                {
+                                    <div class="alert alert-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> <strong>OVERDUE!</strong><br />
+                                        This rental is past the estimated return date.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Information Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-currency-dollar"></i> Financial Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Subtotal:</td>
+                                        <td class="text-end"><strong>$@Model.Subtotal.ToString("N2")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tax:</td>
+                                        <td class="text-end">$@Model.Tax.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Discount:</td>
+                                        <td class="text-end text-success">-$@Model.Discount.ToString("N2")</td>
+                                    </tr>
+                                    <tr class="table-active">
+                                        <td><strong>Total Amount:</strong></td>
+                                        <td class="text-end"><strong>$@Model.TotalAmount.ToString("N2")</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td>Paid Amount:</td>
+                                        <td class="text-end text-success"><strong>$@Model.PaidAmount.ToString("N2")</strong></td>
+                                    </tr>
+                                    <tr class="@(Model.PendingAmount > 0 ? "table-warning" : "")">
+                                        <td><strong>Pending Amount:</strong></td>
+                                        <td class="text-end"><strong>$@Model.PendingAmount.ToString("N2")</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deposit:</td>
+                                        <td class="text-end">$@Model.Deposit.ToString("N2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Deposit Returned:</td>
+                                        <td class="text-end">
+                                            @if (Model.DepositReturned)
+                                            {
+                                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Yes</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> No</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p class="mb-0"><strong>Payment Method:</strong> @Model.PaymentMethod</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locations Card -->
+                @if (!string.IsNullOrEmpty(Model.PickupLocation) || !string.IsNullOrEmpty(Model.ReturnLocation))
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Locations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="text-muted mb-0">Pickup Location</p>
+                                    <p>@(Model.PickupLocation ?? "N/A")</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-muted mb-0">Return Location</p>
+                                    <p>@(Model.ReturnLocation ?? "N/A")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Vehicle Condition Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Vehicle Condition</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Initial Condition</h6>
+                                <p><strong>Hours:</strong> @(Model.InitialHours?.ToString("N1") ?? "N/A")</p>
+                                <p><strong>Mileage:</strong> @(Model.InitialMileage?.ToString("N1") ?? "N/A") km</p>
+                                @if (!string.IsNullOrEmpty(Model.InitialCondition))
+                                {
+                                    <p class="mb-0"><strong>Notes:</strong><br />@Model.InitialCondition</p>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Final Condition</h6>
+                                @if (Model.ActualReturnDate.HasValue)
+                                {
+                                    <p><strong>Hours:</strong> @(Model.FinalHours?.ToString("N1") ?? "N/A")</p>
+                                    <p><strong>Mileage:</strong> @(Model.FinalMileage?.ToString("N1") ?? "N/A") km</p>
+                                    @if (!string.IsNullOrEmpty(Model.FinalCondition))
+                                    {
+                                        <p class="mb-0"><strong>Notes:</strong><br />@Model.FinalCondition</p>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted">Vehicle not returned yet</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes and Cancellation Card -->
+                @if (!string.IsNullOrEmpty(Model.Notes) || !string.IsNullOrEmpty(Model.CancellationReason))
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-sticky"></i> Additional Information</h5>
+                        </div>
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <p><strong>Notes:</strong><br />@Model.Notes</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                            {
+                                <div class="alert alert-warning">
+                                    <strong>Cancellation Reason:</strong><br />@Model.CancellationReason
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Actions Card -->
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.Status == "Active")
+                        {
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee"))
+                            {
+                                <a asp-action="Complete" asp-route-id="@Model.Id" class="btn btn-success w-100 mb-2">
+                                    <i class="bi bi-check-circle"></i> Complete Rental
+                                </a>
+                            }
+                        }
+
+                        @if (Model.PendingAmount > 0 && Model.Status != "Cancelled")
+                        {
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee"))
+                            {
+                                <a asp-action="ProcessPayment" asp-route-id="@Model.Id" class="btn btn-primary w-100 mb-2">
+                                    <i class="bi bi-cash"></i> Process Payment
+                                </a>
+                            }
+                        }
+
+                        @if (Model.Status == "Completed" && !Model.DepositReturned && Model.Deposit > 0)
+                        {
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <form asp-action="ReturnDeposit" asp-route-id="@Model.Id" method="post" class="mb-2">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-warning w-100" onclick="return confirm('Return deposit of $@Model.Deposit.ToString("N2")?')">
+                                        <i class="bi bi-arrow-return-left"></i> Return Deposit
+                                    </button>
+                                </form>
+                            }
+                        }
+
+                        @if (Model.Status == "Active" || Model.Status == "Pending")
+                        {
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                    <i class="bi bi-x-circle"></i> Cancel Rental
+                                </button>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Summary Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Created:</strong><br />@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                        <p><strong>Last Updated:</strong><br />@Model.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</p>
+                        @if (!string.IsNullOrEmpty(Model.InvoiceNumber))
+                        {
+                            <p class="mb-0"><strong>Invoice #:</strong> @Model.InvoiceNumber</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Documents Card -->
+                @if (!string.IsNullOrEmpty(Model.ContractUrl))
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Documents</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="@Model.ContractUrl" target="_blank" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-download"></i> Download Contract
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Cancel Rental</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This action cannot be undone!
+                    </div>
+                    <div class="mb-3">
+                        <label for="cancellationReason" class="form-label">Cancellation Reason *</label>
+                        <textarea class="form-control" id="cancellationReason" name="cancellationReason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Cancel Rental</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

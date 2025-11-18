@@ -1,0 +1,205 @@
+﻿@model Firmness.Web.ViewModels.VehicleRental.CompleteRentalViewModel
+@{
+    ViewData["Title"] = "Complete Rental";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-check-circle"></i> Complete Rental
+            </h1>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.RentalId">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+
+        <!-- Rental Summary Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Rental Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Customer:</strong> @Model.CustomerName</p>
+                        <p><strong>Vehicle:</strong> @Model.VehicleDisplayName</p>
+                        <p><strong>Start Date:</strong> @Model.StartDate.ToString("MMM dd, yyyy")</p>
+                        <p><strong>Estimated Return:</strong> @Model.EstimatedReturnDate.ToString("MMM dd, yyyy")</p>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Total Amount:</td>
+                                <td class="text-end"><strong>$@Model.TotalAmount.ToString("N2")</strong></td>
+                            </tr>
+                            <tr class="table-success">
+                                <td>Paid:</td>
+                                <td class="text-end">$@Model.PaidAmount.ToString("N2")</td>
+                            </tr>
+                            <tr class="@(Model.PendingAmount > 0 ? "table-warning" : "")">
+                                <td><strong>Pending:</strong></td>
+                                <td class="text-end"><strong>$@Model.PendingAmount.ToString("N2")</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Deposit:</td>
+                                <td class="text-end">$@Model.Deposit.ToString("N2")</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                @if (Model.PendingAmount > 0)
+                {
+                    <div class="alert alert-warning mt-2">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Warning:</strong> There is a pending payment of <strong>$@Model.PendingAmount.ToString("N2")</strong>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Complete Form Card -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Return Information</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Complete" asp-route-id="@Model.RentalId" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Return Date -->
+                    <div class="mb-3">
+                        <label asp-for="ReturnDate" class="form-label"></label>
+                        <input asp-for="ReturnDate" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                    </div>
+
+                    <!-- Vehicle Condition -->
+                    <h6 class="border-bottom pb-2 mb-3">Final Vehicle Condition</h6>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FinalHours" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="FinalHours" class="form-control" type="number" step="0.1" />
+                                <span class="input-group-text">hours</span>
+                            </div>
+                            <span asp-validation-for="FinalHours" class="text-danger"></span>
+                            @if (Model.InitialHours.HasValue)
+                            {
+                                <small class="text-muted">Initial: @Model.InitialHours.Value.ToString("N1") hours</small>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="FinalMileage" class="form-label"></label>
+                            <div class="input-group">
+                                <input asp-for="FinalMileage" class="form-control" type="number" step="0.1" />
+                                <span class="input-group-text">km</span>
+                            </div>
+                            <span asp-validation-for="FinalMileage" class="text-danger"></span>
+                            @if (Model.InitialMileage.HasValue)
+                            {
+                                <small class="text-muted">Initial: @Model.InitialMileage.Value.ToString("N1") km</small>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FinalCondition" class="form-label"></label>
+                        <textarea asp-for="FinalCondition" class="form-control" rows="4" placeholder="Describe the condition of the vehicle upon return..."></textarea>
+                        <span asp-validation-for="FinalCondition" class="text-danger"></span>
+                        <small class="form-text text-muted">
+                            Include any damage, issues, or notable changes in the vehicle's condition.
+                        </small>
+                    </div>
+
+                    <!-- Deposit Return -->
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input asp-for="DepositReturned" class="form-check-input" />
+                                <label asp-for="DepositReturned" class="form-check-label">
+                                    Return security deposit of <strong>$@Model.Deposit.ToString("N2")</strong> to customer
+                                </label>
+                            </div>
+                            <small class="text-muted">
+                                Check this box if the vehicle is in acceptable condition and the deposit should be returned.
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Additional Notes -->
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Any additional notes about the return..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Summary Card -->
+                    <div class="card bg-success text-white mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-info-circle"></i> Completion Summary</h5>
+                            <ul class="mb-0">
+                                <li>The rental will be marked as <strong>Completed</strong></li>
+                                <li>The vehicle will be marked as <strong>Available</strong> again</li>
+                                <li>Vehicle hours/mileage will be updated</li>
+                                @if (Model.DepositReturned)
+                                {
+                                    <li>Deposit of <strong>$@Model.Deposit.ToString("N2")</strong> will be marked as returned</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary" asp-action="Details" asp-route-id="@Model.RentalId">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Complete Rental
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Calculate usage difference
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialHours = @(Model.InitialHours?.ToString("N1") ?? "0");
+            const initialMileage = @(Model.InitialMileage?.ToString("N1") ?? "0");
+
+            const finalHoursInput = document.getElementById('FinalHours');
+            const finalMileageInput = document.getElementById('FinalMileage');
+
+            if (finalHoursInput && initialHours > 0) {
+                finalHoursInput.addEventListener('input', function() {
+                    const diff = parseFloat(this.value || 0) - initialHours;
+                    if (diff < 0) {
+                        this.setCustomValidity('Final hours cannot be less than initial hours');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+
+            if (finalMileageInput && initialMileage > 0) {
+                finalMileageInput.addEventListener('input', function() {
+                    const diff = parseFloat(this.value || 0) - initialMileage;
+                    if (diff < 0) {
+                        this.setCustomValidity('Final mileage cannot be less than initial mileage');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
+            }
+        });
+    </script>
+}
+

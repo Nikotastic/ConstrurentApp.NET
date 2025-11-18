@@ -1,0 +1,310 @@
+﻿@model Firmness.Web.ViewModels.VehicleRental.PaginatedVehicleRentalListViewModel
+@{
+    ViewData["Title"] = "Vehicle Rentals";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3">
+        <i class="bi bi-clipboard-check"></i> Vehicle Rentals
+    </h1>
+    <div>
+        <a class="btn btn-success me-2" asp-action="ExportToExcel" title="Export to Excel">
+            <i class="bi bi-file-excel"></i> Excel
+        </a>
+        <a class="btn btn-danger me-2" asp-action="ExportToPdf" title="Export to PDF">
+            <i class="bi bi-file-pdf"></i> PDF
+        </a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee"))
+        {
+            <a class="btn btn-primary" asp-action="Create">
+                <i class="bi bi-plus-circle"></i> New Rental
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <input type="search" name="search" value="@Model.Search" class="form-control" placeholder="Search by customer or vehicle..." />
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                @if (ViewBag.Statuses != null)
+                {
+                    @foreach (var st in ViewBag.Statuses as IEnumerable<SelectListItem>)
+                    {
+                        <option value="@st.Value" selected="@(st.Value == Model.Status)">@st.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" type="submit">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.Status))
+    {
+        <div class="mt-2">
+            <a class="btn btn-sm btn-outline-secondary" asp-action="Index">
+                <i class="bi bi-x-circle"></i> Clear Filters
+            </a>
+        </div>
+    }
+</form>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Statistics Cards -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Active Rentals</h5>
+                <h2>@Model.Rentals.Count(r => r.Status == "Active")</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h5 class="card-title">Pending</h5>
+                <h2>@Model.Rentals.Count(r => r.Status == "Pending")</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h5 class="card-title">Overdue</h5>
+                <h2>@Model.Rentals.Count(r => r.IsOverdue)</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Completed</h5>
+                <h2>@Model.Rentals.Count(r => r.Status == "Completed")</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rentals Table -->
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Vehicle</th>
+                <th>Start Date</th>
+                <th>Return Date</th>
+                <th>Duration</th>
+                <th>Amount</th>
+                <th>Pending</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Rentals.Any())
+            {
+                @foreach (var rental in Model.Rentals)
+                {
+                    <tr class="@(rental.IsOverdue ? "table-danger" : "")">
+                        <td>
+                            <strong>@rental.CustomerName</strong>
+                        </td>
+                        <td>
+                            <small>@rental.VehicleDisplayName</small><br />
+                            @if (!string.IsNullOrEmpty(rental.PickupLocation))
+                            {
+                                <small class="text-muted"><i class="bi bi-geo-alt"></i> @rental.PickupLocation</small>
+                            }
+                        </td>
+                        <td>
+                            @rental.StartDate.ToString("MMM dd, yyyy")
+                        </td>
+                        <td>
+                            @if (rental.ActualReturnDate.HasValue)
+                            {
+                                <span class="badge bg-success">@rental.ActualReturnDate.Value.ToString("MMM dd, yyyy")</span>
+                            }
+                            else
+                            {
+                                @rental.EstimatedReturnDate.ToString("MMM dd, yyyy")
+                                @if (rental.IsOverdue)
+                                {
+                                    <br /><span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> OVERDUE</span>
+                                }
+                            }
+                        </td>
+                        <td>
+                            @rental.DurationInDays days
+                        </td>
+                        <td>
+                            <strong>$@rental.TotalAmount.ToString("N2")</strong>
+                        </td>
+                        <td>
+                            @if (rental.PendingAmount > 0)
+                            {
+                                <span class="text-danger">$@rental.PendingAmount.ToString("N2")</span>
+                            }
+                            else
+                            {
+                                <span class="text-success"><i class="bi bi-check-circle"></i> Paid</span>
+                            }
+                        </td>
+                        <td>
+                            @if (rental.Status == "Active")
+                            {
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-play-circle"></i> Active
+                                </span>
+                            }
+                            else if (rental.Status == "Pending")
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-clock"></i> Pending
+                                </span>
+                            }
+                            else if (rental.Status == "Completed")
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Completed
+                                </span>
+                            }
+                            else if (rental.Status == "Cancelled")
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-x-circle"></i> Cancelled
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info">@rental.Status</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@rental.Id" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                @if (rental.Status == "Active" && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee")))
+                                {
+                                    <a class="btn btn-outline-success" asp-action="Complete" asp-route-id="@rental.Id" title="Complete">
+                                        <i class="bi bi-check-circle"></i>
+                                    </a>
+                                }
+                                @if (rental.PendingAmount > 0 && (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee")))
+                                {
+                                    <a class="btn btn-outline-info" asp-action="ProcessPayment" asp-route-id="@rental.Id" title="Process Payment">
+                                        <i class="bi bi-cash"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center py-4">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <p class="text-muted mt-2">No rentals found.</p>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Employee"))
+                        {
+                            <a class="btn btn-primary" asp-action="Create">
+                                <i class="bi bi-plus-circle"></i> Create First Rental
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Rentals pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" 
+                   asp-route-page="@(Model.CurrentPage - 1)" 
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-search="@Model.Search"
+                   asp-route-status="@Model.Status">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+            
+            @for (var i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+            {
+                var pageNumber = i;
+                <li class="page-item @(pageNumber == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" 
+                       asp-route-page="@pageNumber" 
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-search="@Model.Search"
+                       asp-route-status="@Model.Status">
+                        @pageNumber
+                    </a>
+                </li>
+            }
+            
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" 
+                   asp-route-page="@(Model.CurrentPage + 1)" 
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-search="@Model.Search"
+                   asp-route-status="@Model.Status">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="text-center text-muted mb-3">
+        <small>Page @Model.CurrentPage of @Model.TotalPages (@Model.TotalItems total rentals)</small>
+    </div>
+}
+
+@if (Model.Rentals.Any())
+{
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            @if (Model.TotalPages <= 1)
+            {
+                <small class="text-muted">Showing @Model.Rentals.Count rentals of @Model.TotalItems total</small>
+            }
+        </div>
+        <div>
+            <small class="text-muted">
+                Total Revenue: <strong>$@Model.Rentals.Sum(r => r.TotalAmount).ToString("N2")</strong> |
+                Pending Payments: <strong class="text-danger">$@Model.Rentals.Sum(r => r.PendingAmount).ToString("N2")</strong>
+            </small>
+        </div>
+    </div>
+}
+

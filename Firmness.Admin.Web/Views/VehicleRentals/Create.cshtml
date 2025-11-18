@@ -1,0 +1,358 @@
+﻿@model Firmness.Web.ViewModels.VehicleRental.VehicleRentalFormViewModel
+@{
+    ViewData["Title"] = "Create Vehicle Rental";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">
+            <i class="bi bi-plus-circle text-primary"></i> Create New Vehicle Rental
+        </h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" id="rentalForm">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        
+        <div class="row">
+            <!-- Customer & Vehicle Selection -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-check"></i> Customer & Vehicle</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Customer -->
+                        <div class="mb-3">
+                            <label asp-for="CustomerId" class="form-label fw-bold"></label>
+                            <select asp-for="CustomerId" asp-items="Model.Customers" class="form-select" required>
+                                <option value="">-- Select Customer --</option>
+                            </select>
+                            <span asp-validation-for="CustomerId" class="text-danger small"></span>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> Select the customer renting the vehicle
+                            </div>
+                        </div>
+
+                        <!-- Vehicle -->
+                        <div class="mb-3">
+                            <label asp-for="VehicleId" class="form-label fw-bold"></label>
+                            <select asp-for="VehicleId" asp-items="Model.Vehicles" class="form-select" required>
+                                <option value="">-- Select Available Vehicle --</option>
+                            </select>
+                            <span asp-validation-for="VehicleId" class="text-danger small"></span>
+                            <div class="form-text">
+                                <i class="bi bi-truck"></i> Only available vehicles are shown
+                            </div>
+                        </div>
+
+                        <!-- Vehicle Info Display -->
+                        <div id="vehicleInfo" class="alert alert-info d-none">
+                            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Vehicle Information</h6>
+                            <div id="vehicleDetails"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rental Conditions -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-check2-circle"></i> Initial Condition</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="InitialHours" class="form-label"></label>
+                                <input asp-for="InitialHours" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                <span asp-validation-for="InitialHours" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="InitialMileage" class="form-label"></label>
+                                <input asp-for="InitialMileage" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                <span asp-validation-for="InitialMileage" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="InitialCondition" class="form-label"></label>
+                            <textarea asp-for="InitialCondition" class="form-control" rows="3" placeholder="Describe the initial condition of the vehicle..."></textarea>
+                            <span asp-validation-for="InitialCondition" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rental Details -->
+            <div class="col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Rental Period & Rate</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="StartDate" class="form-label fw-bold"></label>
+                                <input asp-for="StartDate" class="form-control" type="date" required />
+                                <span asp-validation-for="StartDate" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EstimatedReturnDate" class="form-label fw-bold"></label>
+                                <input asp-for="EstimatedReturnDate" class="form-control" type="date" required />
+                                <span asp-validation-for="EstimatedReturnDate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border" id="durationDisplay">
+                            <strong>Duration:</strong> <span id="calculatedDuration">Calculate...</span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RentalPeriodType" class="form-label fw-bold"></label>
+                                <select asp-for="RentalPeriodType" asp-items="Model.RentalPeriodTypes" class="form-select" required>
+                                    <option value="">-- Select Period --</option>
+                                </select>
+                                <span asp-validation-for="RentalPeriodType" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="RentalRate" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="RentalRate" class="form-control" type="number" step="0.01" placeholder="0.00" required />
+                                </div>
+                                <span asp-validation-for="RentalRate" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Deposit" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Deposit" class="form-control" type="number" step="0.01" placeholder="0.00" required />
+                            </div>
+                            <span asp-validation-for="Deposit" class="text-danger small"></span>
+                            <div class="form-text">
+                                <i class="bi bi-shield-check"></i> Security deposit (refundable)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Locations & Notes -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Locations & Notes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="PickupLocation" class="form-label"></label>
+                            <input asp-for="PickupLocation" class="form-control" placeholder="e.g., Main Warehouse, Construction Site A..." />
+                            <span asp-validation-for="PickupLocation" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="ReturnLocation" class="form-label"></label>
+                            <input asp-for="ReturnLocation" class="form-control" placeholder="e.g., Same as pickup..." />
+                            <span asp-validation-for="ReturnLocation" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Additional notes or special conditions..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary & Actions -->
+        <div class="card shadow-sm mb-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-calculator"></i> Rental Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Customer:</strong></td>
+                                <td id="summaryCustomer">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vehicle:</strong></td>
+                                <td id="summaryVehicle">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Period:</strong></td>
+                                <td id="summaryPeriod">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rate:</strong></td>
+                                <td id="summaryRate">-</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">Estimated Total</h6>
+                                <h3 class="text-primary mb-0" id="estimatedTotal">$0.00</h3>
+                                <small class="text-muted">+ Deposit: $<span id="depositAmount">0.00</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between mb-4">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle"></i> Create Rental
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Calculate duration
+            function calculateDuration() {
+                const startVal = $('#StartDate').val();
+                const endVal = $('#EstimatedReturnDate').val();
+                
+                if (!startVal || !endVal) {
+                    $('#calculatedDuration').text('Select dates');
+                    return 0;
+                }
+                
+                const start = new Date(startVal);
+                const end = new Date(endVal);
+                
+                if (end > start) {
+                    const diffTime = Math.abs(end - start);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    $('#calculatedDuration').text(diffDays + ' day' + (diffDays !== 1 ? 's' : ''));
+                    return diffDays;
+                } else {
+                    $('#calculatedDuration').text('Invalid dates');
+                    return 0;
+                }
+            }
+
+            // Update summary
+            function updateSummary() {
+                const customerText = $('#CustomerId option:selected').text();
+                const vehicleText = $('#VehicleId option:selected').text();
+                const periodType = $('#RentalPeriodType option:selected').text();
+                const rate = parseFloat($('#RentalRate').val()) || 0;
+                const deposit = parseFloat($('#Deposit').val()) || 0;
+                const days = calculateDuration();
+
+                console.log('Update Summary:', {
+                    customer: customerText,
+                    vehicle: vehicleText,
+                    period: periodType,
+                    rate: rate,
+                    deposit: deposit,
+                    days: days
+                });
+
+                // Update summary fields
+                $('#summaryCustomer').text(
+                    customerText !== '' && customerText !== '-- Select Customer --' 
+                        ? customerText 
+                        : '-'
+                );
+                
+                $('#summaryVehicle').text(
+                    vehicleText !== '' && vehicleText !== '-- Select Available Vehicle --' 
+                        ? vehicleText 
+                        : '-'
+                );
+                
+                $('#summaryPeriod').text(
+                    periodType !== '' && periodType !== '-- Select Period --' 
+                        ? periodType 
+                        : '-'
+                );
+                
+                if (rate > 0 && periodType !== '' && periodType !== '-- Select Period --') {
+                    $('#summaryRate').text('$' + rate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' per ' + periodType);
+                } else {
+                    $('#summaryRate').text('-');
+                }
+                
+                $('#depositAmount').text(deposit.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+                // Calculate estimated total based on period type
+                let estimatedTotal = 0;
+                let calculationDetails = '';
+                
+                if (days > 0 && rate > 0 && periodType !== '' && periodType !== '-- Select Period --') {
+                    switch(periodType) {
+                        case 'Hourly':
+                            estimatedTotal = rate * days * 8; // Assuming 8 hours per day
+                            calculationDetails = `${rate} × ${days} days × 8 hours = ${estimatedTotal}`;
+                            break;
+                        case 'Daily':
+                            estimatedTotal = rate * days;
+                            calculationDetails = `${rate} × ${days} days = ${estimatedTotal}`;
+                            break;
+                        case 'Weekly':
+                            const weeks = Math.ceil(days / 7);
+                            estimatedTotal = rate * weeks;
+                            calculationDetails = `${rate} × ${weeks} week(s) = ${estimatedTotal}`;
+                            break;
+                        case 'Monthly':
+                            const months = Math.ceil(days / 30);
+                            estimatedTotal = rate * months;
+                            calculationDetails = `${rate} × ${months} month(s) = ${estimatedTotal}`;
+                            break;
+                        default:
+                            estimatedTotal = 0;
+                    }
+                }
+
+                console.log('Calculation:', calculationDetails);
+                $('#estimatedTotal').text('$' + estimatedTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+            }
+
+            // Event listeners
+            $('#StartDate, #EstimatedReturnDate').on('change', function() {
+                calculateDuration();
+                updateSummary();
+            });
+
+            $('#CustomerId, #VehicleId, #RentalPeriodType, #RentalRate, #Deposit').on('change keyup', function() {
+                updateSummary();
+            });
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            $('#StartDate').attr('min', today);
+            
+            // Set default dates if empty
+            if (!$('#StartDate').val()) {
+                $('#StartDate').val(today);
+            }
+            
+            if (!$('#EstimatedReturnDate').val()) {
+                const nextWeek = new Date();
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                $('#EstimatedReturnDate').val(nextWeek.toISOString().split('T')[0]);
+            }
+
+            // Initial calculation
+            calculateDuration();
+            updateSummary();
+        });
+    </script>
+}
+

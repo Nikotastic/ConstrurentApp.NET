@@ -1,0 +1,293 @@
+﻿@model Firmness.Web.ViewModels.Vehicle.PaginatedVehicleListViewModel
+@{
+    ViewData["Title"] = "Vehicles";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3">
+        <i class="bi bi-truck"></i> Vehicles
+    </h1>
+    <div>
+        <a class="btn btn-success me-2" asp-action="ExportToExcel" title="Export to Excel">
+            <i class="bi bi-file-excel"></i> Excel
+        </a>
+        <a class="btn btn-danger me-2" asp-action="ExportToPdf" title="Export to PDF">
+            <i class="bi bi-file-pdf"></i> PDF
+        </a>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <a class="btn btn-primary" asp-action="Create">
+                <i class="bi bi-plus-circle"></i> New Vehicle
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <input type="search" name="search" value="@Model.Search" class="form-control" placeholder="Search by brand, model, or plate..." />
+        </div>
+        <div class="col-md-3">
+            <select name="vehicleType" class="form-select">
+                <option value="">All Types</option>
+                @if (ViewBag.VehicleTypes != null)
+                {
+                    @foreach (var type in ViewBag.VehicleTypes as IEnumerable<SelectListItem>)
+                    {
+                        <option value="@type.Value" selected="@(type.Value == Model.VehicleType)">@type.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All Statuses</option>
+                @if (ViewBag.Statuses != null)
+                {
+                    @foreach (var st in ViewBag.Statuses as IEnumerable<SelectListItem>)
+                    {
+                        <option value="@st.Value" selected="@(st.Value == Model.Status)">@st.Text</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-outline-secondary w-100" type="submit">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.Search) || !string.IsNullOrEmpty(Model.VehicleType) || !string.IsNullOrEmpty(Model.Status))
+    {
+        <div class="mt-2">
+            <a class="btn btn-sm btn-outline-secondary" asp-action="Index">
+                <i class="bi bi-x-circle"></i> Clear Filters
+            </a>
+        </div>
+    }
+</form>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Statistics Cards -->
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Available</h5>
+                <h2>@Model.Vehicles.Count(v => v.IsAvailableForRent)</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Vehicles</h5>
+                <h2>@Model.TotalItems</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h5 class="card-title">In Maintenance</h5>
+                <h2>@Model.Vehicles.Count(v => v.NeedsMaintenance)</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Rented</h5>
+                <h2>@Model.Vehicles.Count(v => v.Status == "Rented")</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vehicles Table -->
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Type</th>
+                <th>License Plate</th>
+                <th>Daily Rate</th>
+                <th>Status</th>
+                <th>Condition</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Vehicles.Any())
+            {
+                @foreach (var vehicle in Model.Vehicles)
+                {
+                    <tr>
+                        <td>
+                            <strong>@vehicle.Brand @vehicle.Model</strong><br />
+                            <small class="text-muted">@vehicle.Year</small><br />
+                            <small class="text-muted">ID: @vehicle.PublicId.ToString().Substring(0, 8)</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">@vehicle.VehicleType</span>
+                        </td>
+                        <td>
+                            <code>@vehicle.LicensePlate</code>
+                        </td>
+                        <td>
+                            <strong>$@vehicle.DailyRate.ToString("N2")</strong>
+                        </td>
+                        <td>
+                            @if (vehicle.IsAvailableForRent)
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Available
+                                </span>
+                            }
+                            else if (vehicle.Status == "Rented")
+                            {
+                                <span class="badge bg-info">
+                                    <i class="bi bi-truck"></i> Rented
+                                </span>
+                            }
+                            else if (vehicle.Status == "Maintenance")
+                            {
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-wrench"></i> Maintenance
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@vehicle.Status</span>
+                            }
+                        </td>
+                        <td>
+                            @if (vehicle.NeedsMaintenance)
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-exclamation-triangle"></i> Needs Maintenance
+                                </span>
+                            }
+                            else if (vehicle.CurrentHours.HasValue)
+                            {
+                                <small class="text-muted">@vehicle.CurrentHours.Value.ToString("N1")h</small>
+                            }
+                            else
+                            {
+                                <small class="text-muted">-</small>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@vehicle.Id" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                {
+                                    <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@vehicle.Id" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                }
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@vehicle.Id" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <i class="bi bi-inbox display-1 text-muted"></i>
+                        <p class="text-muted mt-2">No vehicles found.</p>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <a class="btn btn-primary" asp-action="Create">
+                                <i class="bi bi-plus-circle"></i> Create First Vehicle
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Vehicles pagination">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" 
+                   asp-route-page="@(Model.CurrentPage - 1)" 
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-search="@Model.Search"
+                   asp-route-vehicleType="@Model.VehicleType"
+                   asp-route-status="@Model.Status">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+            
+            @for (var i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+            {
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" 
+                       asp-route-page="@i" 
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-search="@Model.Search"
+                       asp-route-vehicleType="@Model.VehicleType"
+                       asp-route-status="@Model.Status">
+                        @i
+                    </a>
+                </li>
+            }
+            
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" 
+                   asp-route-page="@(Model.CurrentPage + 1)" 
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-search="@Model.Search"
+                   asp-route-vehicleType="@Model.VehicleType"
+                   asp-route-status="@Model.Status">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <div class="text-center text-muted mb-3">
+        <small>Page @Model.CurrentPage of @Model.TotalPages (@Model.TotalItems total vehicles)</small>
+    </div>
+}
+else if (Model.Vehicles.Any())
+{
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <small class="text-muted">Showing @Model.Vehicles.Count vehicles of @Model.TotalItems total</small>
+        </div>
+    </div>
+}
+

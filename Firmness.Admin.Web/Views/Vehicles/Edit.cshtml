@@ -1,0 +1,192 @@
+﻿@model Firmness.Web.ViewModels.Vehicle.VehicleFormViewModel
+@{
+    ViewData["Title"] = "Edit Vehicle";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-pencil"></i> Edit Vehicle
+            </h1>
+            <a class="btn btn-outline-secondary" asp-action="Index">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Basic Information -->
+                    <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Brand" class="form-label"></label>
+                            <input asp-for="Brand" class="form-control" placeholder="e.g., Caterpillar" />
+                            <span asp-validation-for="Brand" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Model" class="form-label"></label>
+                            <input asp-for="Model" class="form-control" placeholder="e.g., 320 GC" />
+                            <span asp-validation-for="Model" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Year" class="form-label"></label>
+                            <input asp-for="Year" class="form-control" type="number" />
+                            <span asp-validation-for="Year" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="LicensePlate" class="form-label"></label>
+                            <input asp-for="LicensePlate" class="form-control" placeholder="ABC-123" />
+                            <span asp-validation-for="LicensePlate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="VehicleType" class="form-label"></label>
+                            <select asp-for="VehicleType" asp-items="Model.VehicleTypes" class="form-select">
+                                <option value="">Select Type...</option>
+                            </select>
+                            <span asp-validation-for="VehicleType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Rental Rates -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Rental Rates</h5>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="HourlyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="HourlyRate" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="DailyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="DailyRate" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="DailyRate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="WeeklyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="WeeklyRate" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="WeeklyRate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="MonthlyRate" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="MonthlyRate" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="MonthlyRate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Technical Details -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Technical Details</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="SerialNumber" class="form-label"></label>
+                            <input asp-for="SerialNumber" class="form-control" />
+                            <span asp-validation-for="SerialNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="CurrentHours" class="form-label"></label>
+                            <input asp-for="CurrentHours" class="form-control" type="number" step="0.1" />
+                            <span asp-validation-for="CurrentHours" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="CurrentMileage" class="form-label"></label>
+                            <input asp-for="CurrentMileage" class="form-control" type="number" step="0.1" />
+                            <span asp-validation-for="CurrentMileage" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Maintenance -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Maintenance</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="MaintenanceHoursInterval" class="form-label"></label>
+                            <input asp-for="MaintenanceHoursInterval" class="form-control" type="number" step="0.1" />
+                            <span asp-validation-for="MaintenanceHoursInterval" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="LastMaintenanceDate" class="form-label"></label>
+                            <input asp-for="LastMaintenanceDate" class="form-control" type="date" />
+                            <span asp-validation-for="LastMaintenanceDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="NextMaintenanceDate" class="form-label"></label>
+                            <input asp-for="NextMaintenanceDate" class="form-control" type="date" />
+                            <span asp-validation-for="NextMaintenanceDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Additional Information</h5>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label asp-for="Specifications" class="form-label"></label>
+                            <textarea asp-for="Specifications" class="form-control" rows="3" placeholder="Enter technical specifications..."></textarea>
+                            <span asp-validation-for="Specifications" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ImageUrl" class="form-label"></label>
+                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DocumentsUrl" class="form-label"></label>
+                            <input asp-for="DocumentsUrl" class="form-control" placeholder="https://example.com/docs.pdf" />
+                            <span asp-validation-for="DocumentsUrl" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Additional notes..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a class="btn btn-secondary" asp-action="Details" asp-route-id="@Model.Id">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Update Vehicle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

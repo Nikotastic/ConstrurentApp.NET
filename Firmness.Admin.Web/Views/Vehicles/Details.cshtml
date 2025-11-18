@@ -1,0 +1,250 @@
+﻿@model Firmness.Web.ViewModels.Vehicle.VehicleDetailsViewModel
+@{
+    ViewData["Title"] = "Vehicle Details";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-truck"></i> Vehicle Details
+            </h1>
+            <div class="btn-group">
+                <a class="btn btn-outline-secondary" asp-action="Index">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <a class="btn btn-outline-primary" asp-action="Edit" asp-route-id="@Model.Id">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                }
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row">
+            <!-- Main Information Card -->
+            <div class="col-md-8">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <strong>@Model.DisplayName</strong>
+                            @if (Model.IsAvailableForRent)
+                            {
+                                <span class="badge bg-success float-end">Available</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary float-end">@Model.Status</span>
+                            }
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p><strong>ID Público:</strong> <code>@Model.PublicId</code></p>
+                                <p><strong>Brand:</strong> @Model.Brand</p>
+                                <p><strong>Model:</strong> @Model.Model</p>
+                                <p><strong>Year:</strong> @Model.Year</p>
+                                <p><strong>Type:</strong> <span class="badge bg-secondary">@Model.VehicleType</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>License Plate:</strong> <code>@Model.LicensePlate</code></p>
+                                <p><strong>Serial Number:</strong> @(Model.SerialNumber ?? "N/A")</p>
+                                <p><strong>Status:</strong> <span class="badge bg-info">@Model.Status</span></p>
+                                <p><strong>Active:</strong> @(Model.IsActive ? "Yes" : "No")</p>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Specifications))
+                        {
+                            <div class="alert alert-info">
+                                <strong>Specifications:</strong>
+                                <p class="mb-0">@Model.Specifications</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Rental Rates Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-currency-dollar"></i> Rental Rates</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p class="text-muted mb-0">Hourly Rate</p>
+                                <h4 class="text-success">$@Model.HourlyRate.ToString("N2")</h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="text-muted mb-0">Daily Rate</p>
+                                <h4 class="text-success">$@Model.DailyRate.ToString("N2")</h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="text-muted mb-0">Weekly Rate</p>
+                                <h4 class="text-success">$@Model.WeeklyRate.ToString("N2")</h4>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="text-muted mb-0">Monthly Rate</p>
+                                <h4 class="text-success">$@Model.MonthlyRate.ToString("N2")</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Information Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-gear"></i> Technical Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Current Hours:</strong> @(Model.CurrentHours?.ToString("N1") ?? "N/A") hours</p>
+                                <p><strong>Current Mileage:</strong> @(Model.CurrentMileage?.ToString("N1") ?? "N/A") km</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Last Maintenance:</strong> @(Model.LastMaintenanceDate?.ToString("MMM dd, yyyy") ?? "N/A")</p>
+                                <p><strong>Next Maintenance:</strong> @(Model.NextMaintenanceDate?.ToString("MMM dd, yyyy") ?? "N/A")</p>
+                            </div>
+                        </div>
+                        @if (Model.NeedsMaintenance)
+                        {
+                            <div class="alert alert-warning mt-2">
+                                <i class="bi bi-exclamation-triangle"></i> <strong>Maintenance Required Soon!</strong>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Rental History Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Rental History</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.RecentRentals.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Customer</th>
+                                            <th>Start Date</th>
+                                            <th>Return Date</th>
+                                            <th>Status</th>
+                                            <th>Amount</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var rental in Model.RecentRentals)
+                                        {
+                                            <tr>
+                                                <td>@rental.CustomerName</td>
+                                                <td>@rental.StartDate.ToString("MMM dd, yyyy")</td>
+                                                <td>@((rental.ActualReturnDate ?? rental.EstimatedReturnDate).ToString("MMM dd, yyyy"))</td>
+                                                <td><span class="badge bg-info">@rental.Status</span></td>
+                                                <td>$@rental.TotalAmount.ToString("N2")</td>
+                                                <td>
+                                                    <a asp-controller="VehicleRentals" asp-action="Details" asp-route-id="@rental.Id" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted text-center my-3">No rental history available.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-md-4">
+                <!-- Quick Stats Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Quick Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Total Rentals:</strong> @Model.TotalRentals</p>
+                        <p><strong>Active Rentals:</strong> @Model.ActiveRentals</p>
+                        <p class="mb-0"><strong>Created:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+                    </div>
+                </div>
+
+                <!-- Actions Card -->
+                @if (Model.IsAvailableForRent)
+                {
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-check-circle"></i> Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <a asp-controller="VehicleRentals" asp-action="Create" asp-route-vehicleId="@Model.Id" class="btn btn-success w-100 mb-2">
+                                <i class="bi bi-plus-circle"></i> Create Rental
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                <!-- Image Card -->
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-image"></i> Image</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="@Model.ImageUrl" alt="@Model.DisplayName" class="img-fluid rounded" />
+                        </div>
+                    </div>
+                }
+
+                <!-- Notes Card -->
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-sticky"></i> Notes</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-0">@Model.Notes</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Documents Card -->
+                @if (!string.IsNullOrEmpty(Model.DocumentsUrl))
+                {
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Documents</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="@Model.DocumentsUrl" target="_blank" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-download"></i> View Documents
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+

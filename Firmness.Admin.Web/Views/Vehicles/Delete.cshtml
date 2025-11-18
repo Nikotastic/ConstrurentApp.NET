@@ -1,0 +1,136 @@
+﻿@model Firmness.Web.ViewModels.Vehicle.VehicleDetailsViewModel
+@{
+    ViewData["Title"] = "Delete Vehicle";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="h3">
+                <i class="bi bi-trash"></i> Delete Vehicle
+            </h1>
+            <a class="btn btn-outline-secondary" asp-action="Index">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <!-- Warning Alert -->
+        <div class="alert alert-danger">
+            <h4 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Warning!</h4>
+            <p>You are about to permanently delete this vehicle. This action cannot be undone.</p>
+            <hr />
+            <p class="mb-0">Please review the information below before confirming the deletion.</p>
+        </div>
+
+        <!-- Vehicle Information Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Vehicle to be Deleted</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Brand:</strong> @Model.Brand</p>
+                        <p><strong>Model:</strong> @Model.Model</p>
+                        <p><strong>Year:</strong> @Model.Year</p>
+                        <p><strong>Type:</strong> <span class="badge bg-secondary">@Model.VehicleType</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>License Plate:</strong> <code>@Model.LicensePlate</code></p>
+                        <p><strong>Serial Number:</strong> @(Model.SerialNumber ?? "N/A")</p>
+                        <p><strong>Status:</strong> <span class="badge bg-info">@Model.Status</span></p>
+                        <p><strong>Active:</strong> @(Model.IsActive ? "Yes" : "No")</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <hr />
+                    <div class="text-center">
+                        <img src="@Model.ImageUrl" alt="@Model.DisplayName" class="img-fluid rounded" style="max-height: 200px;" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Rental Statistics Card -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <p class="text-muted mb-0">Total Rentals</p>
+                        <h4>@Model.TotalRentals</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-0">Active Rentals</p>
+                        <h4 class="@(Model.ActiveRentals > 0 ? "text-danger" : "text-success")">@Model.ActiveRentals</h4>
+                    </div>
+                    <div class="col-md-4">
+                        <p class="text-muted mb-0">Created On</p>
+                        <h6>@Model.CreatedAt.ToString("MMM dd, yyyy")</h6>
+                    </div>
+                </div>
+
+                @if (Model.ActiveRentals > 0)
+                {
+                    <div class="alert alert-danger mt-3 mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> <strong>Cannot Delete!</strong><br />
+                        This vehicle has <strong>@Model.ActiveRentals</strong> active rental(s). You must complete or cancel all active rentals before deleting this vehicle.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Confirmation Form -->
+        @if (Model.ActiveRentals == 0)
+        {
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Confirm Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <p>Please confirm that you want to delete the vehicle:</p>
+                    <p class="text-center mb-3">
+                        <strong class="text-danger">@Model.DisplayName</strong>
+                    </p>
+
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <a class="btn btn-secondary" asp-action="Details" asp-route-id="@Model.Id">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you absolutely sure you want to delete this vehicle?')">
+                                <i class="bi bi-trash"></i> Yes, Delete Vehicle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-secondary" asp-action="Details" asp-route-id="@Model.Id">
+                    <i class="bi bi-arrow-left"></i> Go Back
+                </a>
+            </div>
+        }
+
+        <!-- Information Alert -->
+        <div class="alert alert-info mt-3">
+            <h6 class="alert-heading"><i class="bi bi-info-circle"></i> What will be deleted?</h6>
+            <ul class="mb-0">
+                <li>Vehicle record and all associated data</li>
+                <li>Vehicle specifications and technical information</li>
+                <li>Links to rental history (history will be preserved)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
