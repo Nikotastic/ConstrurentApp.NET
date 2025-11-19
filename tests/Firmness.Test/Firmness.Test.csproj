@@ -28,11 +28,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Firmness.Api\Firmness.Api.csproj" />
-      <ProjectReference Include="..\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
-      <ProjectReference Include="..\Firmness.Application\Firmness.Application.csproj" />
-      <ProjectReference Include="..\Firmness.Admin.Web\Firmness.Web.csproj" />
+        <ProjectReference Include="..\..\src\Firmness.Api\Firmness.Api.csproj" />
+        <ProjectReference Include="..\..\src\Firmness.Infrastructure\Firmness.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\src\Firmness.Application\Firmness.Application.csproj" />
+        <ProjectReference Include="..\..\src\Firmness.Web\Firmness.Web.csproj" />
+        <ProjectReference Include="..\..\src\Firmness.Domain\Firmness.Domain.csproj" />
     </ItemGroup>
+
 
     <!-- xml -->
     <Target Name="CopyAspNetCodegenDeps" AfterTargets="Build">
