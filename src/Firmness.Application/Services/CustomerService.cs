@@ -25,6 +25,9 @@ public class CustomerService : ICustomerService
     // CRUD operations
     public Task<Customer?> GetByIdAsync(Guid id) => _customerRepo.GetByIdAsync(id);
 
+    public Task<Customer?> GetByIdentityUserIdAsync(string identityUserId) 
+        => _customerRepo.GetByIdentityUserIdAsync(identityUserId);
+
     public Task<IEnumerable<Customer>> GetAllAsync() => _customerRepo.GetAllAsync();
     
     public Task<IPaginatedResult<Customer>> GetAllAsync(int page, int pageSize)

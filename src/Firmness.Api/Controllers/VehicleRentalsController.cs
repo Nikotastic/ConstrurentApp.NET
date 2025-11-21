@@ -14,15 +14,18 @@ namespace Firmness.Api.Controllers;
 public class VehicleRentalsController : ControllerBase
 {
     private readonly IVehicleRentalService _rentalService;
+    private readonly ICustomerService _customerService;
     private readonly IMapper _mapper;
     private readonly ILogger<VehicleRentalsController> _logger;
 
     public VehicleRentalsController(
         IVehicleRentalService rentalService,
+        ICustomerService customerService,
         IMapper mapper,
         ILogger<VehicleRentalsController> logger)
     {
         _rentalService = rentalService;
+        _customerService = customerService;
         _mapper = mapper;
         _logger = logger;
     }
@@ -91,6 +94,22 @@ public class VehicleRentalsController : ControllerBase
     {
         try
         {
+            // Security check: Clients can only view their own rentals
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = User.IsInRole("Admin");
+            
+            if (!isAdmin)
+            {
+                // Get the customer associated with the current user
+                var currentCustomer = await _customerService.GetByIdentityUserIdAsync(currentUserId!);
+                
+                if (currentCustomer == null || currentCustomer.Id != customerId)
+                {
+                    _logger.LogWarning("User {UserId} attempted to access rentals for customer {CustomerId}", currentUserId, customerId);
+                    return Forbid(); // 403 Forbidden
+                }
+            }
+            
             var result = await _rentalService.GetRentalsByCustomerIdAsync(customerId);
             if (!result.IsSuccess)
                 return BadRequest(new { isSuccess = false, message = result.ErrorMessage });
@@ -164,7 +183,7 @@ public class VehicleRentalsController : ControllerBase
 
     // POST: api/vehiclerentals
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager,Employee")]
+    [Authorize(Roles = "Admin,Client")]
     [ProducesResponseType(typeof(VehicleRentalDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateVehicleRentalDto createDto)
@@ -197,7 +216,7 @@ public class VehicleRentalsController : ControllerBase
 
     // PUT: api/vehiclerentals/{id}
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(VehicleRentalDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateVehicleRentalDto updateDto)
@@ -249,7 +268,7 @@ public class VehicleRentalsController : ControllerBase
 
     // POST: api/vehiclerentals/{id}/complete
     [HttpPost("{id:guid}/complete")]
-    [Authorize(Roles = "Admin,Manager,Employee")]
+    [Authorize(Roles = "Admin,Client")]
     [ProducesResponseType(typeof(VehicleRentalDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Complete(Guid id, [FromBody] CompleteVehicleRentalDto completeDto)
@@ -279,7 +298,7 @@ public class VehicleRentalsController : ControllerBase
 
     // POST: api/vehiclerentals/{id}/cancel
     [HttpPost("{id:guid}/cancel")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,Client")]
     [ProducesResponseType(typeof(VehicleRentalDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Cancel(Guid id, [FromBody] CancelRentalDto cancelDto)
@@ -309,7 +328,7 @@ public class VehicleRentalsController : ControllerBase
 
     // POST: api/vehiclerentals/{id}/payment
     [HttpPost("{id:guid}/payment")]
-    [Authorize(Roles = "Admin,Manager,Employee")]
+    [Authorize(Roles = "Admin,Client")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ProcessPayment(Guid id, [FromBody] PaymentDto paymentDto)
@@ -338,7 +357,7 @@ public class VehicleRentalsController : ControllerBase
 
     // POST: api/vehiclerentals/{id}/return-deposit
     [HttpPost("{id:guid}/return-deposit")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ReturnDeposit(Guid id)

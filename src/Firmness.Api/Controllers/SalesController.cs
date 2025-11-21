@@ -16,15 +16,18 @@ namespace Firmness.Api.Controllers;
 public class SalesController : ControllerBase
 {
     private readonly ISaleService _saleService;
+    private readonly ICustomerService _customerService;
     private readonly IMapper _mapper;
     private readonly ILogger<SalesController> _logger;
 
     public SalesController(
         ISaleService saleService,
+        ICustomerService customerService,
         IMapper mapper,
         ILogger<SalesController> logger)
     {
         _saleService = saleService;
+        _customerService = customerService;
         _mapper = mapper;
         _logger = logger;
     }
@@ -84,6 +87,22 @@ public class SalesController : ControllerBase
     {
         try
         {
+            // Security check: Clients can only view their own sales
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = User.IsInRole("Admin");
+            
+            if (!isAdmin)
+            {
+                // Get the customer associated with the current user
+                var currentCustomer = await _customerService.GetByIdentityUserIdAsync(currentUserId!);
+                
+                if (currentCustomer == null || currentCustomer.Id != customerId)
+                {
+                    _logger.LogWarning("User {UserId} attempted to access sales for customer {CustomerId}", currentUserId, customerId);
+                    return Forbid(); // 403 Forbidden
+                }
+            }
+            
             var sales = await _saleService.GetByCustomerIdAsync(customerId);
             var saleDtos = _mapper.Map<IEnumerable<SaleDto>>(sales);
             return Ok(new { isSuccess = true, data = saleDtos });

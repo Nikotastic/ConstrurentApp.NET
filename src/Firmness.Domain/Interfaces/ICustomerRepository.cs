@@ -8,6 +8,7 @@ public interface ICustomerRepository
 {
     // Crud operations
     Task<Customer?> GetByIdAsync(Guid id);
+    Task<Customer?> GetByIdentityUserIdAsync(string identityUserId);
     Task<IEnumerable<Customer>> GetAllAsync();
     Task<IPaginatedResult<Customer>> GetAllAsync(int page, int pageSize);
     Task AddAsync(Customer customer);
