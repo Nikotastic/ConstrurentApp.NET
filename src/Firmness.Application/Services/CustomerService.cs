@@ -81,9 +81,10 @@ public class CustomerService : ICustomerService
             var count = await _customerRepo.CountAsync(cancellationToken);
             return Result<long>.Success(count);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Result<long>.Failure("An error occurred while counting customers.");
+            _logger.LogError(ex, "Error counting customers");
+            return Result<long>.Failure("An error occurred while counting customers.", ErrorCodes.ServerError);
         }
     }
 }

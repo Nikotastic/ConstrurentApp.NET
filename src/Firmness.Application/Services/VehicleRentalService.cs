@@ -20,6 +20,7 @@ public class VehicleRentalService : IVehicleRentalService
         IVehicleRentalRepository rentalRepository,
         IVehicleRepository vehicleRepository,
         ICustomerRepository customerRepository,
+        INotificationService @object,
         IMapper mapper)
     {
         _rentalRepository = rentalRepository;

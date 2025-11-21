@@ -1,7 +1,7 @@
 ﻿using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
 
-namespace Firmness.Test;
+namespace Firmness.Test.Mocks;
 
 public class MockEmailService : IEmailService
 {

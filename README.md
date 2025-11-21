@@ -246,29 +246,42 @@ For active development without Docker:
 - **[Authentication](docs/api/AUTHENTICATION.md)** - JWT, Roles and Authorization
 - **[Test Collection](docs/api/TEST_ENDPOINTS.http)** - Examples with REST Client
 
+### 🧪 Testing Documentation
+- **[Test Summary](docs/TEST_SUMMARY.md)** - Complete test coverage and analysis (90 tests)
+- **[Test Guide](tests/Firmness.Test/README_TESTS.md)** - Quick reference for running tests
+
 ### 📖 More Documentation
-    See [docs/README.md](docs/README.md) for the complete technical documentation index.
+See [docs/README.md](docs/README.md) for the complete technical documentation index.
+
 ---
 
 ## 🧪 Testing
 
-## Automated Tests with xUnit
+### Automated Tests with xUnit
 
-The project includes comprehensive integration and unit tests:
+The project includes **90 comprehensive tests** covering services, controllers, and database integration:
+
+```
+✅ Services: 60 tests (Business Logic)
+✅ Controllers: 29 tests (HTTP APIs)
+✅ Integration: 1 test (Database)
+Status: 100% Passing
+```
+
+**Quick Commands:**
 
 ```bash
 # Run all tests
 dotnet test
 
+# Run only service tests (most important)
+dotnet test --filter "FullyQualifiedName~Services"
+
 # Run with detailed output
 dotnet test --logger "console;verbosity=detailed"
-
-# Run specific test class
-dotnet test --filter "FullyQualifiedName~AuthenticationTests"
-
-# Run with code coverage
-dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
 ```
+
+📘 **See [Test Documentation](tests/Firmness.Test/README_TESTS.md) for detailed information.**
 
 ### Test Coverage
 

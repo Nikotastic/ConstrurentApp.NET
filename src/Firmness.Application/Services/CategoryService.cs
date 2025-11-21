@@ -44,17 +44,17 @@ public class CategoryService : ICategoryService
         try
         {
             if (category == null)
-                return Result<Category>.Failure("The category can't be null.", "CATEGORY_NULL");
+                return Result<Category>.Failure("The category can't be null.", ErrorCodes.Validation);
 
             if (string.IsNullOrWhiteSpace(category.Name))
-                return Result<Category>.Failure("The category name is required.", "CATEGORY_NAME_REQUIRED");
+                return Result<Category>.Failure("The category name is required.", ErrorCodes.Validation);
 
             await _repository.AddAsync(category);
             return Result<Category>.Success(category);
         }
         catch (Exception ex)
         {
-            return Result<Category>.Failure($"Error adding category: {ex.Message}", "CATEGORY_ADD_ERROR");
+            return Result<Category>.Failure($"Error adding category: {ex.Message}", ErrorCodes.ServerError);
         }
     }
 
@@ -63,21 +63,21 @@ public class CategoryService : ICategoryService
         try
         {
             if (category == null)
-                return Result.Failure("The category can't be null.", "CATEGORY_NULL");
+                return Result.Failure("The category can't be null.", ErrorCodes.Validation);
 
             if (string.IsNullOrWhiteSpace(category.Name))
-                return Result.Failure("The name is required", "CATEGORY_NAME_REQUIRED");
+                return Result.Failure("The name is required", ErrorCodes.Validation);
 
             var exists = await _repository.ExistsAsync(category.Id);
             if (!exists)
-                return Result.Failure("The category doesn't exist", "CATEGORY_NOT_FOUND");
+                return Result.Failure("The category doesn't exist", ErrorCodes.NotFound);
 
             await _repository.UpdateAsync(category);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            return Result.Failure($"Error updating category: {ex.Message}", "CATEGORY_UPDATE_ERROR");
+            return Result.Failure($"Error updating category: {ex.Message}", ErrorCodes.ServerError);
         }
     }
 
@@ -87,14 +87,14 @@ public class CategoryService : ICategoryService
         {
             var exists = await _repository.ExistsAsync(id);
             if (!exists)
-                return Result.Failure("The category doesn't exist", "CATEGORY_NOT_FOUND");
+                return Result.Failure("The category doesn't exist", ErrorCodes.NotFound);
 
             await _repository.DeleteAsync(id);
             return Result.Success();
         }
         catch (Exception ex)
         {
-            return Result.Failure($"Error deleting category: {ex.Message}", "CATEGORY_DELETE_ERROR");
+            return Result.Failure($"Error deleting category: {ex.Message}", ErrorCodes.ServerError);
         }
     }
 

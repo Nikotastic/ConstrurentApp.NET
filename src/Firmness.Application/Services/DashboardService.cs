@@ -57,20 +57,20 @@ public class DashboardService : IDashboardService
 
     public async Task<int> GetTotalProductsAsync(CancellationToken cancellationToken = default)
     {
-        var products = await _productRepo.GetAllAsync();
-        return products.Count();
+        var count = await _productRepo.CountAsync(cancellationToken);
+        return (int)count;
     }
 
     public async Task<int> GetTotalCustomersAsync(CancellationToken cancellationToken = default)
     {
-        var customers = await _customerRepo.GetAllAsync();
-        return customers.Count();
+        var count = await _customerRepo.CountAsync(cancellationToken);
+        return (int)count;
     }
 
     public async Task<int> GetTotalSalesAsync(CancellationToken cancellationToken = default)
     {
-        var sales = await _saleRepo.GetAllAsync();
-        return sales.Count();
+        var count = await _saleRepo.CountAsync(cancellationToken);
+        return (int)count;
     }
 
     public async Task<decimal> GetTotalRevenueAsync(CancellationToken cancellationToken = default)
