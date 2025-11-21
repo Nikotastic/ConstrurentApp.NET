@@ -37,7 +37,7 @@
     volumes:
       - .:/app
     working_dir: /app
-    command: /bin/bash -lc "cd /app/Firmness.Admin.Web && dotnet restore && dotnet run"
+    command: /bin/bash -lc "cd /app/src/Firmness.Web && dotnet restore && dotnet run"
 
   pgadmin:
     image: dpage/pgadmin4:latest

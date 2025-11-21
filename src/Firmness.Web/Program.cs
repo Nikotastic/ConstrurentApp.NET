@@ -173,6 +173,19 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+// CORS 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy  =>
+        {
+            policy.WithOrigins("http://localhost:4200") // La URL de tu Angular
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 
 // ---------- Ensure DB + Seed data ----------
@@ -209,7 +222,8 @@ else
     // In dev show developer exceptions as needed
     app.UseDeveloperExceptionPage();
 }
-
+app.UseCors(MyAllowSpecificOrigins); 
+app.MapControllers();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

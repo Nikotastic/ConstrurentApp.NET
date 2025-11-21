@@ -8,6 +8,9 @@
 .env.local
 migrate.ps1
 test-auth.ps1
+# Local configuration files (may contain passwords/secrets)
+appsettings.Local.json
+**/appsettings.Local.json
 
 # User-specific files
 *.rsuser

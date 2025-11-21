@@ -57,15 +57,29 @@ if (!string.IsNullOrEmpty(envPath))
 
 // Resolve connection string from environment variables or appsettings
 var configuration = builder.Configuration;
+
+// Try to get complete connection string first
 var defaultConn = Environment.GetEnvironmentVariable("CONN_STR")
                   ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
                   ?? configuration.GetConnectionString("DefaultConnection");
 
+// If no complete connection string, build it from individual environment variables
 if (string.IsNullOrWhiteSpace(defaultConn))
 {
-    // As fallback use a local Postgres connection (developer convenience). You can override with env var.
-    defaultConn = "Host=localhost;Port=5432;Database=FirmnessDB;Username=postgres;Password=postgres";
-    Console.WriteLine("Warning: No connection string configured. Using fallback local connection string. Set CONN_STR or ConnectionStrings__DefaultConnection to override.");
+    var dbHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
+    var dbPort = Environment.GetEnvironmentVariable("PG_PORT") ?? "5432";
+    var dbName = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "FirmnessDB";
+    var dbUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "postgres";
+    var dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+
+    if (string.IsNullOrWhiteSpace(dbPassword))
+    {
+        Console.WriteLine("Warning: POSTGRES_PASSWORD not found in environment variables. Database connection may fail.");
+        Console.WriteLine("Please set POSTGRES_PASSWORD in your .env file or environment variables.");
+    }
+
+    defaultConn = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPassword}";
+    Console.WriteLine($"Built connection string from environment variables: Host={dbHost}, Database={dbName}, User={dbUser}");
 }
 
 // If we are not running inside a container, replace host 'postgres' with 'localhost'
