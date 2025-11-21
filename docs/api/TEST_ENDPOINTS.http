@@ -1,0 +1,375 @@
+﻿### ===========================================
+### 🧪 ENDPOINT TESTING - FIRMNESS API
+### ===========================================
+
+@baseUrl = http://localhost:5086
+@token = 
+@customerId = 
+@productId = 
+@saleId = 
+@vehicleId = 
+@rentalId = 
+
+### ===========================================
+### 🔐 1. AUTENTICACIÓN
+### ===========================================
+
+### 1.1 Registrar nuevo cliente (CORREGIDO - Crea AuthUser + Customer)
+POST {{baseUrl}}/api/auth/register-client
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "Test123!@#",
+  "firstName": "Test",
+  "lastName": "User",
+  "document": "12345678",
+  "phone": "+1234567890",
+  "address": "123 Test Street, Test City"
+}
+
+### 1.2 Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Test123!@#"
+}
+
+### Guardar el token de la respuesta en @token
+### Ejemplo: @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### ===========================================
+### 👤 2. PROFILE (Verificar Token JWT)
+### ===========================================
+
+### 2.1 Obtener mi perfil
+GET {{baseUrl}}/api/profile/me
+Authorization: Bearer {{token}}
+
+### 2.2 Endpoint público (sin token)
+GET {{baseUrl}}/api/profile/public
+
+### 2.3 Endpoint para cualquier autenticado
+GET {{baseUrl}}/api/profile/authenticated
+Authorization: Bearer {{token}}
+
+### 2.4 Solo para clientes
+GET {{baseUrl}}/api/profile/client-only
+Authorization: Bearer {{token}}
+
+### 2.5 Solo para admins (debería fallar con token de cliente)
+GET {{baseUrl}}/api/profile/admin-only
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 👥 3. CUSTOMERS
+### ===========================================
+
+### 3.1 Obtener todos los clientes
+GET {{baseUrl}}/api/customersapi
+
+### 3.2 Obtener cliente por ID
+GET {{baseUrl}}/api/customersapi/{{customerId}}
+
+### 3.3 Obtener detalles completos (Admin only)
+GET {{baseUrl}}/api/customersapi/{{customerId}}/details
+Authorization: Bearer {{token}}
+
+### 3.4 Crear nuevo cliente manualmente
+POST {{baseUrl}}/api/customersapi
+Content-Type: application/json
+
+{
+  "firstName": "Manual",
+  "lastName": "Customer",
+  "email": "manual@example.com",
+  "document": "87654321",
+  "phone": "+0987654321",
+  "address": "456 Manual St"
+}
+
+### 3.5 Actualizar cliente
+PUT {{baseUrl}}/api/customersapi/{{customerId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "phone": "+1111111111",
+  "address": "New Address 123"
+}
+
+### 3.6 Eliminar cliente (Admin only)
+DELETE {{baseUrl}}/api/customersapi/{{customerId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 📦 4. PRODUCTS
+### ===========================================
+
+### 4.1 Obtener todos los productos (paginado)
+GET {{baseUrl}}/api/products?page=1&pageSize=10
+
+### 4.2 Buscar productos
+GET {{baseUrl}}/api/products/search?q=laptop&page=1&pageSize=10
+
+### 4.3 Obtener producto por ID
+GET {{baseUrl}}/api/products/{{productId}}
+
+### 4.4 Contar productos
+GET {{baseUrl}}/api/products/count
+
+### 4.5 Crear nuevo producto (Admin only)
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Laptop HP 15",
+  "description": "Laptop HP 15 pulgadas, 8GB RAM, 256GB SSD",
+  "price": 599.99,
+  "stock": 50,
+  "categoryId": "00000000-0000-0000-0000-000000000000",
+  "imageUrl": "https://example.com/laptop.jpg"
+}
+
+### 4.6 Actualizar producto (Admin only)
+PUT {{baseUrl}}/api/products/{{productId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Laptop HP 15 Pro",
+  "price": 649.99,
+  "stock": 45
+}
+
+### 4.7 Eliminar producto (Admin only)
+DELETE {{baseUrl}}/api/products/{{productId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 💰 5. SALES
+### ===========================================
+
+### 5.1 Obtener todas las ventas (Admin only)
+GET {{baseUrl}}/api/sales
+Authorization: Bearer {{token}}
+
+### 5.2 Obtener venta por ID
+GET {{baseUrl}}/api/sales/{{saleId}}
+Authorization: Bearer {{token}}
+
+### 5.3 Obtener ventas de un cliente
+GET {{baseUrl}}/api/sales/customer/{{customerId}}
+Authorization: Bearer {{token}}
+
+### 5.4 Contar ventas (Admin only)
+GET {{baseUrl}}/api/sales/count
+Authorization: Bearer {{token}}
+
+### 5.5 Crear nueva venta
+POST {{baseUrl}}/api/sales
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "customerId": "{{customerId}}",
+  "paymentMethod": "Credit Card",
+  "discount": 10.00,
+  "tax": 15.00,
+  "notes": "Test sale",
+  "items": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+### 5.6 Actualizar venta (Admin only)
+PUT {{baseUrl}}/api/sales/{{saleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "paymentMethod": "Cash",
+  "discount": 20.00,
+  "tax": 15.00,
+  "notes": "Updated sale"
+}
+
+### 5.7 Eliminar venta (Admin only)
+DELETE {{baseUrl}}/api/sales/{{saleId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 🚗 6. VEHICLES
+### ===========================================
+
+### 6.1 Obtener todos los vehículos
+GET {{baseUrl}}/api/vehicles
+Authorization: Bearer {{token}}
+
+### 6.2 Obtener vehículos disponibles
+GET {{baseUrl}}/api/vehicles/available
+Authorization: Bearer {{token}}
+
+### 6.3 Obtener vehículo por ID
+GET {{baseUrl}}/api/vehicles/{{vehicleId}}
+Authorization: Bearer {{token}}
+
+### 6.4 Obtener vehículos por tipo
+GET {{baseUrl}}/api/vehicles/type/SUV
+Authorization: Bearer {{token}}
+
+### 6.5 Crear nuevo vehículo (Admin/Manager)
+POST {{baseUrl}}/api/vehicles
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "RAV4",
+  "year": 2024,
+  "licensePlate": "ABC123",
+  "vehicleType": "SUV",
+  "color": "White",
+  "dailyRate": 50.00,
+  "status": "Available",
+  "mileage": 5000,
+  "fuelType": "Gasoline",
+  "transmission": "Automatic",
+  "seats": 5
+}
+
+### 6.6 Actualizar vehículo (Admin/Manager)
+PUT {{baseUrl}}/api/vehicles/{{vehicleId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "RAV4 Hybrid",
+  "dailyRate": 55.00,
+  "mileage": 5500
+}
+
+### 6.7 Actualizar estado del vehículo (Admin/Manager)
+PATCH {{baseUrl}}/api/vehicles/{{vehicleId}}/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "Maintenance"
+}
+
+### 6.8 Eliminar vehículo (Admin only)
+DELETE {{baseUrl}}/api/vehicles/{{vehicleId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 🔑 7. VEHICLE RENTALS
+### ===========================================
+
+### 7.1 Obtener todas las rentas
+GET {{baseUrl}}/api/vehiclerentals?includeDetails=true
+Authorization: Bearer {{token}}
+
+### 7.2 Obtener renta por ID
+GET {{baseUrl}}/api/vehiclerentals/{{rentalId}}?includeDetails=true
+Authorization: Bearer {{token}}
+
+### 7.3 Obtener rentas de un cliente
+GET {{baseUrl}}/api/vehiclerentals/customer/{{customerId}}
+Authorization: Bearer {{token}}
+
+### 7.4 Obtener rentas de un vehículo
+GET {{baseUrl}}/api/vehiclerentals/vehicle/{{vehicleId}}
+Authorization: Bearer {{token}}
+
+### 7.5 Obtener rentas por estado
+GET {{baseUrl}}/api/vehiclerentals/status/Active
+Authorization: Bearer {{token}}
+
+### 7.6 Crear nueva renta (Admin/Manager/Employee)
+POST {{baseUrl}}/api/vehiclerentals
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "vehicleId": "{{vehicleId}}",
+  "customerId": "{{customerId}}",
+  "startDate": "2025-11-20T10:00:00Z",
+  "endDate": "2025-11-25T10:00:00Z",
+  "pickupLocation": "Main Office",
+  "returnLocation": "Main Office",
+  "notes": "Test rental"
+}
+
+### 7.7 Actualizar renta (Admin/Manager)
+PUT {{baseUrl}}/api/vehiclerentals/{{rentalId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "endDate": "2025-11-26T10:00:00Z",
+  "notes": "Extended rental period"
+}
+
+### 7.8 Completar renta
+POST {{baseUrl}}/api/vehiclerentals/{{rentalId}}/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "actualReturnDate": "2025-11-25T15:30:00Z",
+  "finalMileage": 5800,
+  "condition": "Good",
+  "additionalCharges": 0
+}
+
+### 7.9 Cancelar renta
+POST {{baseUrl}}/api/vehiclerentals/{{rentalId}}/cancel
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reason": "Customer request"
+}
+
+### 7.10 Eliminar renta (Admin only)
+DELETE {{baseUrl}}/api/vehiclerentals/{{rentalId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 📊 8. DASHBOARD (Si está implementado)
+### ===========================================
+
+### 8.1 Obtener estadísticas generales
+GET {{baseUrl}}/api/dashboard/stats
+Authorization: Bearer {{token}}
+
+### 8.2 Obtener productos más vendidos
+GET {{baseUrl}}/api/dashboard/top-products
+Authorization: Bearer {{token}}
+
+### 8.3 Obtener ventas recientes
+GET {{baseUrl}}/api/dashboard/recent-sales
+Authorization: Bearer {{token}}
+
+### ===========================================
+### ✅ FIN DE PRUEBAS
+### ===========================================
+
+### NOTAS:
+### 1. Reemplaza {{token}} con el token JWT obtenido del login
+### 2. Reemplaza los IDs (customerId, productId, etc.) con IDs reales de tu BD
+### 3. Los endpoints marcados con (Admin only) requieren rol de Admin
+### 4. Los endpoints marcados con (Admin/Manager) requieren rol Admin o Manager
+### 5. Para probar como Admin, necesitas un usuario con rol Admin en la BD
+
