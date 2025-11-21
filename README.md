@@ -350,7 +350,7 @@ Content-Type: application/json
 
 ---
 
-## 🔧 CUseful Commands
+## 🔧 Useful Commands
 
 ### Development
 
@@ -458,7 +458,6 @@ Content-Type: application/json
 
 This project is licensed under the **MIT** license. See [LICENSE](LICENSE) for details.
 
---
 
 ## 👥 Team
 
