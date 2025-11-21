@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Firmness.Application.Interfaces;
+using Firmness.Domain.Entities;
 
 namespace Firmness.Api.Controllers;
 
@@ -16,13 +18,23 @@ public class AuthController : ControllerBase
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
+    private readonly ICustomerService _customerService;
+    private readonly INotificationService _notificationService;
 
-    public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ILogger<AuthController> logger)
+    public AuthController(
+        UserManager<ApplicationUser> userManager, 
+        SignInManager<ApplicationUser> signInManager, 
+        IConfiguration configuration, 
+        ILogger<AuthController> logger,
+        ICustomerService customerService,
+        INotificationService notificationService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _configuration = configuration;
         _logger = logger;
+        _customerService = customerService;
+        _notificationService = notificationService;
     }
 
     [HttpPost("login")]
@@ -49,9 +61,13 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var existing = await _userManager.FindByEmailAsync(model.Email);
-        if (existing != null) return Conflict(new { message = "Email already in use" });
+        var existingEmail = await _userManager.FindByEmailAsync(model.Email);
+        if (existingEmail != null) return Conflict(new { message = "Email already in use" });
 
+        var existingUsername = await _userManager.FindByNameAsync(model.Username);
+        if (existingUsername != null) return Conflict(new { message = "Username already in use" });
+
+        // 1. Create AuthUser for authentication
         var user = new ApplicationUser { UserName = model.Username, Email = model.Email, EmailConfirmed = true };
         var create = await _userManager.CreateAsync(user, model.Password);
         if (!create.Succeeded)
@@ -59,11 +75,57 @@ public class AuthController : ControllerBase
             return BadRequest(new { errors = create.Errors.Select(e => e.Description) });
         }
 
-        // Add Cliente role
+        // 2. Add Client role
         var roleResult = await _userManager.AddToRoleAsync(user, "Client");
         if (!roleResult.Succeeded)
         {
+            // Rollback: delete the created user
+            await _userManager.DeleteAsync(user);
             return BadRequest(new { errors = roleResult.Errors.Select(e => e.Description) });
+        }
+
+        // 3. Create Customer entity (visible in dashboard)
+        try
+        {
+            var customer = new Customer(
+                firstName: model.FirstName ?? model.Username,
+                lastName: model.LastName ?? "",
+                email: model.Email
+            )
+            {
+                IdentityUserId = user.Id,
+                Document = model.Document ?? "",
+                Phone = model.Phone ?? "",
+                Address = model.Address ?? "",
+                IsActive = true
+            };
+
+            await _customerService.AddAsync(customer);
+            
+            _logger.LogInformation(
+                "User successfully registered: {Username} ({Email}) - Customer ID: {CustomerId}", 
+                user.UserName, 
+                user.Email, 
+                customer.Id);
+
+            // Send welcome email
+            try
+            {
+                await _notificationService.SendWelcomeEmailAsync(customer);
+                _logger.LogInformation("Welcome email sent to {Email}", customer.Email);
+            }
+            catch (Exception emailEx)
+            {
+                // Don't fail registration if email fails, just log it
+                _logger.LogError(emailEx, "Failed to send welcome email to {Email}", customer.Email);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating Customer for user {UserId}", user.Id);
+            // Rollback: delete the created user
+            await _userManager.DeleteAsync(user);
+            return StatusCode(500, new { message = "Error creating customer profile. Registration cancelled." });
         }
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -124,6 +186,13 @@ public class AuthController : ControllerBase
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        
+        // Customer fields
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Document { get; set; }
+        public string Phone { get; set; }
+        public string? Address { get; set; }
     }
 
     public class LoginResponse

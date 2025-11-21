@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Firmness.Application.Interfaces;
 using Firmness.Domain.Entities;
 using AutoMapper;
+using Firmness.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace Firmness.Web.Controllers
 {
@@ -13,12 +15,18 @@ namespace Firmness.Web.Controllers
         private readonly ICustomerService _service;
         private readonly IMapper _mapper;
         private readonly ILogger<CustomersController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CustomersController(ICustomerService service, IMapper mapper, ILogger<CustomersController> logger)
+        public CustomersController(
+            ICustomerService service, 
+            IMapper mapper, 
+            ILogger<CustomersController> logger,
+            UserManager<ApplicationUser> userManager)
         {
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
 
@@ -181,7 +189,49 @@ namespace Firmness.Web.Controllers
         {
             try
             {
+                // Get customer before deleting to access IdentityUserId
+                var customer = await _service.GetByIdAsync(id);
+                if (customer == null)
+                {
+                    TempData["Error"] = "Client not found.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // 1. Delete Customer first
                 await _service.DeleteAsync(id);
+                _logger.LogInformation("Customer deleted: {CustomerId}", id);
+
+                // 2. Delete associated AuthUser (if exists)
+                if (!string.IsNullOrEmpty(customer.IdentityUserId))
+                {
+                    var user = await _userManager.FindByIdAsync(customer.IdentityUserId);
+                    if (user != null)
+                    {
+                        var deleteResult = await _userManager.DeleteAsync(user);
+                        if (deleteResult.Succeeded)
+                        {
+                            _logger.LogInformation(
+                                "AuthUser deleted: {UserId} ({Email})", 
+                                customer.IdentityUserId, 
+                                customer.Email);
+                        }
+                        else
+                        {
+                            _logger.LogWarning(
+                                "Failed to delete AuthUser: {UserId}. Errors: {Errors}",
+                                customer.IdentityUserId,
+                                string.Join(", ", deleteResult.Errors.Select(e => e.Description)));
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "AuthUser not found for customer: {CustomerId} (IdentityUserId: {IdentityUserId})",
+                            id,
+                            customer.IdentityUserId);
+                    }
+                }
+
                 TempData["Success"] = "Client successfully removed.";
                 return RedirectToAction(nameof(Index));
             }

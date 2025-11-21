@@ -24,6 +24,15 @@ public class GmailEmailService : IEmailService
 
     public async Task SendEmailAsync(EmailMessage message, CancellationToken cancellationToken = default)
     {
+        if (!IsConfigured())
+        {
+            _logger.LogWarning(
+                "⚠️  Email service not configured. Skipping email to {To} with subject: {Subject}",
+                message.To,
+                message.Subject);
+            return;
+        }
+        
         try
         {
             _logger.LogInformation(
@@ -37,7 +46,7 @@ public class GmailEmailService : IEmailService
             await smtpClient.SendMailAsync(mailMessage, cancellationToken);
 
             _logger.LogInformation(
-                "Email successfully sent to {To}",
+                "✅ Email successfully sent to {To}",
                 message.To);
         }
         catch (SmtpException ex)
@@ -117,16 +126,41 @@ public class GmailEmailService : IEmailService
 
     private void ValidateSettings()
     {
+        var errors = new List<string>();
+        
         if (string.IsNullOrWhiteSpace(_settings.SmtpServer))
-            throw new InvalidOperationException("SmtpServer is not configured in EmailSettings");
+            errors.Add("SmtpServer is not configured");
 
         if (string.IsNullOrWhiteSpace(_settings.SenderEmail))
-            throw new InvalidOperationException("SmtpServer is not configured in EmailSettings");
+            errors.Add("SenderEmail is not configured");
 
         if (string.IsNullOrWhiteSpace(_settings.Username))
-            throw new InvalidOperationException("SmtpServer is not configured in EmailSettings");
+            errors.Add("Username is not configured");
 
         if (string.IsNullOrWhiteSpace(_settings.Password))
-            throw new InvalidOperationException("SmtpServer is not configured in EmailSettings");
+            errors.Add("Password is not configured");
+
+        if (errors.Any())
+        {
+            _logger.LogWarning(
+                "⚠️  Email service is not properly configured. Emails will not be sent. Missing: {MissingSettings}",
+                string.Join(", ", errors));
+        }
+        else
+        {
+            _logger.LogInformation(
+                "✅ Email service configured: {SmtpServer}:{SmtpPort} ({SenderEmail})",
+                _settings.SmtpServer,
+                _settings.SmtpPort,
+                _settings.SenderEmail);
+        }
+    }
+    
+    private bool IsConfigured()
+    {
+        return !string.IsNullOrWhiteSpace(_settings.SmtpServer) &&
+               !string.IsNullOrWhiteSpace(_settings.SenderEmail) &&
+               !string.IsNullOrWhiteSpace(_settings.Username) &&
+               !string.IsNullOrWhiteSpace(_settings.Password);
     }
 }
