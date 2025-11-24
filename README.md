@@ -139,9 +139,34 @@ Firmness/
 - [Docker Desktop](https://www.docker.com/) (recommended for production)
 - [Node.js 18+](https://nodejs.org/) (for Angular client)
 
-### 🐳Option 1: Docker Compose (Recommended)
+### 🐳 Option 1: Docker Compose (Recommended)
 
 The fastest way to run the entire project:
+
+#### 🚀 Quick Start with Scripts
+
+**Windows (PowerShell):**
+```powershell
+# Execute the automated script
+.\rebuild-docker.ps1
+```
+
+**Linux/macOS:**
+```bash
+# Make the script executable
+chmod +x rebuild-docker.sh
+
+# Execute the automated script
+./rebuild-docker.sh
+```
+
+The script will:
+- ✅ Stop existing containers
+- ✅ Rebuild images without cache
+- ✅ Start all services
+- ✅ Show logs and service status
+
+#### 📝 Manual Setup
 
 ```bash
     # 1. Clone repository
@@ -163,6 +188,8 @@ The fastest way to run the entire project:
     # Dashboard: http://localhost:5000
     # PgAdmin: http://localhost:8080
 ```
+
+> **⚠️ CORS Issues on Linux?** If you encounter "Failed to fetch" errors when running on Linux, see the complete guide: **[docs/CORS_FIX_LINUX.md](docs/CORS_FIX_LINUX.md)**
 
 ### 💻 Option 2: Local Development
 
@@ -421,6 +448,78 @@ Content-Type: application/json
     # Run tests
     ng test
 ```
+
+---
+
+## 🆘 Troubleshooting / Solución de Problemas
+
+### 🔴 CORS Errors on Linux/Docker
+If you encounter errors like "Failed to fetch" or CORS issues when running on Linux:
+
+**Quick Solution:**
+```bash
+# Use the automated rebuild script
+./rebuild-docker.sh
+```
+
+**Complete Documentation:** [docs/CORS_FIX_LINUX.md](docs/CORS_FIX_LINUX.md)
+
+**Common Issues:**
+- ✅ HTTPS redirection disabled in Docker containers
+- ✅ CORS properly configured with exposed headers
+- ✅ Nginx proxy configuration fixed
+- ✅ Environment variables set correctly
+
+### 🔴 Database Connection Issues
+```bash
+# Check database container is running
+docker ps | grep firmness_db
+
+# View database logs
+docker logs firmness_db
+
+# Restart database container
+docker-compose restart db
+```
+
+### 🔴 API Not Responding
+```bash
+# Check API logs
+docker logs firmness_api -f
+
+# Verify environment variables
+docker exec firmness_api env | grep JWT
+docker exec firmness_api env | grep CONN_STR
+
+# Restart API
+docker-compose restart api
+```
+
+### 🔴 Frontend Issues
+```bash
+# Check nginx logs
+docker logs firmness_client
+
+# Rebuild only frontend
+docker-compose build client
+docker-compose up -d client
+```
+
+### 🔴 Port Already in Use
+```bash
+# Find what's using the port (Linux)
+sudo lsof -i :5000
+
+# Find what's using the port (Windows)
+netstat -ano | findstr :5000
+
+# Change port in docker-compose.yml or .env file
+```
+
+### 📚 More Help
+- **API Documentation:** [docs/api/ENDPOINTS.md](docs/api/ENDPOINTS.md)
+- **Architecture Guide:** [docs/development/ARCHITECTURE.md](docs/development/ARCHITECTURE.md)
+- **Test Guide:** [tests/Firmness.Test/README_TESTS.md](tests/Firmness.Test/README_TESTS.md)
 
 ---
 
