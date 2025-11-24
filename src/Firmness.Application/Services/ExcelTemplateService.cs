@@ -20,30 +20,49 @@ public class ExcelTemplateService : IExcelTemplateService
         worksheet.Cells[1, 7].Value = "Minimum Stock";
         worksheet.Cells[1, 8].Value = "Barcode";
         worksheet.Cells[1, 9].Value = "Category";
-        worksheet.Cells[1, 10].Value = "Name";
-        worksheet.Cells[1, 11].Value = "Last name";
-        worksheet.Cells[1, 12].Value = "Email";
-        worksheet.Cells[1, 13].Value = "Phone";
-        worksheet.Cells[1, 14].Value = "Address";
-        worksheet.Cells[1, 15].Value = "Document";
-        worksheet.Cells[1, 16].Value = "Amount";
+        worksheet.Cells[1, 10].Value = "Image URL";
+        worksheet.Cells[1, 11].Value = "Name";
+        worksheet.Cells[1, 12].Value = "Last name";
+        worksheet.Cells[1, 13].Value = "Email";
+        worksheet.Cells[1, 14].Value = "Phone";
+        worksheet.Cells[1, 15].Value = "Address";
+        worksheet.Cells[1, 16].Value = "Document";
+        worksheet.Cells[1, 17].Value = "Amount";
 
         // Header styling
-        using (var range = worksheet.Cells[1, 1, 1, 16])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
-            range.Style.Font.Color.SetColor(System.Drawing.Color.White);
-            range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            using (var range = worksheet.Cells[1, 1, 1, 17])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
+                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            }
+        }
+        catch
+        {
+            // Fallback styling without colors if GDI+ is not available
+            using (var range = worksheet.Cells[1, 1, 1, 17])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            }
         }
 
         // Add instructions
         worksheet.Cells["A3"].Value = "INSTRUCTIONS:";
         worksheet.Cells["A3"].Style.Font.Bold = true;
         worksheet.Cells["A3"].Style.Font.Size = 12;
-        worksheet.Cells["A3"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        try
+        {
+            worksheet.Cells["A3"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        }
+        catch { /* Ignore color errors */ }
         
         worksheet.Cells["A4"].Value = "• You can leave columns empty if you don't apply to that row";
         worksheet.Cells["A5"].Value = "• The system automatically identifies whether they are products, customers, or sales";
@@ -54,14 +73,15 @@ public class ExcelTemplateService : IExcelTemplateService
         worksheet.Cells["A10"].Value = "- Customers: First Name, Last Name, Email, ID";
         worksheet.Cells["A11"].Value = "- Sales: Product SKU, Customer Email, Quantity";
         worksheet.Cells["A12"].Value = "• The category must exactly match one of the available categories (see 'Categories' sheet)";
-        using (var instrRange = worksheet.Cells["A4:A12"])
+        worksheet.Cells["A13"].Value = "• Image URL: Direct link to the product image (optional)";
+        using (var instrRange = worksheet.Cells["A4:A13"])
         {
             instrRange.Style.Font.Size = 10;
             instrRange.Style.WrapText = true;
         }
 
         // Auto-fit columns
-        worksheet.Cells.AutoFitColumns();
+        try { worksheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
         
         // Adjust column widths
         worksheet.Column(2).Width = 30; // Producto
@@ -84,7 +104,7 @@ public class ExcelTemplateService : IExcelTemplateService
         // Headers
         var headers = new[]
         {
-            "SKU", "Product","Description", "Price", "Stock", "Cost", "Minimum Stock", "Barcode", "Category", "First Name", "Last Name","Email", "Phone", "Address"," ID Number", "Quantity"
+            "SKU", "Product","Description", "Price", "Stock", "Cost", "Minimum Stock", "Barcode", "Category", "Image URL", "First Name", "Last Name","Email", "Phone", "Address"," ID Number", "Quantity"
         };
 
         for (int i = 0; i < headers.Length; i++)
@@ -93,14 +113,28 @@ public class ExcelTemplateService : IExcelTemplateService
         }
 
         // Header styling
-        using (var range = worksheet.Cells[1, 1, 1, headers.Length])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
-            range.Style.Font.Color.SetColor(System.Drawing.Color.White);
-            range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-            range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            using (var range = worksheet.Cells[1, 1, 1, headers.Length])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
+                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            }
+        }
+        catch
+        {
+            // Fallback styling without colors
+            using (var range = worksheet.Cells[1, 1, 1, headers.Length])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                range.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+            }
         }
 
         int row = 2;
@@ -108,80 +142,89 @@ public class ExcelTemplateService : IExcelTemplateService
         // Ejemplo 1: Cemento (usando categoría exacta del sistema)
         AddRow(worksheet, row++, 
             "CONST-001", "Cemento Portland Gris x 50kg", "Cemento tipo I para construcción general", 
-            25.50m, 18.00m, 200, 50, "7701234567890", "Cement and Concrete (Cemento y Concreto)");
+            25.50m, 18.00m, 200, 50, "7701234567890", "Cement and Concrete (Cemento y Concreto)",
+            "https://example.com/cemento.jpg");
 
         // Ejemplo 2: Producto + Cliente + Venta (herramientas eléctricas)
         AddRow(worksheet, row++, 
             "CONST-002", "Taladro Percutor DeWalt 850W", "Taladro eléctrico profesional con estuche y brocas", 
             185.99m, 120.00m, 35, 10, "7701234567891", "Power Tools (Herramientas Eléctricas)",
+            "https://example.com/taladro.jpg",
             "Roberto", "Martínez", "roberto.martinez@construcciones.com", "+57 310 456 7890", 
             "Carrera 15 #85-32, Bogotá", "52123456", 2);
 
         // Ejemplo 3: Pisos y azulejos
         AddRow(worksheet, row++, 
             "CONST-003", "Cerámica Piso 45x45cm Beige", "Cerámica antideslizante para piso, caja x 2.03 m²", 
-            42.99m, 28.50m, 150, 30, "7701234567892", "Floors and Tiles (Pisos y Azulejos)");
+            42.99m, 28.50m, 150, 30, "7701234567892", "Floors and Tiles (Pisos y Azulejos)",
+            "https://example.com/ceramica.jpg");
 
         // Ejemplo 4: Cliente nuevo (constructor)
         AddRow(worksheet, row++, 
-            null, null, null, null, null, null, null, null, null,
+            null, null, null, null, null, null, null, null, null, null,
             "Ana", "Gómez", "ana.gomez@email.com", "+57 315 678 9012", 
             "Calle 127 #45-67, Bogotá", "1098765432");
 
         // Ejemplo 5: Venta de cemento a cliente nuevo
         AddRow(worksheet, row++, 
-            "CONST-001", null, null, null, null, null, null, null, null,
+            "CONST-001", null, null, null, null, null, null, null, null, null,
             "Ana", "Gómez", "ana.gomez@email.com", null, null, null, 50);
 
         // Ejemplo 6: Varilla y acero
         AddRow(worksheet, row++, 
             "CONST-004", "Varilla Corrugada 3/8\" x 6m", "Varilla de acero corrugado grado 60", 
-            12.75m, 9.20m, 500, 100, "7701234567893", "Rebar and Steel (Varilla y Acero)");
+            12.75m, 9.20m, 500, 100, "7701234567893", "Rebar and Steel (Varilla y Acero)",
+            "https://example.com/varilla.jpg");
 
         // Ejemplo 7: Cliente + venta de varillas (empresa constructora)
         AddRow(worksheet, row++, 
-            "CONST-004", null, null, null, null, null, null, null, null,
+            "CONST-004", null, null, null, null, null, null, null, null, null,
             "Construcciones", "Pérez S.A.S", "compras@construccionesperez.com", "+57 601 234 5678", 
             "Autopista Norte #145-30, Bogotá", "900123456", 100);
 
         // Ejemplo 8: Herramienta manual
         AddRow(worksheet, row++, 
             "CONST-005", "Nivel Láser Autonivelante", "Nivel láser de línea cruzada, alcance 30m", 
-            145.00m, 95.00m, 25, 8, "7701234567894", "Hand Tools (Herramientas Manuales)");
+            145.00m, 95.00m, 25, 8, "7701234567894", "Hand Tools (Herramientas Manuales)",
+            "https://example.com/nivel.jpg");
 
         // Ejemplo 9: Actualizar cliente existente (mismo email)
         AddRow(worksheet, row++, 
-            null, null, null, null, null, null, null, null, null,
+            null, null, null, null, null, null, null, null, null, null,
             "Roberto", "Martínez Vargas", "roberto.martinez@construcciones.com", "+57 310 999 8888", 
             "Carrera 15 #85-32 Oficina 201, Bogotá", "52123456");
 
         // Ejemplo 10: Material eléctrico
         AddRow(worksheet, row++, 
             "CONST-006", "Cable Eléctrico THW 12 AWG x 100m", "Cable de cobre calibre 12 para instalaciones eléctricas", 
-            78.50m, 52.00m, 80, 20, "7701234567895", "Electrical (Electricidad)");
+            78.50m, 52.00m, 80, 20, "7701234567895", "Electrical (Electricidad)",
+            "https://example.com/cable.jpg");
 
         // Ejemplo 11: Tubería PVC
         AddRow(worksheet, row++, 
             "CONST-007", "Tubería PVC 4\" x 3m Sanitaria", "Tubería PVC para desagües y alcantarillado", 
-            18.90m, 12.50m, 120, 25, "7701234567896", "Pipe and PVC (Tubería y PVC)");
+            18.90m, 12.50m, 120, 25, "7701234567896", "Pipe and PVC (Tubería y PVC)",
+            "https://example.com/tuberia.jpg");
 
         // Ejemplo 12: Venta de cerámica a cliente existente
         AddRow(worksheet, row++, 
-            "CONST-003", null, null, null, null, null, null, null, null,
+            "CONST-003", null, null, null, null, null, null, null, null, null,
             "Ana", "Gómez", "ana.gomez@email.com", null, null, null, 20);
 
         // Ejemplo 13: Pintura
         AddRow(worksheet, row++, 
             "CONST-008", "Pintura Vinílica Blanco 20L", "Pintura lavable para interiores y exteriores", 
-            45.99m, 32.00m, 60, 15, "7701234567897", "Paints and Coatings (Pinturas y Recubrimientos)");
+            45.99m, 32.00m, 60, 15, "7701234567897", "Paints and Coatings (Pinturas y Recubrimientos)",
+            "https://example.com/pintura.jpg");
 
         // Ejemplo 14: Renta de maquinaria - Montacargas
         AddRow(worksheet, row++, 
             "RENT-001", "Montacargas Eléctrico 2.5 Ton", "Montacargas eléctrico para renta diaria/mensual", 
-            150.00m, 100.00m, 5, 2, "7701234567898", "Forklifts (Montacargas)");
+            150.00m, 100.00m, 5, 2, "7701234567898", "Forklifts (Montacargas)",
+            "https://example.com/montacargas.jpg");
 
         // Auto-fit columns
-        worksheet.Cells.AutoFitColumns();
+        try { worksheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
         
         // Adjust specific column widths
         worksheet.Column(2).Width = 35;  // Producto
@@ -193,7 +236,11 @@ public class ExcelTemplateService : IExcelTemplateService
         // Add note at bottom
         worksheet.Cells[row + 2, 1].Value = "NOTA: Este archivo contiene datos de ejemplo con categorías reales del sistema. Ver hoja 'Categorías Disponibles' para lista completa.";
         worksheet.Cells[row + 2, 1].Style.Font.Italic = true;
-        worksheet.Cells[row + 2, 1].Style.Font.Color.SetColor(System.Drawing.Color.Gray);
+        try
+        {
+            worksheet.Cells[row + 2, 1].Style.Font.Color.SetColor(System.Drawing.Color.Gray);
+        }
+        catch { /* Ignore color errors */ }
         using (var range = worksheet.Cells[row + 2, 1, row + 2, headers.Length])
         {
             range.Merge = true;
@@ -228,13 +275,26 @@ public class ExcelTemplateService : IExcelTemplateService
         }
 
         // Style headers
-        using (var range = vehiclesSheet.Cells[1, 1, 1, headers.Length])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 127, 80)); // Coral
-            range.Style.Font.Color.SetColor(System.Drawing.Color.White);
-            range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            using (var range = vehiclesSheet.Cells[1, 1, 1, headers.Length])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(255, 127, 80)); // Coral
+                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
+        }
+        catch
+        {
+            // Fallback styling without colors
+            using (var range = vehiclesSheet.Cells[1, 1, 1, headers.Length])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            }
         }
 
         int row = 2;
@@ -342,7 +402,7 @@ public class ExcelTemplateService : IExcelTemplateService
         }
 
         // Auto-fit columns
-        vehiclesSheet.Cells.AutoFitColumns();
+        try { vehiclesSheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
         vehiclesSheet.Column(1).Width = 15;  // Brand
         vehiclesSheet.Column(2).Width = 15;  // Model
         vehiclesSheet.Column(14).Width = 50; // Specifications
@@ -395,7 +455,11 @@ public class ExcelTemplateService : IExcelTemplateService
         instrSheet.Cells["A1"].Value = "VEHICLES BULK IMPORT - INSTRUCTIONS";
         instrSheet.Cells["A1"].Style.Font.Bold = true;
         instrSheet.Cells["A1"].Style.Font.Size = 16;
-        instrSheet.Cells["A1"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        try
+        {
+            instrSheet.Cells["A1"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        }
+        catch { /* Ignore color errors */ }
         
         int row = 3;
         instrSheet.Cells[row++, 1].Value = "HOW TO USE THIS FILE:";
@@ -431,7 +495,7 @@ public class ExcelTemplateService : IExcelTemplateService
         instrSheet.Cells[row++, 1].Value = "• Is Active: 'Yes' or 'No' (default: Yes)";
         instrSheet.Cells[row++, 1].Value = "• Leave fields empty if not applicable";
         
-        instrSheet.Cells.AutoFitColumns();
+        try { instrSheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
         instrSheet.Column(1).Width = 70;
     }
 
@@ -447,11 +511,23 @@ public class ExcelTemplateService : IExcelTemplateService
         typesSheet.Cells["B3"].Value = "Description";
         typesSheet.Cells["C3"].Value = "Typical Use";
         
-        using (var range = typesSheet.Cells["A3:C3"])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            using (var range = typesSheet.Cells["A3:C3"])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+            }
+        }
+        catch
+        {
+            // Fallback styling without colors
+            using (var range = typesSheet.Cells["A3:C3"])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            }
         }
         
         int row = 4;
@@ -482,7 +558,7 @@ public class ExcelTemplateService : IExcelTemplateService
             row++;
         }
         
-        typesSheet.Cells.AutoFitColumns();
+        try { typesSheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
     }
 
     private void AddCategoriesSheet(ExcelPackage package)
@@ -493,7 +569,11 @@ public class ExcelTemplateService : IExcelTemplateService
         catSheet.Cells["A1"].Value = "CATEGORÍAS DISPONIBLES EN EL SISTEMA";
         catSheet.Cells["A1"].Style.Font.Bold = true;
         catSheet.Cells["A1"].Style.Font.Size = 14;
-        catSheet.Cells["A1"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        try
+        {
+            catSheet.Cells["A1"].Style.Font.Color.SetColor(System.Drawing.Color.DarkBlue);
+        }
+        catch { /* Ignore color errors */ }
         using (var range = catSheet.Cells["A1:B1"])
         {
             range.Merge = true;
@@ -503,12 +583,24 @@ public class ExcelTemplateService : IExcelTemplateService
         catSheet.Cells["A3"].Value = "Nombre de Categoría (usar exactamente como aparece)";
         catSheet.Cells["B3"].Value = "Descripción";
         
-        using (var range = catSheet.Cells["A3:B3"])
+        try
         {
-            range.Style.Font.Bold = true;
-            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
-            range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+            using (var range = catSheet.Cells["A3:B3"])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(79, 129, 189));
+                range.Style.Font.Color.SetColor(System.Drawing.Color.White);
+            }
+        }
+        catch
+        {
+            // Fallback styling without colors
+            using (var range = catSheet.Cells["A3:B3"])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            }
         }
         
         int row = 4;
@@ -517,7 +609,11 @@ public class ExcelTemplateService : IExcelTemplateService
         catSheet.Cells[row, 1].Value = "MATERIALES DE CONSTRUCCIÓN";
         catSheet.Cells[row, 1].Style.Font.Bold = true;
         catSheet.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-        catSheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+        try
+        {
+            catSheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+        }
+        catch { /* Ignore color errors */ }
         using (var range = catSheet.Cells[row, 1, row, 2])
         {
             range.Merge = true;
@@ -560,7 +656,11 @@ public class ExcelTemplateService : IExcelTemplateService
         catSheet.Cells[row, 1].Value = "RENTA DE VEHÍCULOS Y MAQUINARIA INDUSTRIAL";
         catSheet.Cells[row, 1].Style.Font.Bold = true;
         catSheet.Cells[row, 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-        catSheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+        try
+        {
+            catSheet.Cells[row, 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+        }
+        catch { /* Ignore color errors */ }
         using (var range = catSheet.Cells[row, 1, row, 2])
         {
             range.Merge = true;
@@ -599,7 +699,7 @@ public class ExcelTemplateService : IExcelTemplateService
         }
         
         // Auto-fit and adjust columns
-        catSheet.Cells.AutoFitColumns();
+        try { catSheet.Cells.AutoFitColumns(); } catch { /* Ignore GDI+ errors on Linux */ }
         catSheet.Column(1).Width = 50;
         catSheet.Column(2).Width = 70;
         
@@ -607,7 +707,11 @@ public class ExcelTemplateService : IExcelTemplateService
         row += 2;
         catSheet.Cells[row, 1].Value = "IMPORTANTE: Al importar productos, el nombre de la categoría debe coincidir EXACTAMENTE con uno de los nombres de esta lista.";
         catSheet.Cells[row, 1].Style.Font.Bold = true;
-        catSheet.Cells[row, 1].Style.Font.Color.SetColor(System.Drawing.Color.Red);
+        try
+        {
+            catSheet.Cells[row, 1].Style.Font.Color.SetColor(System.Drawing.Color.Red);
+        }
+        catch { /* Ignore color errors */ }
         using (var range = catSheet.Cells[row, 1, row, 2])
         {
             range.Merge = true;
@@ -618,7 +722,7 @@ public class ExcelTemplateService : IExcelTemplateService
     private void AddRow(ExcelWorksheet ws, int row,
         string? sku = null, string? producto = null, string? descripcion = null,
         decimal? precio = null, decimal? costo = null, int? stock = null, int? stockMin = null,
-        string? barcode = null, string? categoria = null,
+        string? barcode = null, string? categoria = null, string? imageUrl = null,
         string? nombre = null, string? apellido = null, string? email = null,
         string? telefono = null, string? direccion = null, string? documento = null,
         int? cantidad = null)
@@ -633,6 +737,7 @@ public class ExcelTemplateService : IExcelTemplateService
         ws.Cells[row, col++].Value = stockMin;
         ws.Cells[row, col++].Value = barcode;
         ws.Cells[row, col++].Value = categoria;
+        ws.Cells[row, col++].Value = imageUrl; // New column
         ws.Cells[row, col++].Value = nombre;
         ws.Cells[row, col++].Value = apellido;
         ws.Cells[row, col++].Value = email;
