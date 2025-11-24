@@ -28,6 +28,7 @@ public class VehiclesController : ControllerBase
 
     // GET: api/vehicles
     [HttpGet]
+    [AllowAnonymous] // Public endpoint for client catalog
     [ProducesResponseType(typeof(IEnumerable<VehicleDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll()
@@ -54,6 +55,7 @@ public class VehiclesController : ControllerBase
 
     // GET: api/vehicles/available
     [HttpGet("available")]
+    [AllowAnonymous] // Public endpoint for client catalog
     [ProducesResponseType(typeof(IEnumerable<VehicleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAvailable()
     {

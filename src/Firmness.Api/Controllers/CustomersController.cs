@@ -15,17 +15,17 @@ namespace Firmness.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CustomersApiController : ControllerBase
+public class CustomersController : ControllerBase
 {
     private readonly ICustomerService _customerService;
     private readonly IMapper _mapper;
-    private readonly ILogger<CustomersApiController> _logger;
+    private readonly ILogger<CustomersController> _logger;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public CustomersApiController(
+    public CustomersController(
         ICustomerService customerService,
         IMapper mapper,
-        ILogger<CustomersApiController> logger,
+        ILogger<CustomersController> logger,
         UserManager<ApplicationUser> userManager)
     {
         _customerService = customerService;
@@ -37,6 +37,34 @@ public class CustomersApiController : ControllerBase
 
     // GET: api/customers
     // It obtains all customers (information limited for security reasons)
+
+    // GET: api/customers/me
+    // Obtains the current authenticated customer's information
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CustomerDto>> GetMe()
+    {
+        try
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(new { message = "User ID not found in token" });
+
+            var customer = await _customerService.GetByIdentityUserIdAsync(userId);
+            if (customer == null)
+                return NotFound(new { message = "Customer profile not found for this user" });
+
+            var customerDto = _mapper.Map<CustomerDto>(customer);
+            return Ok(new { isSuccess = true, data = customerDto });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving current customer profile");
+            return StatusCode(500, new { message = "Internal Server Error" });
+        }
+    }
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CustomerDto>), StatusCodes.Status200OK)]
@@ -158,8 +186,21 @@ public class CustomersApiController : ControllerBase
             if (customer == null)
                 return NotFound(new { message = $"Client with ID {id} not found" });
 
+            _logger.LogInformation("Updating customer {Id}. Current IsActive: {CurrentIsActive}. DTO IsActive: {DtoIsActive}", 
+                    id, customer.IsActive, updateDto.IsActive.HasValue ? updateDto.IsActive.Value.ToString() : "NULL");
+
+            // Security: Prevent non-admins from changing IsActive status
+            // If the user is NOT an admin, we force IsActive to null so AutoMapper ignores it (preserving current state)
+            if (!User.IsInRole("Admin"))
+            {
+                updateDto.IsActive = null;
+            }
+
             // Map updateDto to customer (non-null properties only)
             _mapper.Map(updateDto, customer);
+            
+            _logger.LogInformation("After mapping. New IsActive: {NewIsActive}", customer.IsActive);
+
             await _customerService.UpdateAsync(customer);
 
             var customerDto = _mapper.Map<CustomerDto>(customer);
@@ -235,4 +276,3 @@ public class CustomersApiController : ControllerBase
         }
     }
 }
-

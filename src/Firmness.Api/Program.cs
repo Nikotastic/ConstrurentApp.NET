@@ -150,6 +150,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireClientRole", policy => policy.RequireRole("Client"));
 });
 
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithExposedHeaders("*");
+    });
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 // Add Application services (includes AutoMapper)
@@ -180,33 +192,62 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Apply migrations and seed Identity data (roles/users)
+// Apply migrations and seed Identity data (roles/users) with retry logic
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var logger = services.GetRequiredService<ILogger<Program>>();
-    try
+    
+    int maxRetries = 10;
+    int retryDelay = 2000; // 2 seconds
+    
+    for (int i = 0; i < maxRetries; i++)
     {
-        var db = services.GetRequiredService<ApplicationDbContext>();
-        db.Database.Migrate();
-        await SeedData.InitializeAsync(services);
-        logger.LogInformation("Database migrated and seed data initialized (Identity roles/users).");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error while migrating or seeding the database.");
-        // Do not rethrow to allow the app to run in a degraded state if necessary.
+        try
+        {
+            var db = services.GetRequiredService<ApplicationDbContext>();
+            if (db.Database.GetPendingMigrations().Any())
+            {
+                logger.LogInformation("Applying pending migrations...");
+                db.Database.Migrate();
+            }
+            else
+            {
+                logger.LogInformation("No pending migrations found.");
+            }
+            
+            await SeedData.InitializeAsync(services);
+            logger.LogInformation("Database migrated and seed data initialized.");
+            break; // Success
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"Attempt {i + 1}/{maxRetries} failed to migrate database. Retrying in {retryDelay/1000}s...");
+            if (i == maxRetries - 1)
+            {
+                logger.LogError("Max retries reached. Database migration failed.");
+            }
+            else
+            {
+                Thread.Sleep(retryDelay);
+            }
+        }
     }
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments for easier testing
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Only use HTTPS redirection when not in container (Docker uses HTTP internally)
+if (!inContainer)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+// Enable CORS - MUST be before Authentication/Authorization
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();

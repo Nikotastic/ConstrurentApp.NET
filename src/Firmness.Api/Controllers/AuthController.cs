@@ -40,20 +40,53 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try 
+        {
+            _logger.LogInformation("Login attempt for {Email}", model.Email);
 
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
-            return Unauthorized(new { message = "Invalid credentials" });
+            if (!ModelState.IsValid) 
+            {
+                _logger.LogWarning("Invalid model state for {Email}", model.Email);
+                return BadRequest(ModelState);
+            }
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-        if (!result.Succeeded)
-            return Unauthorized(new { message = "Invalid credentials" });
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found: {Email}", model.Email);
+                return Unauthorized(new { message = "Invalid credentials" });
+            }
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var token = GenerateJwtToken(user, roles);
+            _logger.LogInformation("User found, checking password for {Email}", model.Email);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            if (!result.Succeeded)
+            {
+                _logger.LogWarning("Invalid password for {Email}", model.Email);
+                return Unauthorized(new { message = "Invalid credentials" });
+            }
 
-        return Ok(new LoginResponse { Token = token, ExpiresInSeconds = 3600 });
+            // Check if customer is active
+            var customer = await _customerService.GetByIdentityUserIdAsync(user.Id);
+            if (customer != null && !customer.IsActive)
+            {
+                _logger.LogWarning("Login blocked: Customer account is inactive for {Email}", model.Email);
+                return Unauthorized(new { message = "Your account is inactive. Please contact support." });
+            }
+
+            _logger.LogInformation("Password correct, getting roles for {Email}", model.Email);
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            _logger.LogInformation("Generating token for {Email}", model.Email);
+            var token = GenerateJwtToken(user, roles);
+
+            _logger.LogInformation("Login successful for {Email}", model.Email);
+            return Ok(new LoginResponse { Token = token, ExpiresInSeconds = 3600 });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for email {Email}. StackTrace: {StackTrace}", model.Email, ex.StackTrace);
+            return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}", details = ex.ToString() });
+        }
     }
 
     [HttpPost("register-client")]
