@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
+using Firmness.Domain.Interfaces;
 
 namespace Firmness.Test;
 
@@ -18,6 +19,7 @@ public class SalesControllerTests
     private readonly Mock<ISaleService> _mockSaleService;
     private readonly Mock<ICustomerService> _mockCustomerService;
     private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IEmailService> _mockEmailService;
     private readonly Mock<ILogger<SalesController>> _mockLogger;
     private readonly SalesController _controller;
 
@@ -26,11 +28,13 @@ public class SalesControllerTests
         _mockSaleService = new Mock<ISaleService>();
         _mockCustomerService = new Mock<ICustomerService>();
         _mockMapper = new Mock<IMapper>();
+        _mockEmailService = new Mock<IEmailService>();
         _mockLogger = new Mock<ILogger<SalesController>>();
 
         _controller = new SalesController(
             _mockSaleService.Object,
             _mockCustomerService.Object,
+            _mockEmailService.Object,
             _mockMapper.Object,
             _mockLogger.Object
         );
