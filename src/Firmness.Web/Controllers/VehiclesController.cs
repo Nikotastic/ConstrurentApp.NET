@@ -1,6 +1,7 @@
 ﻿using Firmness.Application.Interfaces;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
+using Firmness.Domain.Interfaces;
 using Firmness.Web.ViewModels.Vehicle;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,17 +15,20 @@ public class VehiclesController : Controller
     private readonly IVehicleService _vehicleService;
     private readonly IVehicleRentalService _rentalService;
     private readonly IExportService _exportService;
+    private readonly IFileStorageService _fileStorageService;
     private readonly ILogger<VehiclesController> _logger;
 
     public VehiclesController(
         IVehicleService vehicleService,
         IVehicleRentalService rentalService,
         IExportService exportService,
+        IFileStorageService fileStorageService,
         ILogger<VehiclesController> logger)
     {
         _vehicleService = vehicleService;
         _rentalService = rentalService;
         _exportService = exportService;
+        _fileStorageService = fileStorageService;
         _logger = logger;
     }
 
@@ -177,7 +181,7 @@ public class VehiclesController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> Create(VehicleFormViewModel viewModel)
+    public async Task<IActionResult> Create(VehicleFormViewModel viewModel, IFormFile? imageFile)
     {
         if (!ModelState.IsValid)
         {
@@ -187,33 +191,30 @@ public class VehiclesController : Controller
 
         try
         {
-            var vehicle = new Domain.Entities.Vehicle(
-                viewModel.Brand,
-                viewModel.Model,
-                viewModel.Year,
-                viewModel.LicensePlate,
-                (VehicleType)viewModel.VehicleType
-            )
+            // Handle image upload
+            string imageUrl = viewModel.ImageUrl ?? string.Empty;
+            if (imageFile != null && imageFile.Length > 0)
             {
-                HourlyRate = viewModel.HourlyRate,
-                DailyRate = viewModel.DailyRate,
-                WeeklyRate = viewModel.WeeklyRate,
-                MonthlyRate = viewModel.MonthlyRate,
-                CurrentHours = viewModel.CurrentHours,
-                CurrentMileage = viewModel.CurrentMileage,
-                Specifications = viewModel.Specifications,
-                SerialNumber = viewModel.SerialNumber,
-                MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
-                LastMaintenanceDate = viewModel.LastMaintenanceDate,
-                NextMaintenanceDate = viewModel.NextMaintenanceDate,
-                ImageUrl = viewModel.ImageUrl,
-                DocumentsUrl = viewModel.DocumentsUrl,
-                Notes = viewModel.Notes,
-                IsActive = viewModel.IsActive
-            };
+                _logger.LogInformation("Uploading vehicle image: {FileName}", imageFile.FileName);
+                try
+                {
+                    imageUrl = await _fileStorageService.UploadFileAsync(
+                        imageFile.FileName,
+                        imageFile.OpenReadStream(),
+                        imageFile.ContentType,
+                        "vehicles"
+                    );
+                    _logger.LogInformation("Image uploaded successfully: {ImageUrl}", imageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading vehicle image");
+                    ModelState.AddModelError("imageFile", "Error al subir la imagen. Por favor intenta de nuevo.");
+                    viewModel.VehicleTypes = GetVehicleTypeSelectList();
+                    return View(viewModel);
+                }
+            }
 
-            // Note: You'll need to add a method in IVehicleService to accept Vehicle entity
-            // For now, we'll use a workaround
             var createDto = new Domain.DTOs.Vehicle.CreateVehicleDto
             {
                 Brand = viewModel.Brand,
@@ -230,7 +231,7 @@ public class VehiclesController : Controller
                 Specifications = viewModel.Specifications,
                 SerialNumber = viewModel.SerialNumber,
                 MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
-                ImageUrl = viewModel.ImageUrl,
+                ImageUrl = imageUrl,
                 DocumentsUrl = viewModel.DocumentsUrl,
                 Notes = viewModel.Notes
             };
@@ -284,7 +285,7 @@ public class VehiclesController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin,Manager")]
-    public async Task<IActionResult> Edit(Guid id, VehicleFormViewModel viewModel)
+    public async Task<IActionResult> Edit(Guid id, VehicleFormViewModel viewModel, IFormFile? imageFile)
     {
         if (id != viewModel.Id)
         {
@@ -299,6 +300,44 @@ public class VehiclesController : Controller
 
         try
         {
+            // Handle image upload
+            string imageUrl = viewModel.ImageUrl ?? string.Empty;
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                _logger.LogInformation("Uploading new vehicle image: {FileName}", imageFile.FileName);
+                try
+                {
+                    // Delete old image if exists
+                    if (!string.IsNullOrWhiteSpace(viewModel.ImageUrl))
+                    {
+                        try
+                        {
+                            await _fileStorageService.DeleteFileAsync(viewModel.ImageUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Could not delete old vehicle image: {ImageUrl}", viewModel.ImageUrl);
+                        }
+                    }
+
+                    // Upload new image
+                    imageUrl = await _fileStorageService.UploadFileAsync(
+                        imageFile.FileName,
+                        imageFile.OpenReadStream(),
+                        imageFile.ContentType,
+                        "vehicles"
+                    );
+                    _logger.LogInformation("New image uploaded successfully: {ImageUrl}", imageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading vehicle image");
+                    ModelState.AddModelError("imageFile", "Error al subir la imagen. Por favor intenta de nuevo.");
+                    viewModel.VehicleTypes = GetVehicleTypeSelectList();
+                    return View(viewModel);
+                }
+            }
+
             var updateDto = new Domain.DTOs.Vehicle.UpdateVehicleDto
             {
                 Brand = viewModel.Brand,
@@ -317,7 +356,7 @@ public class VehiclesController : Controller
                 MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
                 LastMaintenanceDate = viewModel.LastMaintenanceDate,
                 NextMaintenanceDate = viewModel.NextMaintenanceDate,
-                ImageUrl = viewModel.ImageUrl,
+                ImageUrl = imageUrl,
                 DocumentsUrl = viewModel.DocumentsUrl,
                 Notes = viewModel.Notes,
                 IsActive = viewModel.IsActive
