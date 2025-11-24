@@ -16,7 +16,7 @@
 
         <div class="card">
             <div class="card-body">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input type="hidden" asp-for="Id" />
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
@@ -143,10 +143,37 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ImageUrl" class="form-label"></label>
-                            <input asp-for="ImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
-                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-image me-1"></i>Imagen del Vehículo
+                            </label>
+                            
+                            <!-- Current image -->
+                            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small">Imagen actual:</label>
+                                    <div>
+                                        <img id="currentImage" src="@Model.ImageUrl" alt="Current" class="img-thumbnail" 
+                                             style="max-width: 300px; max-height: 300px;" 
+                                             onerror="this.style.display='none'" />
+                                    </div>
+                                </div>
+                            }
+                            
+                            <!-- Upload new image -->
+                            <input type="file" name="imageFile" class="form-control" accept="image/*" 
+                                   onchange="previewImage(this)" />
+                            <small class="text-muted">Selecciona una nueva imagen para reemplazar la actual (JPG, PNG, GIF - máx. 5MB)</small>
+                            
+                            <!-- New image preview -->
+                            <div id="imagePreview" class="mt-3" style="display: none;">
+                                <label class="form-label text-success small">Nueva imagen:</label>
+                                <img id="preview" src="" alt="Vista previa" class="img-thumbnail" style="max-width: 300px; max-height: 300px;" />
+                            </div>
+                            
+                            <!-- Hidden field to keep current URL -->
+                            <input type="hidden" asp-for="ImageUrl" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="DocumentsUrl" class="form-label"></label>
@@ -189,4 +216,25 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                const preview = document.getElementById('preview');
+                const previewContainer = document.getElementById('imagePreview');
+                const currentImage = document.getElementById('currentImage');
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    if (currentImage) {
+                        currentImage.style.opacity = '0.5';
+                    }
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 }
