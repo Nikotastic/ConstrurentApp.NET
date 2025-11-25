@@ -1,4 +1,4 @@
-﻿@model Firmness.Web.ViewModels.VehicleRental.VehicleRentalFormViewModel
+@model Firmness.Web.ViewModels.VehicleRental.VehicleRentalFormViewModel
 @{
     ViewData["Title"] = "Create Vehicle Rental";
 }
@@ -65,12 +65,12 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="InitialHours" class="form-label"></label>
-                                <input asp-for="InitialHours" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                <input asp-for="InitialHours" class="form-control" type="number" step="1" placeholder="0" />
                                 <span asp-validation-for="InitialHours" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label asp-for="InitialMileage" class="form-label"></label>
-                                <input asp-for="InitialMileage" class="form-control" type="number" step="0.01" placeholder="0.00" />
+                                <input asp-for="InitialMileage" class="form-control" type="number" step="1" placeholder="0" />
                                 <span asp-validation-for="InitialMileage" class="text-danger small"></span>
                             </div>
                         </div>
@@ -119,7 +119,7 @@
                                 <label asp-for="RentalRate" class="form-label fw-bold"></label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input asp-for="RentalRate" class="form-control" type="number" step="0.01" placeholder="0.00" required />
+                                    <input asp-for="RentalRate" class="form-control" type="number" step="1" placeholder="0" required />
                                 </div>
                                 <span asp-validation-for="RentalRate" class="text-danger small"></span>
                             </div>
@@ -129,7 +129,7 @@
                             <label asp-for="Deposit" class="form-label fw-bold"></label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input asp-for="Deposit" class="form-control" type="number" step="0.01" placeholder="0.00" required />
+                                <input asp-for="Deposit" class="form-control" type="number" step="1" placeholder="0" required />
                             </div>
                             <span asp-validation-for="Deposit" class="text-danger small"></span>
                             <div class="form-text">

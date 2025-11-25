@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Firmness.Web.Models;
 using Firmness.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Firmness.Web.Controllers;
 
@@ -16,8 +17,18 @@ public class HomeController : Controller
         _dashboardService = dashboardService;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index()
     {
+        // If user is not authenticated, show landing page with empty model
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            _logger.LogInformation("User not authenticated - showing landing page");
+            return View(new DashboardViewModel());
+        }
+
+        // If authenticated, load dashboard data
+        _logger.LogInformation("User authenticated - loading dashboard data");
         try
         {
             var dashboardData = await _dashboardService.GetDashboardDataAsync();
