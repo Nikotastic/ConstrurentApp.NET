@@ -11,6 +11,7 @@ import { filter } from 'rxjs/operators';
 
 import { ToastComponent } from './presentation/shared/components/toast/toast.component';
 import { ConfirmationModalComponent } from './presentation/shared/components/confirmation-modal/confirmation-modal.component';
+import { ChatbotComponent } from './presentation/shared/components/chatbot/chatbot.component';
 
 /**
  * Root App Component
@@ -26,6 +27,7 @@ import { ConfirmationModalComponent } from './presentation/shared/components/con
     RouterLinkActive,
     ToastComponent,
     ConfirmationModalComponent,
+    ChatbotComponent,
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',

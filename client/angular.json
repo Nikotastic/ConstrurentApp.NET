@@ -30,7 +30,7 @@
               },
               "src/logo.ico"
             ],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss",  "node_modules/bootstrap-icons/font/bootstrap-icons.css"],
             "scripts": []
           },
           "configurations": {
@@ -90,7 +90,8 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.scss"],
+            "styles": ["src/styles.scss",
+            "node_modules/bootstrap-icons/font/bootstrap-icons.css"],
             "scripts": []
           }
         }
