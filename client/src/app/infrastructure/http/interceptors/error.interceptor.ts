@@ -8,24 +8,16 @@ import { catchError, throwError } from 'rxjs';
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      let errorMessage = 'An unexpected error occurred';
-
-      if (error.error instanceof ErrorEvent) {
-        // Client-side error
-        errorMessage = `Error: ${error.error.message}`;
-      } else {
-        // Server-side error
-        errorMessage = error.error?.message || error.message || `Error Code: ${error.status}`;
-      }
-
+      // Log the error for debugging
       console.error('HTTP Error:', {
         status: error.status,
-        message: errorMessage,
-        url: error.url
+        message: error.error?.message || error.message,
+        url: error.url,
+        error: error.error,
       });
 
-      return throwError(() => new Error(errorMessage));
+      // Return the original HttpErrorResponse so components can access status, error.message, etc.
+      return throwError(() => error);
     })
   );
 };
-
