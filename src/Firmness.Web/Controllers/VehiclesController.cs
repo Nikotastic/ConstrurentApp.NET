@@ -172,7 +172,9 @@ public class VehiclesController : Controller
         var viewModel = new VehicleFormViewModel
         {
             Year = DateTime.Now.Year,
-            VehicleTypes = GetVehicleTypeSelectList()
+            VehicleTypes = GetVehicleTypeSelectList(),
+            Statuses = GetStatusSelectList(),
+            Status = (int)VehicleStatus.Available
         };
         return View(viewModel);
     }
@@ -231,6 +233,12 @@ public class VehiclesController : Controller
                 Specifications = viewModel.Specifications,
                 SerialNumber = viewModel.SerialNumber,
                 MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
+                LastMaintenanceDate = viewModel.LastMaintenanceDate.HasValue 
+                    ? DateTime.SpecifyKind(viewModel.LastMaintenanceDate.Value, DateTimeKind.Utc) 
+                    : null,
+                NextMaintenanceDate = viewModel.NextMaintenanceDate.HasValue 
+                    ? DateTime.SpecifyKind(viewModel.NextMaintenanceDate.Value, DateTimeKind.Utc) 
+                    : null,
                 ImageUrl = imageUrl,
                 DocumentsUrl = viewModel.DocumentsUrl,
                 Notes = viewModel.Notes
@@ -253,6 +261,7 @@ public class VehiclesController : Controller
             _logger.LogError(ex, "Error creating vehicle");
             TempData["Error"] = "An error occurred while creating the vehicle.";
             viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            viewModel.Statuses = GetStatusSelectList();
             return View(viewModel);
         }
     }
@@ -345,6 +354,7 @@ public class VehiclesController : Controller
                 Year = viewModel.Year,
                 LicensePlate = viewModel.LicensePlate,
                 VehicleType = (VehicleType)viewModel.VehicleType,
+                Status = (VehicleStatus)viewModel.Status,
                 HourlyRate = viewModel.HourlyRate,
                 DailyRate = viewModel.DailyRate,
                 WeeklyRate = viewModel.WeeklyRate,
@@ -354,8 +364,12 @@ public class VehiclesController : Controller
                 Specifications = viewModel.Specifications,
                 SerialNumber = viewModel.SerialNumber,
                 MaintenanceHoursInterval = viewModel.MaintenanceHoursInterval,
-                LastMaintenanceDate = viewModel.LastMaintenanceDate,
-                NextMaintenanceDate = viewModel.NextMaintenanceDate,
+                LastMaintenanceDate = viewModel.LastMaintenanceDate.HasValue 
+                    ? DateTime.SpecifyKind(viewModel.LastMaintenanceDate.Value, DateTimeKind.Utc) 
+                    : null,
+                NextMaintenanceDate = viewModel.NextMaintenanceDate.HasValue 
+                    ? DateTime.SpecifyKind(viewModel.NextMaintenanceDate.Value, DateTimeKind.Utc) 
+                    : null,
                 ImageUrl = imageUrl,
                 DocumentsUrl = viewModel.DocumentsUrl,
                 Notes = viewModel.Notes,
@@ -379,6 +393,7 @@ public class VehiclesController : Controller
             _logger.LogError(ex, "Error updating vehicle {VehicleId}", id);
             TempData["Error"] = "An error occurred while updating the vehicle.";
             viewModel.VehicleTypes = GetVehicleTypeSelectList();
+            viewModel.Statuses = GetStatusSelectList();
             return View(viewModel);
         }
     }
@@ -447,6 +462,20 @@ public class VehiclesController : Controller
             .ToList();
     }
 
+    private List<SelectListItem> GetStatusSelectList()
+    {
+        return Enum.GetValues(typeof(VehicleStatus))
+            .Cast<VehicleStatus>()
+            .Select(s => new SelectListItem
+            {
+                Value = ((int)s).ToString(),
+                Text = s.ToString()
+            })
+            .ToList();
+    }
+
+
+
     private VehicleListViewModel MapToListViewModel(Domain.DTOs.Vehicle.VehicleDto dto)
     {
         return new VehicleListViewModel
@@ -514,6 +543,7 @@ public class VehiclesController : Controller
             Year = dto.Year,
             LicensePlate = dto.LicensePlate,
             VehicleType = (int)Enum.Parse<VehicleType>(dto.VehicleType),
+            Status = (int)Enum.Parse<VehicleStatus>(dto.Status),
             HourlyRate = dto.HourlyRate,
             DailyRate = dto.DailyRate,
             WeeklyRate = dto.WeeklyRate,
@@ -529,7 +559,8 @@ public class VehiclesController : Controller
             DocumentsUrl = dto.DocumentsUrl,
             Notes = dto.Notes,
             IsActive = dto.IsActive,
-            VehicleTypes = GetVehicleTypeSelectList()
+            VehicleTypes = GetVehicleTypeSelectList(),
+            Statuses = GetStatusSelectList()
         };
     }
 
