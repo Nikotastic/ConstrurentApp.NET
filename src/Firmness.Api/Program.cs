@@ -11,6 +11,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var env = builder.Environment;
 
+// Add environment variables to configuration 
+builder.Configuration.AddEnvironmentVariables();
+
 // Load .env or .env.local if present (same approach as Admin.Web, prefer .env.local)
 string[] candidates = { ".env.local", ".env" };
 string? envPath = null;
