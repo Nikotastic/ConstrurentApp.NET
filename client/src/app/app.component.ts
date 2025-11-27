@@ -55,7 +55,7 @@ export class AppComponent {
           '/profile',
         ];
 
-        const url = event.urlAfterRedirects;
+        const url = event.urlAfterRedirects.split('?')[0]; // Ignore query params
         const isHiddenRoute = hiddenLayoutRoutes.includes(url);
         const isProtectedRoute = protectedRoutesPrefixes.some((prefix) =>
           url.startsWith(prefix)
