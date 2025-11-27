@@ -20,11 +20,10 @@ import { CatalogItem } from './catalog-item.interface';
       <!-- Header with Search -->
       <div class="mb-8">
         <h1 class="text-4xl font-bold mb-4 text-gray-800">
-          🛒 Catálogo de Productos
+          🛒 Product Catalog
         </h1>
         <p class="text-gray-600 mb-6">
-          Explora nuestro catálogo de materiales de construcción y maquinaria
-          industrial
+          Explore our catalog of construction materials and industrial machinery
         </p>
 
         <!-- Search Bar -->
@@ -34,7 +33,7 @@ import { CatalogItem } from './catalog-item.interface';
               type="text"
               [(ngModel)]="searchTerm"
               (input)="onSearch()"
-              placeholder="🔍 Buscar productos o vehículos..."
+              placeholder="🔍 Search for products or vehicles..."
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -51,7 +50,7 @@ import { CatalogItem } from './catalog-item.interface';
             "
             class="px-4 py-2 rounded-lg border transition-colors"
           >
-            📦 Todos
+            📦 All
           </button>
           <button
             (click)="filterByType('products')"
@@ -62,7 +61,7 @@ import { CatalogItem } from './catalog-item.interface';
             "
             class="px-4 py-2 rounded-lg border transition-colors"
           >
-            🏗️ Productos
+            🏗️ Products
           </button>
           <button
             (click)="filterByType('vehicles')"
@@ -73,7 +72,7 @@ import { CatalogItem } from './catalog-item.interface';
             "
             class="px-4 py-2 rounded-lg border transition-colors"
           >
-            🚜 Vehículos
+            🚜 Vehicles
           </button>
         </div>
       </div>
@@ -83,7 +82,7 @@ import { CatalogItem } from './catalog-item.interface';
         <div
           class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"
         ></div>
-        <p class="mt-4 text-gray-600">Cargando catálogo...</p>
+        <p class="mt-4 text-gray-600">Loading catalog...</p>
       </div>
 
       <!-- Error State -->
@@ -93,7 +92,7 @@ import { CatalogItem } from './catalog-item.interface';
       >
         <div class="text-4xl mb-2">⚠️</div>
         <h3 class="text-xl font-semibold text-red-800 mb-2">
-          Error al cargar el catálogo
+          Error loading catalog
         </h3>
         <p class="text-red-600 mb-4">{{ error }}</p>
         <button
@@ -114,9 +113,9 @@ import { CatalogItem } from './catalog-item.interface';
           >
             <div class="text-6xl mb-4">📦</div>
             <h2 class="text-2xl font-semibold text-gray-600 mb-2">
-              No se encontraron resultados
+              No results found
             </h2>
-            <p class="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
+            <p class="text-gray-500">Try adjusting the search filters</p>
           </div>
 
           <!-- Grid -->
@@ -210,7 +209,7 @@ import { CatalogItem } from './catalog-item.interface';
                     </span>
                     <span class="text-xs text-gray-500 block">
                       {{
-                        item.itemType === 'vehicle' ? 'por día' : 'por unidad'
+                        item.itemType === 'vehicle' ? 'per day' : 'per unit'
                       }}
                     </span>
                   </div>
@@ -240,10 +239,10 @@ import { CatalogItem } from './catalog-item.interface';
                     </svg>
                     {{
                       item.stock === 0
-                        ? 'Agotado'
+                        ? 'Out of stock'
                         : item.itemType === 'vehicle'
-                        ? 'Reservar'
-                        : 'Agregar'
+                        ? 'Reserve'
+                        : 'Add'
                     }}
                   </button>
                 </div>
@@ -263,14 +262,14 @@ import { CatalogItem } from './catalog-item.interface';
           class="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
           (click)="$event.stopPropagation()"
         >
-          <h3 class="text-2xl font-bold mb-4">Agregar al Carrito</h3>
+          <h3 class="text-2xl font-bold mb-4">Add to Cart</h3>
           <p class="text-gray-700 mb-4">{{ selectedItem.name }}</p>
 
           <div class="space-y-4">
-            <!-- Tipo: Venta o Alquiler (Only for products) -->
+            <!-- Type: Sale or Rental (Only for products) -->
             <div *ngIf="selectedItem.itemType === 'product'">
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Tipo de operación</label
+                >Type of operation</label
               >
               <div class="flex gap-4">
                 <button
@@ -282,7 +281,7 @@ import { CatalogItem } from './catalog-item.interface';
                   "
                   class="flex-1 py-2 px-4 rounded-lg transition-colors"
                 >
-                  💰 Compra
+                  💰 Purchase
                 </button>
                 <button
                   (click)="isRental = true"
@@ -293,7 +292,7 @@ import { CatalogItem } from './catalog-item.interface';
                   "
                   class="flex-1 py-2 px-4 rounded-lg transition-colors"
                 >
-                  📅 Alquiler
+                  📅 Rental
                 </button>
               </div>
             </div>
@@ -301,7 +300,7 @@ import { CatalogItem } from './catalog-item.interface';
             <!-- Quantity -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Cantidad</label
+                >Quantity</label
               >
               <input
                 type="number"
@@ -315,7 +314,7 @@ import { CatalogItem } from './catalog-item.interface';
             <!-- Days (for rental or vehicle) -->
             <div *ngIf="isRental || selectedItem.itemType === 'vehicle'">
               <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Días de alquiler</label
+                >Days of rental</label
               >
               <input
                 type="number"
@@ -342,7 +341,7 @@ import { CatalogItem } from './catalog-item.interface';
               (click)="closeModal()"
               class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg transition-colors"
             >
-              Cancelar
+              Cancel
             </button>
             <button
               (click)="addToCart()"
@@ -350,8 +349,8 @@ import { CatalogItem } from './catalog-item.interface';
             >
               {{
                 selectedItem.itemType === 'vehicle'
-                  ? 'Reservar'
-                  : 'Agregar al Carrito'
+                  ? 'Reserve'
+                  : 'Add to Cart'
               }}
             </button>
           </div>
@@ -422,7 +421,7 @@ export class ProductListComponent implements OnInit {
       error: (err) => {
         console.error('Error loading catalog:', err);
         this.error =
-          'No se pudieron cargar los productos y vehículos. Por favor, intenta de nuevo.';
+          'Could not load products and vehicles. Please try again.';
         this.loading = false;
       },
     });
@@ -461,7 +460,7 @@ export class ProductListComponent implements OnInit {
   showAddToCartModal(item: CatalogItem) {
     if (item.itemType === 'vehicle') {
       this.toastService.warning(
-        '🚧 ¡Próximamente! El sistema de reserva de vehículos está en desarrollo. Podrás alquilar equipos pesados muy pronto.',
+        '🚧 Coming soon! The vehicle rental system is under development. You can rent heavy equipment very soon.',
         4000
       );
       return;
@@ -495,11 +494,11 @@ export class ProductListComponent implements OnInit {
         this.days
       );
       this.toastService.success(
-        `✅ ${this.selectedItem.name} agregado al carrito`
+        `${this.selectedItem.name} added to cart`
       );
     } else {
       this.toastService.warning(
-        '🚧 Sistema de vehículos en construcción. ¡Estamos trabajando para ofrecerte la mejor experiencia!',
+        '🚧 Vehicle rental system under development. You can rent heavy equipment very soon!',
         4000
       );
     }
@@ -509,9 +508,9 @@ export class ProductListComponent implements OnInit {
 
   getStockLabel(item: CatalogItem): string {
     if (item.itemType === 'vehicle') {
-      return item.stock > 0 ? 'Disponible' : 'No disponible';
+      return item.stock > 0 ? 'Available' : 'Not available';
     }
-    return item.stock > 0 ? `Stock: ${item.stock}` : 'Agotado';
+    return item.stock > 0 ? `Stock: ${item.stock}` : 'Out of stock';
   }
 
   getStockBadgeClass(item: CatalogItem): string {

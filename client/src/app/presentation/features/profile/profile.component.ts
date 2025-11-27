@@ -23,9 +23,9 @@ import { of } from 'rxjs';
       <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-800">👤 Mi Perfil</h1>
+          <h1 class="text-3xl font-bold text-gray-800">👤 Profile</h1>
           <p class="text-gray-600">
-            Gestiona tu información personal y preferencias
+            Manage your personal information and preferences
           </p>
         </div>
 
@@ -56,7 +56,7 @@ import { of } from 'rxjs';
                     <label
                       class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white font-semibold text-sm"
                     >
-                      <span>📷 Cambiar</span>
+                      <span>📷 Change</span>
                       <input
                         type="file"
                         class="hidden"
@@ -96,7 +96,7 @@ import { of } from 'rxjs';
                 <!-- Full Name -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Nombre Completo</label
+                    >Full Name</label
                   >
                   <input
                     type="text"
@@ -117,7 +117,7 @@ import { of } from 'rxjs';
                 <!-- Email (Read Only) -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Correo Electrónico</label
+                    >Email</label
                   >
                   <input
                     type="email"
@@ -130,7 +130,7 @@ import { of } from 'rxjs';
                 <!-- Phone -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Teléfono</label
+                    >Phone</label
                   >
                   <input
                     type="tel"
@@ -142,7 +142,7 @@ import { of } from 'rxjs';
                 <!-- Address -->
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-gray-700 mb-2"
-                    >Dirección</label
+                    >Address</label
                   >
                   <input
                     type="text"
@@ -160,13 +160,13 @@ import { of } from 'rxjs';
                   *ngIf="successMessage"
                   class="text-green-600 mr-4 font-medium animate-fade-in"
                 >
-                  ✅ {{ successMessage }}
+                  {{ successMessage }}
                 </p>
                 <p
                   *ngIf="errorMessage"
                   class="text-red-600 mr-4 font-medium animate-fade-in"
                 >
-                  ⚠️ {{ errorMessage }}
+                  {{ errorMessage }}
                 </p>
 
                 <button
@@ -179,7 +179,7 @@ import { of } from 'rxjs';
                       class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
                     ></div>
                   </span>
-                  {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+                  {{ saving ? 'Saving...' : 'Save Changes' }}
                 </button>
               </div>
             </form>

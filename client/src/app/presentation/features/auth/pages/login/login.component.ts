@@ -52,13 +52,13 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.isLoading = false;
-        this.toastService.success('¡Bienvenido de nuevo! 👋');
+        this.toastService.success('Welcome back 👋');
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.isLoading = false;
         const msg =
-          error.error?.message || 'Credenciales inválidas. Inténtalo de nuevo.';
+          error.error?.message || 'Invalid credentials. Please try again.';
         this.errorMessage = msg;
         this.toastService.error(msg);
       },

@@ -47,14 +47,14 @@ import { ProfileService } from '@application/services/profile.service';
               routerLinkActive="bg-slate-700 text-white"
               class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
             >
-              <span class="mr-3">🏗️</span> Catálogo
+              <span class="mr-3">🏗️</span> Catalog
             </a>
             <a
               routerLink="/cart"
               routerLinkActive="bg-slate-700 text-white"
               class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
             >
-              <span class="mr-3">🛒</span> Carrito
+              <span class="mr-3">🛒</span> Shopping Cart
               <span
                 *ngIf="cartItemCount > 0"
                 class="ml-auto bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full"
@@ -67,14 +67,14 @@ import { ProfileService } from '@application/services/profile.service';
               routerLinkActive="bg-slate-700 text-white"
               class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
             >
-              <span class="mr-3">📦</span> Mis Pedidos
+              <span class="mr-3">📦</span> My Orders
             </a>
             <a
               routerLink="/profile"
               routerLinkActive="bg-slate-700 text-white"
               class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-700 hover:text-white rounded-lg transition-colors"
             >
-              <span class="mr-3">👤</span> Mi Perfil
+              <span class="mr-3">👤</span> Profile
             </a>
           </nav>
 
@@ -83,7 +83,7 @@ import { ProfileService } from '@application/services/profile.service';
               (click)="logout()"
               class="flex items-center w-full px-4 py-2 text-red-400 hover:bg-slate-700 hover:text-red-300 rounded-lg transition-colors"
             >
-              <span class="mr-3">🚪</span> Cerrar Sesión
+              <span class="mr-3">🚪</span> Logout 
             </button>
           </div>
         </aside>
@@ -94,7 +94,7 @@ import { ProfileService } from '@application/services/profile.service';
           <header class="bg-white shadow-sm z-10">
             <div class="px-6 py-4 flex justify-between items-center">
               <h2 class="text-xl font-semibold text-gray-800">
-                Panel de Cliente
+                Client Panel
               </h2>
 
               <div class="flex items-center space-x-4">
@@ -128,7 +128,7 @@ import { ProfileService } from '@application/services/profile.service';
                     <div class="text-sm font-medium text-gray-900">
                       {{ userName }}
                     </div>
-                    <div class="text-xs text-gray-500">Cliente</div>
+                    <div class="text-xs text-gray-500">Client</div>
                   </div>
                   <div
                     class="h-10 w-10 bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 rounded-full flex items-center justify-center font-bold shadow-sm border border-orange-100 overflow-hidden"

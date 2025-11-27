@@ -1,9 +1,9 @@
 <div class="register-container">
   <div class="register-card">
     <div class="register-header">
-      <a routerLink="/" class="back-home">← Volver al Inicio</a>
-      <h1>Crear Cuenta</h1>
-      <p>Regístrate como cliente</p>
+      <a routerLink="/" class="back-home">← Come back</a>
+      <h1>Create Account</h1>
+      <p>Register as a client</p>
     </div>
 
     <form
@@ -13,7 +13,7 @@
     >
       <!-- Username -->
       <div class="form-group">
-        <label for="username">Nombre de Usuario *</label>
+        <label for="username">Username *</label>
         <input
           id="username"
           type="text"
@@ -25,9 +25,9 @@
         @if (username?.invalid && username?.touched) {
         <div class="error-message">
           @if (username?.errors?.['required']) {
-          <span>El nombre de usuario es requerido</span>
+          <span>Username is required</span>
           } @if (username?.errors?.['minlength']) {
-          <span>Debe tener al menos 3 caracteres</span>
+          <span>Must have at least 3 characters</span>
           }
         </div>
         }
@@ -35,21 +35,21 @@
 
       <!-- Email -->
       <div class="form-group">
-        <label for="email">Correo Electrónico *</label>
+        <label for="email">Email *</label>
         <input
           id="email"
           type="email"
           formControlName="email"
           class="form-control"
           [class.error]="email?.invalid && email?.touched"
-          placeholder="tu@email.com"
+          placeholder="your@email.com"
         />
         @if (email?.invalid && email?.touched) {
         <div class="error-message">
           @if (email?.errors?.['required']) {
-          <span>El correo es requerido</span>
+          <span>Email is required</span>
           } @if (email?.errors?.['email']) {
-          <span>Ingresa un correo válido</span>
+          <span>Enter a valid email</span>
           }
         </div>
         }
@@ -57,7 +57,7 @@
 
       <!-- Password -->
       <div class="form-group">
-        <label for="password">Contraseña *</label>
+        <label for="password">Password *</label>
         <input
           id="password"
           type="password"
@@ -69,9 +69,9 @@
         @if (password?.invalid && password?.touched) {
         <div class="error-message">
           @if (password?.errors?.['required']) {
-          <span>La contraseña es requerida</span>
+          <span>Password is required</span>
           } @if (password?.errors?.['minlength']) {
-          <span>Debe tener al menos 6 caracteres</span>
+          <span>Must have at least 6 characters</span>
           }
         </div>
         }
@@ -80,7 +80,7 @@
       <!-- First Name & Last Name (Row) -->
       <div class="form-row">
         <div class="form-group">
-          <label for="firstName">Nombre *</label>
+          <label for="firstName">Name *</label>
           <input
             id="firstName"
             type="text"
@@ -92,16 +92,16 @@
           @if (firstName?.invalid && firstName?.touched) {
           <div class="error-message">
             @if (firstName?.errors?.['required']) {
-            <span>Requerido</span>
+            <span>Required</span>
             } @if (firstName?.errors?.['minlength']) {
-            <span>Mín. 2 caracteres</span>
+            <span>Min. 2 characters</span>
             }
           </div>
           }
         </div>
 
         <div class="form-group">
-          <label for="lastName">Apellido *</label>
+          <label for="lastName">Last Name *</label>
           <input
             id="lastName"
             type="text"
@@ -113,9 +113,9 @@
           @if (lastName?.invalid && lastName?.touched) {
           <div class="error-message">
             @if (lastName?.errors?.['required']) {
-            <span>Requerido</span>
+            <span>Required</span>
             } @if (lastName?.errors?.['minlength']) {
-            <span>Mín. 2 caracteres</span>
+            <span>Min. 2 characters</span>
             }
           </div>
           }
@@ -124,7 +124,7 @@
 
       <!-- Document -->
       <div class="form-group">
-        <label for="document">Documento de Identidad</label>
+        <label for="document">Document</label>
         <input
           id="document"
           type="text"
@@ -136,7 +136,7 @@
 
       <!-- Phone -->
       <div class="form-group">
-        <label for="phone">Teléfono</label>
+        <label for="phone">Phone</label>
         <input
           id="phone"
           type="tel"
@@ -148,7 +148,7 @@
 
       <!-- Address -->
       <div class="form-group">
-        <label for="address">Dirección</label>
+        <label for="address">Address</label>
         <input
           id="address"
           type="text"
@@ -169,17 +169,17 @@
       <button type="submit" class="btn btn-primary" [disabled]="isLoading">
         @if (isLoading) {
         <span class="spinner"></span>
-        <span>Registrando...</span>
+        <span>Registering...</span>
         } @else {
-        <span>Crear Cuenta</span>
+        <span>Register</span>
         }
       </button>
 
       <!-- Login Link -->
       <div class="form-footer">
         <p>
-          ¿Ya tienes cuenta?
-          <a routerLink="/login" class="link">Inicia sesión aquí</a>
+          Do you have an account?
+          <a routerLink="/login" class="link">Login here</a>
         </p>
       </div>
     </form>

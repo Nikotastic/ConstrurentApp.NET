@@ -15,10 +15,10 @@ import { FormsModule } from '@angular/forms';
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-4xl font-bold mb-2 text-gray-800">
-          🛒 Carrito de Compras
+          🛒 Shopping Cart
         </h1>
         <p class="text-gray-600">
-          Revisa y confirma tus productos antes de proceder al pago
+          Review and confirm your products before proceeding to payment
         </p>
       </div>
 
@@ -29,10 +29,10 @@ import { FormsModule } from '@angular/forms';
       >
         <div class="text-8xl mb-4">🛒</div>
         <h2 class="text-3xl font-semibold text-gray-700 mb-3">
-          Tu carrito está vacío
+          Your cart is empty
         </h2>
         <p class="text-gray-500 mb-8 text-lg">
-          ¡Explora nuestro catálogo y encuentra lo que necesitas!
+          Explore our catalog and find what you need!
         </p>
         <a
           routerLink="/products"
@@ -52,7 +52,7 @@ import { FormsModule } from '@angular/forms';
               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
             />
           </svg>
-          Ver Productos
+          View Products
         </a>
       </div>
 
@@ -67,8 +67,8 @@ import { FormsModule } from '@angular/forms';
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <p class="text-blue-800 font-medium">
               📦 {{ cartService.getItemCount() }}
-              {{ cartService.getItemCount() === 1 ? 'producto' : 'productos' }}
-              en tu carrito
+              {{ cartService.getItemCount() === 1 ? 'product' : 'products' }}
+              in your cart
             </p>
           </div>
 
@@ -110,10 +110,10 @@ import { FormsModule } from '@angular/forms';
                         : 'bg-green-100 text-green-800'
                     "
                   >
-                    {{ item.isRental ? '📅 Alquiler' : '💰 Compra' }}
+                    {{ item.isRental ? '📅 Rental' : '💰 Purchase' }}
                   </span>
                   <span class="text-sm text-gray-500">
-                    Precio unitario:
+                    Unit price:
                     <strong
                       >\${{ item.product.price | number : '1.2-2' }}</strong
                     >
@@ -125,7 +125,7 @@ import { FormsModule } from '@angular/forms';
                   <!-- Quantity -->
                   <div class="flex items-center gap-2">
                     <label class="text-sm font-medium text-gray-700"
-                      >Cantidad:</label
+                      >Quantity:</label
                     >
                     <div class="flex items-center border rounded-lg">
                       <button
@@ -190,7 +190,7 @@ import { FormsModule } from '@angular/forms';
                   <!-- Days (for rental) -->
                   <div *ngIf="item.isRental" class="flex items-center gap-2">
                     <label class="text-sm font-medium text-gray-700"
-                      >Días:</label
+                      >Days:</label
                     >
                     <div class="flex items-center border rounded-lg">
                       <button
@@ -257,7 +257,7 @@ import { FormsModule } from '@angular/forms';
                     {{ item.quantity }} × \${{
                       item.product.price | number : '1.2-2'
                     }}
-                    <span *ngIf="item.isRental"> × {{ item.days }} días</span>
+                    <span *ngIf="item.isRental"> × {{ item.days }} days</span>
                   </div>
                 </div>
 
@@ -279,7 +279,7 @@ import { FormsModule } from '@angular/forms';
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                     />
                   </svg>
-                  Eliminar
+                  Remove
                 </button>
               </div>
             </div>
@@ -305,7 +305,7 @@ import { FormsModule } from '@angular/forms';
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              Continuar Comprando
+              Continue Shopping
             </a>
           </div>
         </div>
@@ -314,7 +314,7 @@ import { FormsModule } from '@angular/forms';
         <div class="lg:col-span-1">
           <div class="bg-white p-6 rounded-lg shadow-lg sticky top-4">
             <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
-              📋 Resumen del Pedido
+              📋 Order Summary
             </h2>
 
             <!-- Items Breakdown -->
@@ -334,8 +334,8 @@ import { FormsModule } from '@angular/forms';
                 >
               </div>
               <div class="flex justify-between text-sm text-gray-500">
-                <span>Envío</span>
-                <span>A calcular</span>
+                <span>Shipping</span>
+                <span>To be calculated</span>
               </div>
             </div>
 
@@ -368,7 +368,7 @@ import { FormsModule } from '@angular/forms';
                   d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                 />
               </svg>
-              Proceder al Pago
+              Proceed to Payment
             </button>
 
             <!-- Clear Cart -->
@@ -376,7 +376,7 @@ import { FormsModule } from '@angular/forms';
               (click)="clearCart()"
               class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-medium py-2 px-4 rounded-lg transition-colors text-sm"
             >
-              Vaciar Carrito
+              Clear
             </button>
 
             <!-- Additional Info -->
@@ -397,8 +397,8 @@ import { FormsModule } from '@angular/forms';
                   />
                 </svg>
                 <div class="text-xs text-blue-800">
-                  <p class="font-semibold mb-1">Compra Segura</p>
-                  <p>Tus datos están protegidos con encriptación SSL</p>
+                  <p class="font-semibold mb-1">Safe Purchase</p>
+                  <p>Your data is protected with SSL encryption</p>
                 </div>
               </div>
             </div>
@@ -419,18 +419,18 @@ export class CartComponent {
 
   async clearCart() {
     const confirmed = await this.confirmationService.confirm({
-      title: '¿Vaciar Carrito?',
+      title: 'Clear Cart?',
       message:
-        '¿Estás seguro de que deseas eliminar todos los productos del carrito? Esta acción no se puede deshacer.',
-      confirmText: 'Sí, vaciar',
-      cancelText: 'Cancelar',
+        'Are you sure you want to clear your cart? This action cannot be undone.',
+      confirmText: 'Yes, clear',
+      cancelText: 'Cancel',
       type: 'warning',
       icon: '🗑️',
     });
 
     if (confirmed) {
       this.cartService.clearCart();
-      this.toastService.success('✅ Carrito vaciado correctamente');
+      this.toastService.success('Cart cleared successfully');
     }
   }
 
@@ -443,7 +443,7 @@ export class CartComponent {
       this.cartService.updateQuantity(productId, currentQuantity + 1);
     } else {
       this.toastService.warning(
-        '⚠️ No hay más stock disponible para este producto'
+        '⚠️ This product is out of stock.'
       );
     }
   }
@@ -466,7 +466,7 @@ export class CartComponent {
 
   proceedToCheckout() {
     this.toastService.warning(
-      '🚧 ¡Estamos preparando algo increíble! El sistema de pagos estará disponible muy pronto. Podrás pagar con tarjeta, transferencia y más.',
+      '🚧 We are preparing something amazing! The payment system will be available very soon. You can pay with credit card, transfer, and more.',
       6000
     );
   }

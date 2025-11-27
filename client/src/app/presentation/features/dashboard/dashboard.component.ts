@@ -14,17 +14,17 @@ import { TokenService } from '@application/services/token.service';
     >
       <div class="relative z-10">
         <h1 class="text-3xl font-bold mb-2">
-          ¡Bienvenido de nuevo, {{ userName }}!
+          Welcome back, {{ userName }}!
         </h1>
         <p class="text-blue-100 max-w-2xl">
-          ¿Listo para tu próximo proyecto? Explora nuestro catálogo de
-          maquinaria pesada y materiales de construcción.
+          Ready for your next project? Explore our catalog of heavy machinery
+          and construction materials.
         </p>
         <button
           routerLink="/products"
           class="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-md transform hover:-translate-y-1"
         >
-          Ver Catálogo
+          Explore Catalog
         </button>
       </div>
       <div
@@ -50,10 +50,10 @@ import { TokenService } from '@application/services/token.service';
           <span class="text-2xl">🏗️</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-800 mb-1">
-          Alquilar Maquinaria
+          Rent Heavy Machinery
         </h3>
         <p class="text-sm text-gray-500">
-          Explora nuestra flota de equipos pesados.
+          Explore our fleet of heavy machinery.
         </p>
       </div>
 
@@ -67,10 +67,10 @@ import { TokenService } from '@application/services/token.service';
           <span class="text-2xl">🧱</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-800 mb-1">
-          Comprar Materiales
+          Buy Materials
         </h3>
         <p class="text-sm text-gray-500">
-          Cemento, acero y agregados de calidad.
+          Cement, steel, and construction aggregates.
         </p>
       </div>
 
@@ -84,10 +84,10 @@ import { TokenService } from '@application/services/token.service';
           <span class="text-2xl">📋</span>
         </div>
         <h3 class="text-lg font-semibold text-gray-800 mb-1">
-          Historial de Pedidos
+          Order History
         </h3>
         <p class="text-sm text-gray-500">
-          Revisa el estado de tus solicitudes.
+          Check the status of your orders.
         </p>
       </div>
     </div>
@@ -99,19 +99,19 @@ import { TokenService } from '@application/services/token.service';
       <div
         class="px-6 py-4 border-b border-gray-100 flex justify-between items-center"
       >
-        <h3 class="font-semibold text-gray-800">Actividad Reciente</h3>
+        <h3 class="font-semibold text-gray-800">Recent Activity</h3>
         <button class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-          Ver todo
+          See all
         </button>
       </div>
       <div class="p-6 text-center text-gray-500 py-12">
         <div class="text-4xl mb-3 opacity-50">📭</div>
-        <p class="text-gray-400">No tienes actividad reciente.</p>
+        <p class="text-gray-400">You have no recent activity.</p>
         <button
           routerLink="/products"
           class="mt-4 text-orange-500 hover:text-orange-600 font-medium hover:underline"
         >
-          Comenzar a comprar →
+          Start shopping →
         </button>
       </div>
     </div>

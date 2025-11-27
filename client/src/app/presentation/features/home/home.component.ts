@@ -16,15 +16,15 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         <div class="hero-content">
           <div class="container">
             <div class="hero-text">
-              <span class="badge-new">🚀 Plataforma #1 en Construcción</span>
+              <span class="badge-new">🚀 Platform #1 in Construction</span>
               <h1 class="hero-title">
-                Construye el Futuro con
+                Build the Future with
                 <span class="gradient-text">Firmness</span>
               </h1>
               <p class="hero-subtitle">
-                Alquila maquinaria pesada y compra materiales de construcción de
-                primera calidad. Todo en un solo lugar, rápido, seguro y al
-                mejor precio.
+                Rent heavy machinery and buy construction materials of
+                first-class quality. All in one place, fast, safe and at the
+                best price.
               </p>
               <div class="hero-buttons">
                 <a routerLink="/register" class="btn btn-primary btn-lg">
@@ -38,7 +38,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                       d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"
                     />
                   </svg>
-                  Comenzar Ahora
+                  Start Now
                 </a>
                 <a routerLink="/login" class="btn btn-outline btn-lg">
                   <svg
@@ -53,21 +53,21 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                       clip-rule="evenodd"
                     />
                   </svg>
-                  Ver Demo
+                  See Demo
                 </a>
               </div>
               <div class="hero-stats">
                 <div class="stat">
                   <span class="stat-number">500+</span>
-                  <span class="stat-label">Equipos Disponibles</span>
+                  <span class="stat-label">Available Equipment</span>
                 </div>
                 <div class="stat">
                   <span class="stat-number">1,200+</span>
-                  <span class="stat-label">Clientes Satisfechos</span>
+                  <span class="stat-label">Satisfied Clients</span>
                 </div>
                 <div class="stat">
                   <span class="stat-number">98%</span>
-                  <span class="stat-label">Tasa de Satisfacción</span>
+                  <span class="stat-label">Satisfaction Rate</span>
                 </div>
               </div>
             </div>
@@ -86,38 +86,36 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <section class="about-section">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Sobre Nosotros</span>
-            <h2 class="section-title">¿Qué es Firmness?</h2>
+            <span class="section-badge">About Us</span>
+            <h2 class="section-title">Who is Firmness?</h2>
             <p class="section-subtitle">
-              Somos la plataforma líder que conecta profesionales de la
-              construcción con los mejores equipos y materiales
+              We are the leading platform that connects professionals in
+              construction with the best equipment and materials
             </p>
           </div>
           <div class="about-grid">
             <div class="about-card">
               <div class="about-icon">🏗️</div>
-              <h3>Nuestra Misión</h3>
+              <h3>Our Mission</h3>
               <p>
-                Facilitar el acceso a maquinaria y materiales de construcción de
-                alta calidad, haciendo que cada proyecto sea más eficiente y
-                rentable.
+                To facilitate access to construction equipment and materials of
+                high quality, making each project more efficient and profitable.
               </p>
             </div>
             <div class="about-card">
               <div class="about-icon">🎯</div>
-              <h3>Nuestra Visión</h3>
+              <h3>Our Vision</h3>
               <p>
-                Ser la plataforma #1 en Latinoamérica para la industria de la
-                construcción, transformando la manera en que se ejecutan los
-                proyectos.
+                To be the #1 platform in Latin America for the construction
+                industry, transforming the way projects are executed.
               </p>
             </div>
             <div class="about-card">
               <div class="about-icon">💎</div>
-              <h3>Nuestros Valores</h3>
+              <h3>Our Values</h3>
               <p>
-                Confiabilidad, transparencia, innovación y compromiso con la
-                excelencia en cada servicio que ofrecemos.
+                Reliability, transparency, innovation and commitment to
+                excellence in every service we offer.
               </p>
             </div>
           </div>
@@ -128,32 +126,32 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <section class="services-section">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Nuestros Servicios</span>
-            <h2 class="section-title">Todo lo que Necesitas para Construir</h2>
+            <span class="section-badge">Our Services</span>
+            <h2 class="section-title">Everything You Need to Build</h2>
           </div>
           <div class="services-grid">
             <div class="service-card">
               <div class="service-image">
                 <img
                   src="https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600&q=80"
-                  alt="Excavadora"
+                  alt="Excavator"
                 />
                 <div class="service-overlay">
-                  <span class="service-badge">Más Popular</span>
+                  <span class="service-badge">Most Popular</span>
                 </div>
               </div>
               <div class="service-content">
-                <h3>Alquiler de Maquinaria</h3>
+                <h3>Equipment Rental</h3>
                 <p>
-                  Excavadoras, grúas, retroexcavadoras y más. Equipos modernos
-                  con mantenimiento garantizado.
+                  Excavators, cranes, backhoe excavators and more. Modern
+                  equipment with guaranteed maintenance.
                 </p>
                 <ul class="service-features">
-                  <li>✓ Entrega en 24 horas</li>
-                  <li>✓ Operadores certificados disponibles</li>
-                  <li>✓ Seguro incluido</li>
+                  <li>✓ Delivery in 24 hours</li>
+                  <li>✓ Certified operators available</li>
+                  <li>✓ Insurance included</li>
                 </ul>
-                <a href="#" class="service-link">Ver Catálogo →</a>
+                <a href="#" class="service-link">View Catalog →</a>
               </div>
             </div>
 
@@ -165,17 +163,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                 />
               </div>
               <div class="service-content">
-                <h3>Venta de Materiales</h3>
+                <h3>Material Sales</h3>
                 <p>
-                  Cemento, acero, ladrillos, arena y todos los materiales que
-                  necesitas para tu obra.
+                  Cement, steel, bricks, sand and all the materials you need for
+                  your construction.
                 </p>
                 <ul class="service-features">
-                  <li>✓ Precios mayoristas</li>
-                  <li>✓ Marcas reconocidas</li>
-                  <li>✓ Envío gratuito en compras grandes</li>
+                  <li>✓ Wholesale prices</li>
+                  <li>✓ Recognized brands</li>
+                  <li>✓ Free shipping on large purchases</li>
                 </ul>
-                <a href="#" class="service-link">Explorar Productos →</a>
+                <a href="#" class="service-link">Explore Products →</a>
               </div>
             </div>
 
@@ -183,21 +181,21 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               <div class="service-image">
                 <img
                   src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=600&q=80"
-                  alt="Herramientas"
+                  alt="Tools"
                 />
               </div>
               <div class="service-content">
-                <h3>Herramientas Especializadas</h3>
+                <h3>Specialized Tools</h3>
                 <p>
-                  Taladros, sierras, compresores y herramientas eléctricas de
-                  última generación.
+                  Drill presses, saws, compressors and electric tools of the
+                  latest generation.
                 </p>
                 <ul class="service-features">
-                  <li>✓ Alquiler por horas o días</li>
-                  <li>✓ Equipos profesionales</li>
-                  <li>✓ Asesoría técnica incluida</li>
+                  <li>✓ Rental by hours or days</li>
+                  <li>✓ Professional equipment</li>
+                  <li>✓ Technical advice included</li>
                 </ul>
-                <a href="#" class="service-link">Ver Herramientas →</a>
+                <a href="#" class="service-link">View Tools →</a>
               </div>
             </div>
           </div>
@@ -224,8 +222,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <section class="testimonials-section">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Testimonios</span>
-            <h2 class="section-title">Lo que Dicen Nuestros Clientes</h2>
+            <span class="section-badge">Testimonials</span>
+            <h2 class="section-title">What Our Clients Say</h2>
           </div>
           <div class="testimonials-grid">
             <div
@@ -252,8 +250,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <section class="faq-section">
         <div class="container">
           <div class="section-header">
-            <span class="section-badge">Preguntas Frecuentes</span>
-            <h2 class="section-title">¿Tienes Dudas?</h2>
+            <span class="section-badge">Frequently Asked Questions</span>
+            <h2 class="section-title">Do You Have Questions?</h2>
           </div>
           <div class="faq-grid">
             <div
@@ -277,14 +275,14 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       <section class="cta-section">
         <div class="container">
           <div class="cta-content">
-            <h2>¿Listo para Comenzar tu Próximo Proyecto?</h2>
-            <p>Únete a más de 1,200 profesionales que confían en Firmness</p>
+            <h2>Ready to Start Your Next Project?</h2>
+            <p>Join over 1,200 professionals who trust Firmness</p>
             <div class="cta-buttons">
               <a routerLink="/register" class="btn btn-white btn-lg">
-                Crear Cuenta Gratis
+                Create Free Account
               </a>
               <a routerLink="/login" class="btn btn-outline-white btn-lg">
-                Iniciar Sesión
+                Login
               </a>
             </div>
           </div>
@@ -301,8 +299,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
                 <span>Firmness</span>
               </div>
               <p>
-                Tu socio confiable en construcción. Conectamos profesionales con
-                los mejores equipos y materiales.
+                Your trusted partner in construction. Connecting professionals
+                with the best equipment and materials.
               </p>
               <div class="social-links">
                 <a href="#"
@@ -341,34 +339,34 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
               </div>
             </div>
             <div class="footer-col">
-              <h4>Servicios</h4>
+              <h4>Services</h4>
               <ul>
-                <li><a href="#">Alquiler de Maquinaria</a></li>
-                <li><a href="#">Venta de Materiales</a></li>
-                <li><a href="#">Herramientas</a></li>
-                <li><a href="#">Asesoría Técnica</a></li>
+                <li><a href="#">Equipment Rental</a></li>
+                <li><a href="#">Material Sales</a></li>
+                <li><a href="#">Tools</a></li>
+                <li><a href="#">Technical Advice</a></li>
               </ul>
             </div>
             <div class="footer-col">
-              <h4>Empresa</h4>
+              <h4>Company</h4>
               <ul>
-                <li><a href="#">Sobre Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
-                <li><a href="#">Trabaja con Nosotros</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="#">Work with Us</a></li>
                 <li><a href="#">Blog</a></li>
               </ul>
             </div>
             <div class="footer-col">
               <h4>Legal</h4>
               <ul>
-                <li><a href="#">Términos y Condiciones</a></li>
-                <li><a href="#">Política de Privacidad</a></li>
-                <li><a href="#">Política de Cookies</a></li>
+                <li><a href="#">Terms and Conditions</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+                <li><a href="#">Cookie Policy</a></li>
               </ul>
             </div>
           </div>
           <div class="footer-bottom">
-            <p>&copy; 2025 Firmness. Todos los derechos reservados.</p>
+            <p>&copy; 2025 Firmness. All rights reserved.</p>
           </div>
         </div>
       </footer>
@@ -381,57 +379,57 @@ export class HomeComponent {
   features = [
     {
       icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/></svg>',
-      title: 'Equipos Certificados',
+      title: 'Certified Equipment',
       description:
-        'Toda nuestra maquinaria cuenta con certificaciones de seguridad y mantenimiento preventivo',
+        'All our machinery is equipped with safety certifications and preventive maintenance',
     },
     {
       icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/></svg>',
-      title: 'Precios Competitivos',
+      title: 'Competitive Prices',
       description:
-        'Los mejores precios del mercado sin comprometer la calidad de nuestros servicios',
+        'The best prices in the market without compromising the quality of our services',
     },
     {
       icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>',
-      title: 'Disponibilidad 24/7',
+      title: '24/7 Availability',
       description:
-        'Atención al cliente y soporte técnico disponible las 24 horas del día, todos los días',
+        'Customer support and technical support available 24 hours a day, 7 days a week',
     },
     {
       icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>',
-      title: 'Seguro Incluido',
+      title: 'Included Insurance',
       description:
-        'Todos nuestros alquileres incluyen seguro contra daños y responsabilidad civil',
+        'All our rentals include insurance against damage and civil liability',
     },
     {
-      icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>',
-      title: 'Entrega Rápida',
+      icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z"/></svg>',
+      title: 'Fast Delivery',
       description:
-        'Entregamos tus equipos y materiales en menos de 24 horas en toda la ciudad',
+        'Deliver your equipment and materials within 24 hours in the entire city',
     },
     {
       icon: '<svg width="48" height="48" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd"/></svg>',
-      title: 'Asesoría Experta',
+      title: 'Expert Advice',
       description:
-        'Nuestro equipo de expertos te ayuda a elegir el equipo perfecto para tu proyecto',
+        'Our team of experts helps you choose the perfect equipment for your project',
     },
   ];
 
   testimonials = [
     {
-      text: 'Firmness transformó la manera en que gestionamos nuestros proyectos. El alquiler de maquinaria es rápido y confiable.',
+      text: 'Firmness transformed the way we manage our projects. Machinery rental is fast and reliable.',
       name: 'Carlos Méndez',
-      role: 'Ingeniero Civil',
+      role: 'Civil Engineer',
       initials: 'CM',
     },
     {
-      text: 'Los precios son excelentes y la calidad de los materiales es superior. Definitivamente mi primera opción.',
+      text: 'The prices are excellent and the quality of the materials is superior. Definitely my first choice.',
       name: 'María González',
-      role: 'Contratista',
+      role: 'Contractor',
       initials: 'MG',
     },
     {
-      text: 'El servicio al cliente es excepcional. Siempre están disponibles para resolver cualquier duda.',
+      text: 'The customer service is exceptional. They are always available to resolve any questions.',
       name: 'Roberto Silva',
       role: 'Constructor',
       initials: 'RS',
@@ -440,33 +438,33 @@ export class HomeComponent {
 
   faqs = [
     {
-      question: '¿Cómo funciona el alquiler de maquinaria?',
+      question: 'How does machinery rental work?',
       answer:
-        'Simplemente selecciona el equipo que necesitas, elige las fechas de alquiler y realiza el pago. Nosotros nos encargamos de la entrega y recogida.',
+        'Simply select the equipment you need, choose the rental dates and make the payment. We handle the delivery and pickup.',
       open: false,
     },
     {
-      question: '¿Qué incluye el precio del alquiler?',
+      question: 'What is included in the rental price?',
       answer:
-        'El precio incluye el seguro, mantenimiento preventivo, entrega y recogida del equipo. También puedes contratar un operador certificado por un costo adicional.',
+        'The price includes insurance, preventive maintenance, delivery and pickup of the equipment. You can also contract a certified operator for an additional cost.',
       open: false,
     },
     {
-      question: '¿Hacen entregas fuera de la ciudad?',
+      question: 'Do they make deliveries outside the city?',
       answer:
-        'Sí, realizamos entregas a nivel nacional. Los costos de envío varían según la distancia y el tipo de equipo.',
+        'Yes, we make deliveries nationwide. Shipping costs vary depending on the distance and type of equipment.',
       open: false,
     },
     {
-      question: '¿Qué métodos de pago aceptan?',
+      question: 'What payment methods do they accept?',
       answer:
-        'Aceptamos tarjetas de crédito, débito, transferencias bancarias y pagos en efectivo. También ofrecemos planes de financiamiento para proyectos grandes.',
+        'We accept credit cards, debit cards, bank transfers, and cash payments. We also offer financing plans for large projects.',
       open: false,
     },
     {
-      question: '¿Puedo cancelar o modificar mi reserva?',
+      question: 'Can I cancel or modify my reservation?',
       answer:
-        'Sí, puedes cancelar o modificar tu reserva hasta 24 horas antes de la fecha de entrega sin ningún cargo adicional.',
+        'Yes, you can cancel or modify your reservation up to 24 hours before the delivery date without any additional charges.',
       open: false,
     },
   ];
