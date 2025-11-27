@@ -53,6 +53,9 @@ services:
       - S3Settings__SecretKey=${S3Settings__SecretKey}
       - S3Settings__UseCloudFront=${S3Settings__UseCloudFront}
       - S3Settings__CloudFrontDomain=${S3Settings__CloudFrontDomain}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - Gemini__ApiKey=${GEMINI_API_KEY}
+      - Gemini__Model=${Gemini__Model}
     ports:
       - "${API_PORT}:8080"
     depends_on:
