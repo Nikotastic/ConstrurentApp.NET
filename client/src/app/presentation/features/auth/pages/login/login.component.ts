@@ -57,8 +57,25 @@ export class LoginComponent {
       },
       error: (error) => {
         this.isLoading = false;
-        const msg =
-          error.error?.message || 'Invalid credentials. Please try again.';
+
+        // Handle specific error cases
+        let msg = 'Invalid credentials. Please try again.';
+
+        if (error.status === 401) {
+          // Unauthorized - Invalid credentials or inactive account
+          const serverMsg = error.error?.message || '';
+          if (serverMsg.toLowerCase().includes('inactive')) {
+            msg = '⚠️ Your account is inactive. Please contact support.';
+          } else if (serverMsg.toLowerCase().includes('credentials')) {
+            msg =
+              '⚠️ Invalid email or password. Please check your credentials and try again.';
+          } else {
+            msg = '⚠️ ' + serverMsg;
+          }
+        } else if (error.error?.message) {
+          msg = error.error.message;
+        }
+
         this.errorMessage = msg;
         this.toastService.error(msg);
       },

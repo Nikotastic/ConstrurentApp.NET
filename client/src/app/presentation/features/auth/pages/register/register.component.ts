@@ -60,14 +60,29 @@ export class RegisterComponent {
       },
       error: (error) => {
         this.isLoading = false;
-        if (error.error?.errors) {
+
+        // Handle specific error cases
+        if (error.status === 409) {
+          // Conflict - Email or Username already exists
+          const message = error.error?.message || '';
+          if (message.toLowerCase().includes('email')) {
+            this.errorMessage =
+              'This email is already registered. Please use a different email or try logging in.';
+          } else if (message.toLowerCase().includes('username')) {
+            this.errorMessage =
+              'This username is already taken. Please choose a different username.';
+          } else {
+            this.errorMessage = '⚠️ ' + message;
+          }
+        } else if (error.error?.errors) {
           // Handle validation errors from backend
           this.errorMessage = Array.isArray(error.error.errors)
             ? error.error.errors.join(', ')
             : error.error.errors;
+        } else if (error.error?.message) {
+          this.errorMessage = error.error.message;
         } else {
-          this.errorMessage =
-            error.error?.message || 'Registration failed. Please try again.';
+          this.errorMessage = 'Registration failed. Please try again.';
         }
       },
     });
