@@ -346,11 +346,11 @@ public class VehicleRentalService : IVehicleRentalService
             await _rentalRepository.UpdateAsync(rental);
 
             // Update vehicle status back to available
-            var vehicle = await _vehicleRepository.GetByIdAsync(rental.VehicleId);
-            if (vehicle != null)
+            // Use the Vehicle navigation property that's already loaded to avoid tracking conflicts
+            if (rental.Vehicle != null)
             {
-                vehicle.Status = VehicleStatus.Available;
-                await _vehicleRepository.UpdateAsync(vehicle);
+                rental.Vehicle.Status = VehicleStatus.Available;
+                await _vehicleRepository.UpdateAsync(rental.Vehicle);
             }
 
             var rentalDto = _mapper.Map<VehicleRentalDto>(rental);

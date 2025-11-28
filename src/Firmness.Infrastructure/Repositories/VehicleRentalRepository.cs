@@ -56,6 +56,7 @@ public class VehicleRentalRepository : IVehicleRentalRepository
     {
         return await _db.VehicleRentals
             .AsNoTracking()
+            .Include(r => r.Vehicle)
             .Where(r => r.CustomerId == customerId)
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
