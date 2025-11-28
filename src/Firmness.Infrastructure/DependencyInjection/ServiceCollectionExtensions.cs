@@ -7,6 +7,7 @@ using Firmness.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Firmness.Infrastructure.Data;
+using Firmness.Application.Interfaces;
 
 namespace Firmness.Infrastructure.DependencyInjection;
 
@@ -26,6 +27,9 @@ public static class ServiceCollectionExtensions
         // UnitOfWork for application services to consume
         services.AddScoped<IUnitOfWork, ApplicationDbContext>();
         
+        // Identity Services
+        services.AddScoped<IUserAccountService, Firmness.Infrastructure.Identity.UserAccountService>();
+
         // Email Service Configuration (adapter)
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         
