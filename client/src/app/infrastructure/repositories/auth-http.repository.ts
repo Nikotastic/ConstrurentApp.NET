@@ -47,8 +47,7 @@ export class AuthHttpRepository implements IAuthRepository {
   private readonly storageService = inject(STORAGE_SERVICE_TOKEN);
   private readonly baseUrl = `${environment.apiUrl}/auth`;
 
-
-   // Login user with credentials
+  // Login user with credentials
 
   login(
     credentials: LoginCredentials
@@ -61,8 +60,7 @@ export class AuthHttpRepository implements IAuthRepository {
     return this.http.post<LoginResponseDTO>(`${this.baseUrl}/login`, dto);
   }
 
-
-   // Register new client
+  // Register new client
 
   registerClient(
     data: RegisterData
@@ -84,7 +82,7 @@ export class AuthHttpRepository implements IAuthRepository {
     );
   }
 
-   // Get current authenticated user from stored token
+  // Get current authenticated user from stored token
 
   getCurrentUser(): Observable<AuthUser | null> {
     const token = this.storageService.get('auth_token');
@@ -121,14 +119,47 @@ export class AuthHttpRepository implements IAuthRepository {
     }
   }
 
-
-   // Logout current user
+  // Logout current user
 
   logout(): void {
     this.storageService.remove('auth_token');
   }
 
-   // Decode JWT token
+  activateAccount(
+    userId: string,
+    code: string,
+    password: string
+  ): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/activate`, {
+      userId,
+      code,
+      password,
+    });
+  }
+
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.baseUrl}/forgot-password`,
+      { email }
+    );
+  }
+
+  resetPassword(
+    userId: string,
+    code: string,
+    newPassword: string
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.baseUrl}/reset-password`,
+      {
+        userId,
+        code,
+        newPassword,
+      }
+    );
+  }
+
+  // Decode JWT token
 
   private decodeToken(token: string): any {
     try {
@@ -146,7 +177,6 @@ export class AuthHttpRepository implements IAuthRepository {
       return null;
     }
   }
-
 
   // Check if token is expired
 

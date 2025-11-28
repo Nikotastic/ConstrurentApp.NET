@@ -36,6 +36,29 @@ export interface IAuthRepository {
    * Logout current user
    */
   logout(): void;
+
+  /**
+   * Activate account with token and new password
+   */
+  activateAccount(
+    userId: string,
+    code: string,
+    password: string
+  ): Observable<void>;
+
+  /**
+   * Request password reset for email
+   */
+  forgotPassword(email: string): Observable<{ message: string }>;
+
+  /**
+   * Reset password with token
+   */
+  resetPassword(
+    userId: string,
+    code: string,
+    newPassword: string
+  ): Observable<{ message: string }>;
 }
 
 /**
