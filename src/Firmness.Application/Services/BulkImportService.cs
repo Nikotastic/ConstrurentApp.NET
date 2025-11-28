@@ -6,6 +6,8 @@ using OfficeOpenXml;
 
 namespace Firmness.Application.Services;
 
+
+// Service for bulk importing data from Excel files
 public class BulkImportService : IBulkImportService
 {
     private readonly IProductRepository _productRepo;
@@ -47,7 +49,7 @@ public class BulkImportService : IBulkImportService
                 {
                     RowNumber = 0,
                     Field = "General",
-                    ErrorMessage = "El archivo Excel está vacío"
+                    ErrorMessage = "The Excel file is empty"
                 });
                 return result;
             }
@@ -57,7 +59,7 @@ public class BulkImportService : IBulkImportService
             
             result.TotalRows = worksheet.Dimension.Rows - 1;
 
-            // Cargar datos existentes en memoria para búsquedas más rápidas
+            // Load existing data into memory for faster lookups
             var existingProducts = (await _productRepo.GetAllAsync()).ToList();
             var existingCustomers = (await _customerRepo.GetAllAsync()).ToList();
 
@@ -86,7 +88,7 @@ public class BulkImportService : IBulkImportService
                 }
             }
 
-            // Enviar correos de bienvenida masivos a los nuevos clientes
+            // Send mass welcome emails to new customers
             if (newCustomers.Any())
             {
                 try
@@ -107,12 +109,14 @@ public class BulkImportService : IBulkImportService
             {
                 RowNumber = 0,
                 Field = "General",
-                ErrorMessage = $"Error al procesar el archivo: {ex.Message}"
+                ErrorMessage = $"Error processing file: {ex.Message}"
             });
             return result;
         }
     }
 
+   
+    // Reads the headers from the first row of the worksheet
     private Dictionary<string, int> ReadHeaders(ExcelWorksheet worksheet)
     {
         var headers = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -129,6 +133,7 @@ public class BulkImportService : IBulkImportService
         return headers;
     }
 
+    // Reads the data from the specified row of the worksheet
     private Dictionary<string, object?> ReadRowData(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers)
     {
         var data = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
@@ -141,6 +146,7 @@ public class BulkImportService : IBulkImportService
         return data;
     }
 
+    // Identifies the data type based on the headers
     private string IdentifyDataType(Dictionary<string, int> headers)
     {
         var hasVehicleFields = headers.Keys.Any(h => 
@@ -185,6 +191,7 @@ public class BulkImportService : IBulkImportService
         return "mixed";
     }
 
+    // Processes the data from the specified row
     private async Task ProcessRow(Dictionary<string, object?> rowData, 
         string dataType, BulkImportResult result, int rowNumber,
         List<Product> existingProducts, List<Customer> existingCustomers, List<Customer> newCustomers)
@@ -207,6 +214,7 @@ public class BulkImportService : IBulkImportService
         }
     }
 
+    // Processes the mixed data from the specified row
     private async Task ProcessMixedRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber,
         List<Product> existingProducts, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
@@ -215,7 +223,7 @@ public class BulkImportService : IBulkImportService
         
         Guid? productId = null;
         
-        // Procesar Producto si hay datos
+        // Process Product if there are data
         if (!string.IsNullOrWhiteSpace(productName))
         {
             try
@@ -280,7 +288,7 @@ public class BulkImportService : IBulkImportService
             }
         }
 
-        // Procesar Cliente si hay datos
+        // Process Customer if there are data
         var customerEmail = GetStringValue(rowData, "Email", "ClienteEmail", "CustomerEmail", "Correo", "Mail");
         var firstName = GetStringValue(rowData, "Nombre", "FirstName", "Name");
         var lastName = GetStringValue(rowData, "Apellido", "LastName", "Surname");
@@ -341,7 +349,7 @@ public class BulkImportService : IBulkImportService
             }
         }
 
-        // Procesar Venta si hay datos suficientes
+        // Process Sale if there is enough data
         var quantity = GetIntValue(rowData, "Quantity", "Cantidad", "Qty", "CantidadVendida", "CantidadVenta");
         
         if (quantity > 0 && productId.HasValue && customerId.HasValue)
@@ -361,8 +369,8 @@ public class BulkImportService : IBulkImportService
                     result.Errors.Add(new ImportError
                     {
                         RowNumber = rowNumber,
-                        Field = "Venta",
-                        ErrorMessage = "No se pudo determinar el precio unitario para la venta"
+                        Field = "Sale",
+                        ErrorMessage = "The unit price for sale could not be determined"
                     });
                 }
                 else
@@ -387,13 +395,14 @@ public class BulkImportService : IBulkImportService
                 result.Errors.Add(new ImportError
                 {
                     RowNumber = rowNumber,
-                    Field = "Venta",
-                    ErrorMessage = $"Error al procesar venta: {ex.Message}"
+                    Field = "Sale",
+                    ErrorMessage = $"Error processing sale: {ex.Message}"
                 });
             }
         }
     }
 
+    // Processes the product data from the specified row
     private async Task ProcessProductRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Product> existingProducts)
     {
         var sku = GetStringValue(rowData, "SKU", "Codigo", "Code");
@@ -404,10 +413,10 @@ public class BulkImportService : IBulkImportService
         var imageUrl = GetStringValue(rowData, "Imagen", "Image", "ImageUrl", "Foto");
 
         if (string.IsNullOrWhiteSpace(name))
-            throw new Exception("El nombre del producto es obligatorio");
+            throw new Exception("The product name is required");
         
         if (price <= 0)
-            throw new Exception("El precio debe ser mayor a cero");
+            throw new Exception("The price must be greater than zero");
 
         var existingProduct = existingProducts.FirstOrDefault(p => 
             !string.IsNullOrEmpty(sku) && p.SKU.Equals(sku, StringComparison.OrdinalIgnoreCase));
@@ -440,6 +449,7 @@ public class BulkImportService : IBulkImportService
         }
     }
 
+    // Processes the customer data from the specified row
     private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
         var firstName = GetStringValue(rowData, "FirstName", "Nombre", "Name");
@@ -450,10 +460,10 @@ public class BulkImportService : IBulkImportService
         var address = GetStringValue(rowData, "Address", "Direccion", "Dir");
 
         if (string.IsNullOrWhiteSpace(firstName))
-            throw new Exception("El nombre es obligatorio");
+            throw new Exception("The name is required");
         
         if (string.IsNullOrWhiteSpace(email))
-            throw new Exception("El email es obligatorio");
+            throw new Exception("The email is required");
 
         var existingCustomer = existingCustomers.FirstOrDefault(c => 
             c.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
@@ -487,6 +497,7 @@ public class BulkImportService : IBulkImportService
         }
     }
 
+    // Processes the vehicle data from the specified row
     private async Task ProcessVehicleRow(Dictionary<string, object?> rowData, BulkImportResult result, int rowNumber)
     {
         try
@@ -554,7 +565,7 @@ public class BulkImportService : IBulkImportService
                 return;
             }
 
-            // Leer otros campos
+            // Read other fields
             var serialNumber = GetStringValue(rowData, "Serial Number", "SerialNumber", "NumeroSerie");
             var hourlyRate = GetDecimalValue(rowData, "Hourly Rate", "HourlyRate", "TarifaPorHora");
             var dailyRate = GetDecimalValue(rowData, "Daily Rate", "DailyRate", "TarifaDiaria");
@@ -573,7 +584,7 @@ public class BulkImportService : IBulkImportService
                            isActiveStr.Equals("Si", StringComparison.OrdinalIgnoreCase) ||
                            isActiveStr.Equals("True", StringComparison.OrdinalIgnoreCase);
 
-            // Validar que al menos tenga una tarifa
+            // Validate that at least one rate is greater than 0
             if (hourlyRate <= 0 && dailyRate <= 0 && weeklyRate <= 0 && monthlyRate <= 0)
             {
                 result.Errors.Add(new ImportError
@@ -585,14 +596,14 @@ public class BulkImportService : IBulkImportService
                 return;
             }
 
-            // Buscar si existe el vehículo por placa
+            // Search for existing vehicle by license plate
             var existingVehicles = await _vehicleRepo.GetAllAsync();
             var existingVehicle = existingVehicles.FirstOrDefault(v => 
                 v.LicensePlate.Equals(licensePlate, StringComparison.OrdinalIgnoreCase));
 
             if (existingVehicle != null)
             {
-                // Actualizar vehículo existente
+                // Update existing vehicle
                 existingVehicle.Brand = brand;
                 existingVehicle.Model = model;
                 existingVehicle.Year = year;
@@ -613,11 +624,10 @@ public class BulkImportService : IBulkImportService
                 existingVehicle.UpdatedAt = DateTime.UtcNow;
 
                 await _vehicleRepo.UpdateAsync(existingVehicle);
-                result.ProductsUpdated++; // Usamos el contador de productos para vehículos por ahora
+                result.ProductsUpdated++; 
             }
             else
             {
-                // Crear nuevo vehículo usando el constructor público
                 var newVehicle = new Vehicle(brand, model, year, licensePlate, vehicleType)
                 {
                     SerialNumber = serialNumber,
@@ -639,7 +649,7 @@ public class BulkImportService : IBulkImportService
                 };
 
                 await _vehicleRepo.AddAsync(newVehicle);
-                result.ProductsCreated++; // Usamos el contador de productos para vehículos por ahora
+                result.ProductsCreated++; 
             }
         }
         catch (Exception ex)
@@ -653,11 +663,13 @@ public class BulkImportService : IBulkImportService
         }
     }
 
+    // Checks if the row is empty
     private bool IsEmptyRow(Dictionary<string, object?> rowData)
     {
         return rowData.All(kvp => kvp.Value == null || string.IsNullOrWhiteSpace(kvp.Value.ToString()));
     }
 
+    // Gets the string value from the specified row
     private string GetStringValue(Dictionary<string, object?> data, params string[] possibleKeys)
     {
         foreach (var key in possibleKeys)
@@ -670,6 +682,7 @@ public class BulkImportService : IBulkImportService
         return string.Empty;
     }
 
+    // Gets the decimal value from the specified row
     private decimal GetDecimalValue(Dictionary<string, object?> data, params string[] possibleKeys)
     {
         foreach (var key in possibleKeys)
@@ -683,6 +696,7 @@ public class BulkImportService : IBulkImportService
         return 0;
     }
 
+    // Gets the integer value from the specified row
     private int GetIntValue(Dictionary<string, object?> data, params string[] possibleKeys)
     {
         foreach (var key in possibleKeys)
@@ -696,6 +710,7 @@ public class BulkImportService : IBulkImportService
         return 0;
     }
 
+    // Gets the row data as a string
     private string GetRowDataAsString(ExcelWorksheet worksheet, int row, Dictionary<string, int> headers)
     {
         var values = new List<string>();
