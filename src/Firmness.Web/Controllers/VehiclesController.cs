@@ -217,7 +217,7 @@ public class VehiclesController : Controller
                 }
             }
 
-            var createDto = new Domain.DTOs.Vehicle.CreateVehicleDto
+            var createDto = new Application.DTOs.Vehicle.CreateVehicleDto
             {
                 Brand = viewModel.Brand,
                 Model = viewModel.Model,
@@ -347,7 +347,7 @@ public class VehiclesController : Controller
                 }
             }
 
-            var updateDto = new Domain.DTOs.Vehicle.UpdateVehicleDto
+            var updateDto = new Application.DTOs.Vehicle.UpdateVehicleDto
             {
                 Brand = viewModel.Brand,
                 Model = viewModel.Model,
@@ -476,7 +476,7 @@ public class VehiclesController : Controller
 
 
 
-    private VehicleListViewModel MapToListViewModel(Domain.DTOs.Vehicle.VehicleDto dto)
+    private VehicleListViewModel MapToListViewModel(Application.DTOs.Vehicle.VehicleDto dto)
     {
         return new VehicleListViewModel
         {
@@ -498,7 +498,7 @@ public class VehiclesController : Controller
         };
     }
 
-    private VehicleDetailsViewModel MapToDetailsViewModel(Domain.DTOs.Vehicle.VehicleDto dto)
+    private VehicleDetailsViewModel MapToDetailsViewModel(Application.DTOs.Vehicle.VehicleDto dto)
     {
         return new VehicleDetailsViewModel
         {
@@ -533,7 +533,7 @@ public class VehiclesController : Controller
         };
     }
 
-    private VehicleFormViewModel MapToFormViewModel(Domain.DTOs.Vehicle.VehicleDto dto)
+    private VehicleFormViewModel MapToFormViewModel(Application.DTOs.Vehicle.VehicleDto dto)
     {
         return new VehicleFormViewModel
         {

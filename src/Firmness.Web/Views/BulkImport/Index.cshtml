@@ -209,29 +209,64 @@
                     <h6 class="mb-0"><i class="bi bi-download me-2"></i>Templates and Examples</h6>
                 </div>
                 <div class="card-body">
-                    <p class="mb-3">Download a template to make importing easier:</p>
+                    <p class="mb-3">Download templates and references to make importing easier:</p>
                     
-                    <h6 class="text-muted mb-2">Products, Customers & Sales</h6>
+                    <!-- Empty Templates -->
+                    <h6 class="text-primary mb-2"><i class="bi bi-file-earmark me-1"></i> Empty Templates / Plantillas Vacías</h6>
                     <div class="d-grid gap-2 mb-3">
-                        <a asp-action="DownloadTemplate" class="btn btn-outline-primary">
-                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Download Empty Template
+                        <a asp-action="DownloadTemplate" asp-route-type="products" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-box me-2"></i>Products Template / Plantilla de Productos
                         </a>
-                        <a asp-action="DownloadSample" class="btn btn-outline-success">
-                            <i class="bi bi-file-earmark-excel me-2"></i>Download Sample with Data
+                        <a asp-action="DownloadTemplate" asp-route-type="vehicles" class="btn btn-outline-warning btn-sm">
+                            <i class="bi bi-truck me-2"></i>Vehicles Template / Plantilla de Vehículos
+                        </a>
+                        <a asp-action="DownloadTemplate" asp-route-type="customers" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-people me-2"></i>Customers Template / Plantilla de Clientes
                         </a>
                     </div>
 
                     <hr />
 
-                    <h6 class="text-warning mb-2">🚚 Vehicles - Massive Data (NEW)</h6>
-                    <div class="alert alert-warning py-2 mb-2">
-                        <small><i class="bi bi-info-circle me-1"></i> Contains 100 sample vehicle records ready to import!</small>
+                    <!-- Sample Data with Examples -->
+                    <h6 class="text-success mb-2"><i class="bi bi-file-earmark-excel me-1"></i> Sample Data / Datos de Ejemplo</h6>
+                    <div class="alert alert-success py-2 mb-2">
+                        <small><i class="bi bi-info-circle me-1"></i> Contains 15 realistic products with messy data to demonstrate auto-organization!</small>
                     </div>
-                    <div class="d-grid">
-                        <a asp-action="DownloadVehiclesSample" class="btn btn-warning">
-                            <i class="bi bi-truck me-2"></i>Download Vehicles Bulk Sample (100 records)
+                    <div class="d-grid gap-2 mb-3">
+                        <a asp-action="DownloadSampleData" class="btn btn-success">
+                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>Download Sample Data (15 Products)
                         </a>
                     </div>
+
+                    <hr />
+
+                    <!-- Categories Reference -->
+                    <h6 class="text-info mb-2"><i class="bi bi-tags me-1"></i> Categories Reference / Referencia de Categorías</h6>
+                    <div class="alert alert-info py-2 mb-2">
+                        <small><i class="bi bi-lightbulb me-1"></i> List of 10 common categories. New categories are auto-created!</small>
+                    </div>
+                    <div class="d-grid gap-2 mb-3">
+                        <a asp-action="DownloadCategoriesReference" class="btn btn-info">
+                            <i class="bi bi-list-ul me-2"></i>Download Categories Reference
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <!-- Legacy Downloads (kept for compatibility) -->
+                    <details class="mb-0">
+                        <summary class="text-muted small" style="cursor: pointer;">
+                            <i class="bi bi-archive me-1"></i> Legacy Downloads (Old Format)
+                        </summary>
+                        <div class="mt-2 d-grid gap-2">
+                            <a asp-action="DownloadSample" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-file-earmark me-2"></i>Old Products Sample
+                            </a>
+                            <a asp-action="DownloadVehiclesSample" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-truck me-2"></i>Old Vehicles Sample
+                            </a>
+                        </div>
+                    </details>
                 </div>
             </div>
 

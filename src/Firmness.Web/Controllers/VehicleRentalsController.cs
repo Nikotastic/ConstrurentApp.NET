@@ -1,5 +1,5 @@
 ﻿﻿using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Enums;
 using Firmness.Web.ViewModels.VehicleRental;
 using Microsoft.AspNetCore.Authorization;

@@ -37,22 +37,22 @@ public class BulkImportController : Controller
     {
         if (file == null || file.Length == 0)
         {
-            TempData["Error"] = "Por favor seleccione un archivo Excel válido";
+            TempData["Error"] = "Please select a valid Excel file";
             return RedirectToAction(nameof(Index));
         }
 
-        // Validar extensión
+        // Validate extension
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (extension != ".xlsx" && extension != ".xls")
         {
-            TempData["Error"] = "Solo se permiten archivos Excel (.xlsx, .xls)";
+            TempData["Error"] = "Only Excel files (.xlsx, .xls) are allowed";
             return RedirectToAction(nameof(Index));
         }
 
-        // Validar tamaño (máximo 10 MB)
+        // Validate size (max 10 MB)
         if (file.Length > 10 * 1024 * 1024)
         {
-            TempData["Error"] = "El archivo es demasiado grande. Tamaño máximo: 10 MB";
+            TempData["Error"] = "File is too large. Maximum size: 10 MB";
             return RedirectToAction(nameof(Index));
         }
 
@@ -63,71 +63,99 @@ public class BulkImportController : Controller
 
             if (result.HasErrors)
             {
-                TempData["Warning"] = $"Importación completada con errores. {result.Summary}";
+                TempData["Warning"] = $"Import completed with errors. {result.Summary}";
                 return View("Result", result);
             }
 
-            TempData["Success"] = $"¡Importación exitosa! {result.Summary}";
+            TempData["Success"] = $"Import successful! {result.Summary}";
             return View("Result", result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al importar archivo Excel");
-            TempData["Error"] = $"Error al procesar el archivo: {ex.Message}";
+            _logger.LogError(ex, "Error importing Excel file");
+            TempData["Error"] = $"Error processing file: {ex.Message}";
             return RedirectToAction(nameof(Index));
         }
     }
 
     // GET: BulkImport/DownloadTemplate
-    public IActionResult DownloadTemplate()
+    public IActionResult DownloadTemplate(string type = "products")
     {
         try
         {
-            var fileBytes = _excelTemplateService.GenerateTemplate();
-            var fileName = "BulkImport_Template.xlsx";
+            byte[] fileBytes;
+            string fileName;
+
+            switch (type.ToLower())
+            {
+                case "vehicles":
+                    fileBytes = _excelTemplateService.GenerateVehicleTemplate();
+                    fileName = $"Vehicle_Import_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+                    break;
+                case "customers":
+                    fileBytes = _excelTemplateService.GenerateCustomerTemplate();
+                    fileName = $"Customer_Import_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+                    break;
+                default:
+                    fileBytes = _excelTemplateService.GenerateProductTemplate();
+                    fileName = $"Product_Import_Template_{DateTime.Now:yyyyMMdd}.xlsx";
+                    break;
+            }
             
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating template");
-            TempData["Error"] = "Error al crear la plantilla";
+            TempData["Error"] = "Error generating template";
             return RedirectToAction(nameof(Index));
         }
     }
     
-    // GET: BulkImport/DownloadSample
+    // GET: BulkImport/DownloadSample (deprecated - redirect to DownloadTemplate)
     public IActionResult DownloadSample()
+    {
+        return DownloadTemplate("products");
+    }
+
+    // GET: BulkImport/DownloadVehiclesSample (deprecated - redirect to DownloadTemplate)
+    public IActionResult DownloadVehiclesSample()
+    {
+        return DownloadTemplate("vehicles");
+    }
+
+    // GET: BulkImport/DownloadSampleData
+    public IActionResult DownloadSampleData()
     {
         try
         {
-            var fileBytes = _excelTemplateService.GenerateSampleData();
-            var fileName = "BulkImport_SampleData.xlsx";
+            var fileBytes = _excelTemplateService.GenerateSampleDataFile();
+            var fileName = $"Sample_Data_{DateTime.Now:yyyyMMdd}.xlsx";
             
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error generating sample data");
-            TempData["Error"] = "Error al crear el archivo de ejemplo";
+            TempData["Error"] = "Error generating sample data";
             return RedirectToAction(nameof(Index));
         }
     }
 
-    // GET: BulkImport/DownloadVehiclesSample
-    public IActionResult DownloadVehiclesSample()
+    // GET: BulkImport/DownloadCategoriesReference
+    public IActionResult DownloadCategoriesReference()
     {
         try
         {
-            var fileBytes = _excelTemplateService.GenerateVehiclesSampleData();
-            var fileName = $"Vehicles_BulkImport_Sample_{DateTime.Now:yyyyMMdd}.xlsx";
+            var fileBytes = _excelTemplateService.GenerateCategoriesReference();
+            var fileName = $"Categories_Reference_{DateTime.Now:yyyyMMdd}.xlsx";
             
             return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating vehicles sample data");
-            TempData["Error"] = "Error al crear el archivo de ejemplo de vehículos";
+            _logger.LogError(ex, "Error generating categories reference");
+            TempData["Error"] = "Error generating categories reference";
             return RedirectToAction(nameof(Index));
         }
     }
