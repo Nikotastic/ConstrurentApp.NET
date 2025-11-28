@@ -1,5 +1,5 @@
 ﻿using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs;
+using Firmness.Application.DTOs;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
 using Firmness.Domain.Interfaces;

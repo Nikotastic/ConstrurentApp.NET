@@ -1,7 +1,7 @@
 ﻿﻿﻿using AutoMapper;
 using Firmness.Application.Interfaces;
 using Firmness.Domain.Common;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
 using Firmness.Domain.Interfaces;

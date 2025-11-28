@@ -2,6 +2,7 @@
 using Firmness.Application.Models;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
+using Microsoft.Extensions.Configuration;
 using OfficeOpenXml;
 
 namespace Firmness.Application.Services;
@@ -15,7 +16,10 @@ public class BulkImportService : IBulkImportService
     private readonly ISaleRepository _saleRepo;
     private readonly ISaleItemRepository _saleItemRepo;
     private readonly IVehicleRepository _vehicleRepo;
+    private readonly ICategoryRepository _categoryRepo;
     private readonly INotificationService _notificationService;
+    private readonly IUserAccountService _userAccountService;
+    private readonly IConfiguration _configuration;
 
     public BulkImportService(
         IProductRepository productRepo,
@@ -23,14 +27,20 @@ public class BulkImportService : IBulkImportService
         ISaleRepository saleRepo,
         ISaleItemRepository saleItemRepo,
         IVehicleRepository vehicleRepo,
-        INotificationService notificationService)
+        ICategoryRepository categoryRepo,
+        INotificationService notificationService,
+        IUserAccountService userAccountService,
+        IConfiguration configuration)
     {
         _productRepo = productRepo;
         _customerRepo = customerRepo;
         _saleRepo = saleRepo;
         _saleItemRepo = saleItemRepo;
         _vehicleRepo = vehicleRepo;
+        _categoryRepo = categoryRepo;
         _notificationService = notificationService;
+        _userAccountService = userAccountService;
+        _configuration = configuration;
     }
 
     public async Task<BulkImportResult> ImportFromExcelAsync(Stream fileStream, CancellationToken cancellationToken = default)
@@ -88,16 +98,32 @@ public class BulkImportService : IBulkImportService
                 }
             }
 
-            // Send mass welcome emails to new customers
+            // Send activation emails to new customers
             if (newCustomers.Any())
             {
-                try
+                foreach (var customer in newCustomers)
                 {
-                    await _notificationService.SendBulkWelcomeEmailsAsync(newCustomers, cancellationToken);
-                }
-                catch (Exception)
-                {
-                  
+                    try
+                    {
+                        var (userId, token) = await _userAccountService.CreateUserAndGenerateActivationTokenAsync(customer.Email, customer.FirstName, customer.LastName);
+                        
+                        customer.IdentityUserId = userId;
+                        await _customerRepo.UpdateAsync(customer);
+
+                        var clientUrl = _configuration["ClientUrl"] ?? "http://localhost:4200";
+                        var activationLink = $"{clientUrl}/auth/activate?userId={userId}&code={System.Net.WebUtility.UrlEncode(token)}";
+
+                        await _notificationService.SendAccountActivationEmailAsync(customer, activationLink, cancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        result.Errors.Add(new ImportError
+                        {
+                            RowNumber = 0,
+                            Field = "AccountActivation",
+                            ErrorMessage = $"Error activating account for {customer.Email}: {ex.Message}"
+                        });
+                    }
                 }
             }
 
@@ -411,12 +437,16 @@ public class BulkImportService : IBulkImportService
         var price = GetDecimalValue(rowData, "Precio", "Price", "PrecioUnitario", "UnitPrice");
         var stock = GetDecimalValue(rowData, "Stock", "Existencia", "Cantidad", "Inventory");
         var imageUrl = GetStringValue(rowData, "Imagen", "Image", "ImageUrl", "Foto");
+        var categoryName = GetStringValue(rowData, "Category", "Categoria", "Categoría");
 
         if (string.IsNullOrWhiteSpace(name))
             throw new Exception("The product name is required");
         
         if (price <= 0)
             throw new Exception("The price must be greater than zero");
+
+        // Get or create category
+        Guid? categoryId = await GetOrCreateCategoryAsync(categoryName);
 
         var existingProduct = existingProducts.FirstOrDefault(p => 
             !string.IsNullOrEmpty(sku) && p.SKU.Equals(sku, StringComparison.OrdinalIgnoreCase));
@@ -428,6 +458,8 @@ public class BulkImportService : IBulkImportService
             existingProduct.Price = price;
             existingProduct.Stock = stock;
             existingProduct.ImageUrl = imageUrl;
+            if (categoryId.HasValue)
+                existingProduct.CategoryId = categoryId.Value;
             
             await _productRepo.UpdateAsync(existingProduct);
             result.ProductsUpdated++;
@@ -443,6 +475,9 @@ public class BulkImportService : IBulkImportService
                 stock
             );
             
+            if (categoryId.HasValue)
+                product.CategoryId = categoryId.Value;
+            
             await _productRepo.AddAsync(product);
             existingProducts.Add(product);
             result.ProductsCreated++;
@@ -452,12 +487,12 @@ public class BulkImportService : IBulkImportService
     // Processes the customer data from the specified row
     private async Task ProcessCustomerRow(Dictionary<string, object?> rowData, BulkImportResult result, List<Customer> existingCustomers, List<Customer> newCustomers)
     {
-        var firstName = GetStringValue(rowData, "FirstName", "Nombre", "Name");
-        var lastName = GetStringValue(rowData, "LastName", "Apellido", "Surname");
-        var email = GetStringValue(rowData, "Email", "Correo", "Mail");
+        var firstName = GetStringValue(rowData, "FirstName", "First Name", "First Name *", "Nombre", "Name");
+        var lastName = GetStringValue(rowData, "LastName", "Last Name", "Last Name *", "Apellido", "Surname");
+        var email = GetStringValue(rowData, "Email", "Email *", "Correo", "Mail");
         var document = GetStringValue(rowData, "Document", "Documento", "DNI", "ID");
-        var phone = GetStringValue(rowData, "Phone", "Telefono", "Tel", "Celular");
-        var address = GetStringValue(rowData, "Address", "Direccion", "Dir");
+        var phone = GetStringValue(rowData, "Phone", "Telefono", "Teléfono", "Tel", "Celular");
+        var address = GetStringValue(rowData, "Address", "Direccion", "Dirección", "Dir");
 
         if (string.IsNullOrWhiteSpace(firstName))
             throw new Exception("The name is required");
@@ -663,10 +698,24 @@ public class BulkImportService : IBulkImportService
         }
     }
 
-    // Checks if the row is empty
+    // Checks if the row is empty or contains instructions
     private bool IsEmptyRow(Dictionary<string, object?> rowData)
     {
-        return rowData.All(kvp => kvp.Value == null || string.IsNullOrWhiteSpace(kvp.Value.ToString()));
+        // Check if all values are null or empty
+        if (rowData.All(kvp => kvp.Value == null || string.IsNullOrWhiteSpace(kvp.Value.ToString())))
+            return true;
+
+        // Check if the row contains instruction keywords (common in template files)
+        var firstValue = rowData.Values.FirstOrDefault(v => v != null && !string.IsNullOrWhiteSpace(v.ToString()))?.ToString() ?? "";
+        var instructionKeywords = new[] { 
+            "INSTRUCTIONS", "INSTRUCCIONES", "Fields marked", "Campos marcados",
+            "Must be unique", "Debe ser único", "Delete the example", "Eliminar los ejemplos",
+            "If customer exists", "Si el cliente existe", "required", "requerido",
+            "valid format", "formato válido", "before importing", "antes de importar"
+        };
+
+        return instructionKeywords.Any(keyword => 
+            firstValue.Contains(keyword, StringComparison.OrdinalIgnoreCase));
     }
 
     // Gets the string value from the specified row
@@ -721,5 +770,36 @@ public class BulkImportService : IBulkImportService
                 values.Add($"{header.Key}: {value}");
         }
         return string.Join(" | ", values);
+    }
+
+    // Gets or creates a category by name (case-insensitive)
+    private async Task<Guid?> GetOrCreateCategoryAsync(string categoryName)
+    {
+        if (string.IsNullOrWhiteSpace(categoryName))
+            return null;
+
+        try
+        {
+            var categories = await _categoryRepo.GetAllAsync();
+            var existingCategory = categories.FirstOrDefault(c => 
+                c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+
+            if (existingCategory != null)
+                return existingCategory.Id;
+
+            // Create new category
+            var newCategory = new Category(categoryName)
+            {
+                Description = $"Auto-created category: {categoryName}",
+                IsActive = true
+            };
+
+            await _categoryRepo.AddAsync(newCategory);
+            return newCategory.Id;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
