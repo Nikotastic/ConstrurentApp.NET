@@ -66,13 +66,46 @@
           [class.error]="password?.invalid && password?.touched"
           placeholder="••••••••"
         />
-        @if (password?.invalid && password?.touched) {
-        <div class="error-message">
-          @if (password?.errors?.['required']) {
-          <span>Password is required</span>
-          } @if (password?.errors?.['minlength']) {
-          <span>Must have at least 6 characters</span>
-          }
+        <!-- Password Requirements -->
+        @if (password?.touched || password?.dirty) {
+        <div class="password-requirements">
+          <p class="text-xs text-gray-500 mb-1">Password must contain:</p>
+          <ul class="text-xs space-y-1">
+            <li
+              [class.text-green-600]="hasMinLength"
+              [class.text-gray-400]="!hasMinLength"
+            >
+              <span class="mr-1">{{ hasMinLength ? "✓" : "○" }}</span> At least
+              6 characters
+            </li>
+            <li
+              [class.text-green-600]="hasUpperCase"
+              [class.text-gray-400]="!hasUpperCase"
+            >
+              <span class="mr-1">{{ hasUpperCase ? "✓" : "○" }}</span> Uppercase
+              letter
+            </li>
+            <li
+              [class.text-green-600]="hasLowerCase"
+              [class.text-gray-400]="!hasLowerCase"
+            >
+              <span class="mr-1">{{ hasLowerCase ? "✓" : "○" }}</span> Lowercase
+              letter
+            </li>
+            <li
+              [class.text-green-600]="hasNumber"
+              [class.text-gray-400]="!hasNumber"
+            >
+              <span class="mr-1">{{ hasNumber ? "✓" : "○" }}</span> Number
+            </li>
+            <li
+              [class.text-green-600]="hasSymbol"
+              [class.text-gray-400]="!hasSymbol"
+            >
+              <span class="mr-1">{{ hasSymbol ? "✓" : "○" }}</span> Symbol (e.g.
+              !&#64;#$)
+            </li>
+          </ul>
         </div>
         }
       </div>

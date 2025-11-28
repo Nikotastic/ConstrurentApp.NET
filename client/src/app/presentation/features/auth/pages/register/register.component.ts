@@ -33,7 +33,16 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.pattern(
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/
+          ),
+        ],
+      ],
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       document: [''],
@@ -119,5 +128,30 @@ export class RegisterComponent {
   }
   get address() {
     return this.registerForm.get('address');
+  }
+
+  // Password validation helpers
+  get passwordValue(): string {
+    return this.password?.value || '';
+  }
+
+  get hasMinLength(): boolean {
+    return this.passwordValue.length >= 6;
+  }
+
+  get hasUpperCase(): boolean {
+    return /[A-Z]/.test(this.passwordValue);
+  }
+
+  get hasLowerCase(): boolean {
+    return /[a-z]/.test(this.passwordValue);
+  }
+
+  get hasNumber(): boolean {
+    return /\d/.test(this.passwordValue);
+  }
+
+  get hasSymbol(): boolean {
+    return /[\W_]/.test(this.passwordValue);
   }
 }
