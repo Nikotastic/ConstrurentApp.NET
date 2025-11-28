@@ -31,6 +31,25 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login'], {
           queryParams: { returnUrl: router.url },
         });
+        return throwError(() => error);
+      }
+
+      // If 403 Forbidden or 404 Not Found on customers endpoints, user might have been deleted
+      // This handles /customers/me, /customers/{id}, etc.
+      if (
+        (error.status === 403 || error.status === 404) &&
+        req.url.includes('/customers')
+      ) {
+        console.warn('User account not found or deleted - logging out');
+        tokenService.removeToken();
+
+        // Navigate to home with account deleted message
+        router.navigate(['/'], {
+          queryParams: { message: 'account_deleted' },
+        });
+
+        // Don't propagate the error further to prevent component error handlers from showing messages
+        return throwError(() => new Error('Account deleted'));
       }
 
       return throwError(() => error);

@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
@@ -10,6 +10,27 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="landing-page">
+      <!-- Alert Message for Deleted Account -->
+      <div class="alert-container" *ngIf="showDeletedAccountAlert">
+        <div class="alert alert-warning">
+          <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <div class="alert-content">
+            <h3>Account Deleted</h3>
+            <p>
+              Your account has been removed from the system. If you believe this
+              is an error, please contact support.
+            </p>
+          </div>
+          <button class="alert-close" (click)="closeAlert()">×</button>
+        </div>
+      </div>
+
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-overlay"></div>
@@ -373,8 +394,23 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     </div>
   `,
 })
-export class HomeComponent {
-  constructor(private sanitizer: DomSanitizer) {}
+export class HomeComponent implements OnInit {
+  showDeletedAccountAlert = false;
+
+  constructor(private sanitizer: DomSanitizer, private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    // Check if user was redirected due to account deletion
+    this.route.queryParams.subscribe((params) => {
+      if (params['message'] === 'account_deleted') {
+        this.showDeletedAccountAlert = true;
+      }
+    });
+  }
+
+  closeAlert(): void {
+    this.showDeletedAccountAlert = false;
+  }
 
   features = [
     {
