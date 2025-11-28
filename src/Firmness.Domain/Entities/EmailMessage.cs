@@ -53,6 +53,7 @@ public class EmailMessage
         return new EmailMessage(customerEmail, subject, body, isHtml: true);
     }
 
+    // Create purchase confirmation email
     public static EmailMessage CreatePurchaseConfirmation(string customerEmail, string customerName, decimal totalAmount, string invoiceNumber)
     {
         var subject = $"Purchase Confirmation - Invoice #{invoiceNumber}";
@@ -67,6 +68,53 @@ public class EmailMessage
                     <p><strong>Total:</strong> ${totalAmount:N2}</p>
                 </div>
                 <p>You can download your invoice from your customer panel.</p>
+                <br/>
+                <p style='color: #7f8c8d;'>Greetings,<br/>The Firmness Team</p>
+            </body>
+            </html>";
+
+        return new EmailMessage(customerEmail, subject, body, isHtml: true);
+    }
+    // Create account activation email
+    public static EmailMessage CreateAccountActivationEmail(string customerEmail, string customerName, string activationLink)
+    {
+        var subject = "Activate your Firmness account";
+        var body = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2 style='color: #2c3e50;'>Welcome to Firmness!</h2>
+                <p>Dear <strong>{customerName}</strong>,</p>
+                <p>Your account has been created. To activate it and set your password, please click the link below:</p>
+                <p style='text-align: center; margin: 30px 0;'>
+                    <a href='{activationLink}' style='background-color: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Activate Account</a>
+                </p>
+                <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                <p>{activationLink}</p>
+                <br/>
+                <p style='color: #7f8c8d;'>Greetings,<br/>The Firmness Team</p>
+            </body>
+            </html>";
+
+        return new EmailMessage(customerEmail, subject, body, isHtml: true);
+    }
+
+    // Create password reset email
+    public static EmailMessage CreatePasswordResetEmail(string customerEmail, string customerName, string resetLink)
+    {
+        var subject = "Reset your password - Firmness";
+        var body = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2 style='color: #e74c3c;'>Password Reset Request</h2>
+                <p>Dear <strong>{customerName}</strong>,</p>
+                <p>We received a request to reset your password. If you didn't make this request, you can ignore this email.</p>
+                <p>To reset your password, click the link below:</p>
+                <p style='text-align: center; margin: 30px 0;'>
+                    <a href='{resetLink}' style='background-color: #e74c3c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Reset Password</a>
+                </p>
+                <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                <p>{resetLink}</p>
+                <p><strong>This link will expire in 24 hours.</strong></p>
                 <br/>
                 <p style='color: #7f8c8d;'>Greetings,<br/>The Firmness Team</p>
             </body>
