@@ -10,6 +10,9 @@ import { Vehicle } from '@domain/entities/vehicle.entity';
 import { Observable, of, forkJoin } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CatalogItem } from './catalog-item.interface';
+import { RentalService } from '@application/services/rental.service';
+import { ProfileService } from '@application/services/profile.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-product-list',
@@ -123,7 +126,7 @@ import { CatalogItem } from './catalog-item.interface';
             class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             <div
-              *ngFor="let item of items"
+              *ngFor="let item of paginatedItems"
               class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               <!-- Image -->
@@ -208,9 +211,7 @@ import { CatalogItem } from './catalog-item.interface';
                       $ {{ item.price | number : '1.2-2' }}
                     </span>
                     <span class="text-xs text-gray-500 block">
-                      {{
-                        item.itemType === 'vehicle' ? 'per day' : 'per unit'
-                      }}
+                      {{ item.itemType === 'vehicle' ? 'per day' : 'per unit' }}
                     </span>
                   </div>
                   <button
@@ -247,6 +248,50 @@ import { CatalogItem } from './catalog-item.interface';
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Pagination Controls -->
+          <div
+            *ngIf="paginatedItems.length > 0"
+            class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow"
+          >
+            <div class="text-sm text-gray-600">
+              Showing {{ startIndex + 1 }} to {{ endIndex }} of
+              {{ items.length }} items
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="previousPage()"
+                [disabled]="currentPage === 1"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              >
+                ← Previous
+              </button>
+              <div class="flex gap-1">
+                <button
+                  *ngFor="let page of visiblePages"
+                  (click)="goToPage(page)"
+                  [class]="
+                    currentPage === page
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  "
+                  class="px-3 py-2 rounded-lg transition-colors min-w-[40px]"
+                >
+                  {{ page }}
+                </button>
+              </div>
+              <button
+                (click)="nextPage()"
+                [disabled]="currentPage === totalPages"
+                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              >
+                Next →
+              </button>
+            </div>
+            <div class="text-sm text-gray-600">
+              Page {{ currentPage }} of {{ totalPages }}
             </div>
           </div>
         </div>
@@ -311,8 +356,8 @@ import { CatalogItem } from './catalog-item.interface';
               />
             </div>
 
-            <!-- Days (for rental or vehicle) -->
-            <div *ngIf="isRental || selectedItem.itemType === 'vehicle'">
+            <!-- Days (for rental product) -->
+            <div *ngIf="isRental && selectedItem.itemType === 'product'">
               <label class="block text-sm font-medium text-gray-700 mb-2"
                 >Days of rental</label
               >
@@ -322,6 +367,35 @@ import { CatalogItem } from './catalog-item.interface';
                 min="1"
                 class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+
+            <!-- Date Range (for vehicle rental) -->
+            <div *ngIf="selectedItem.itemType === 'vehicle'" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Start Date</label
+                >
+                <input
+                  type="date"
+                  [(ngModel)]="startDate"
+                  (change)="calculateDays()"
+                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2"
+                  >Return Date</label
+                >
+                <input
+                  type="date"
+                  [(ngModel)]="endDate"
+                  (change)="calculateDays()"
+                  class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div class="text-sm text-gray-600">
+                Duration: <span class="font-bold">{{ days }} days</span>
+              </div>
             </div>
 
             <!-- Total -->
@@ -348,9 +422,7 @@ import { CatalogItem } from './catalog-item.interface';
               class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
             >
               {{
-                selectedItem.itemType === 'vehicle'
-                  ? 'Reserve'
-                  : 'Add to Cart'
+                selectedItem.itemType === 'vehicle' ? 'Reserve' : 'Add to Cart'
               }}
             </button>
           </div>
@@ -364,6 +436,9 @@ export class ProductListComponent implements OnInit {
   private vehicleService = inject(VehicleService);
   private cartService = inject(CartService);
   private toastService = inject(ToastService);
+  private rentalService = inject(RentalService);
+  private profileService = inject(ProfileService);
+  private router = inject(Router);
 
   allItems: CatalogItem[] = [];
   filteredProducts$: Observable<CatalogItem[]> = of([]);
@@ -377,8 +452,32 @@ export class ProductListComponent implements OnInit {
   days = 1;
   isRental = false;
 
+  // Rental dates
+  startDate: string = '';
+  endDate: string = '';
+  currentUserId: string | null = null;
+
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 12;
+  paginatedItems: CatalogItem[] = [];
+  totalPages = 0;
+  startIndex = 0;
+  endIndex = 0;
+  visiblePages: number[] = [];
+
   ngOnInit() {
     this.loadAll();
+    this.loadUserProfile();
+  }
+
+  loadUserProfile() {
+    this.profileService.getProfile().subscribe({
+      next: (profile) => {
+        if (profile) this.currentUserId = profile.id;
+      },
+      error: () => console.log('User not logged in or error loading profile'),
+    });
   }
 
   loadAll() {
@@ -420,8 +519,7 @@ export class ProductListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading catalog:', err);
-        this.error =
-          'Could not load products and vehicles. Please try again.';
+        this.error = 'Could not load products and vehicles. Please try again.';
         this.loading = false;
       },
     });
@@ -455,21 +553,95 @@ export class ProductListComponent implements OnInit {
     }
 
     this.filteredProducts$ = of(filtered);
+    this.updatePagination(filtered);
+  }
+
+  updatePagination(items: CatalogItem[]) {
+    this.totalPages = Math.ceil(items.length / this.itemsPerPage);
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+
+    this.startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    this.endIndex = Math.min(this.startIndex + this.itemsPerPage, items.length);
+    this.paginatedItems = items.slice(this.startIndex, this.endIndex);
+
+    // Calculate visible pages (show max 5 page numbers)
+    this.visiblePages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(this.totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      this.visiblePages.push(i);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.applyFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.applyFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  goToPage(page: number) {
+    this.currentPage = page;
+    this.applyFilters();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   showAddToCartModal(item: CatalogItem) {
-    if (item.itemType === 'vehicle') {
-      this.toastService.warning(
-        '🚧 Coming soon! The vehicle rental system is under development. You can rent heavy equipment very soon.',
-        4000
-      );
-      return;
-    }
-
     this.selectedItem = item;
     this.quantity = 1;
     this.days = 1;
     this.isRental = false;
+
+    if (item.itemType === 'vehicle') {
+      // Initialize dates for vehicle rental (today and tomorrow)
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      this.startDate = today.toISOString().split('T')[0];
+      this.endDate = tomorrow.toISOString().split('T')[0];
+      this.calculateDays();
+    }
+  }
+
+  calculateDays() {
+    if (!this.startDate || !this.endDate) return;
+
+    const start = new Date(this.startDate);
+    const end = new Date(this.endDate);
+
+    // Calculate difference in milliseconds
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    // Convert to days (ceil to ensure at least 1 day if same day)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    this.days = diffDays > 0 ? diffDays : 1;
+
+    // Ensure end date is not before start date
+    if (end < start) {
+      this.days = 1;
+      // Optionally reset end date to start date
+    }
   }
 
   closeModal() {
@@ -493,14 +665,46 @@ export class ProductListComponent implements OnInit {
         this.isRental,
         this.days
       );
-      this.toastService.success(
-        `${this.selectedItem.name} added to cart`
-      );
+      this.toastService.success(`${this.selectedItem.name} added to cart`);
     } else {
-      this.toastService.warning(
-        '🚧 Vehicle rental system under development. You can rent heavy equipment very soon!',
-        4000
-      );
+      // Vehicle Rental Logic
+      if (!this.currentUserId) {
+        this.toastService.error('You must be logged in to rent a vehicle');
+        return;
+      }
+
+      const rentalData = {
+        customerId: this.currentUserId,
+        vehicleId: this.selectedItem.id,
+        startDate: new Date(this.startDate).toISOString(),
+        estimatedReturnDate: new Date(this.endDate).toISOString(),
+        rentalPeriodType: 'Daily',
+        rentalRate: this.selectedItem.price,
+        deposit: 0,
+        paymentMethod: 1, // Card
+        pickupLocation: 'Main Office',
+        notes: 'Online reservation via Web App',
+      };
+
+      this.rentalService.createRental(rentalData).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.toastService.success('Vehicle reserved successfully! 🚜');
+            this.closeModal();
+            // Redirect to orders page
+            this.router.navigate(['/orders']);
+          } else {
+            this.toastService.error('Could not reserve vehicle');
+          }
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastService.error(
+            err.error?.message || 'Error creating rental'
+          );
+        },
+      });
+      return; // Don't close modal immediately, wait for response
     }
 
     this.closeModal();

@@ -66,10 +66,9 @@ export const routes: Routes = [
       },
       {
         path: 'orders',
-        // Placeholder for orders
         loadComponent: () =>
-          import('./presentation/features/dashboard/dashboard.component').then(
-            (m) => m.DashboardComponent
+          import('./presentation/features/my-orders/my-orders.component').then(
+            (m) => m.MyOrdersComponent
           ),
       },
       {
