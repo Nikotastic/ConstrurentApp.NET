@@ -32,6 +32,28 @@ export const routes: Routes = [
         './presentation/features/auth/pages/register/register.component'
       ).then((m) => m.RegisterComponent),
   },
+  {
+    path: 'auth/activate',
+    loadComponent: () =>
+      import(
+        './presentation/features/auth/pages/activate-account/activate-account.component'
+      ).then((m) => m.ActivateAccountComponent),
+  },
+  {
+    path: 'auth/forgot-password',
+    canActivate: [noAuthGuard],
+    loadComponent: () =>
+      import(
+        './presentation/features/auth/pages/forgot-password/forgot-password.component'
+      ).then((m) => m.ForgotPasswordComponent),
+  },
+  {
+    path: 'auth/reset-password',
+    loadComponent: () =>
+      import(
+        './presentation/features/auth/pages/reset-password/reset-password.component'
+      ).then((m) => m.ResetPasswordComponent),
+  },
 
   // Protected Routes (with Main Layout) - Client Role Only
   {
