@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs;
+using Firmness.Application.DTOs;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
