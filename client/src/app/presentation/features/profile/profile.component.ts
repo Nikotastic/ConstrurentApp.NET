@@ -221,7 +221,7 @@ export class ProfileComponent implements OnInit {
       .pipe(
         catchError((error) => {
           console.error('Error loading profile', error);
-          this.errorMessage = 'No se pudo cargar el perfil.';
+          this.errorMessage = 'Error loading profile.';
           return of(null);
         }),
         finalize(() => (this.loading = false))

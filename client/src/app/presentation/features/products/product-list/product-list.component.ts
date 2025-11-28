@@ -409,7 +409,7 @@ export class ProductListComponent implements OnInit {
           price: v.dailyRate,
           photoUrl: v.imageUrl || '',
           stock: v.isAvailable() ? 1 : 0,
-          categoryName: 'Vehículos',
+          categoryName: 'vehicles',
           itemType: 'vehicle',
           originalItem: v,
         }));
