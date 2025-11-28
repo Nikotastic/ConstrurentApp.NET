@@ -321,7 +321,7 @@ namespace Firmness.Web.Controllers
                 if (!updateResult.IsSuccess)
                 {
                     _logger.LogWarning("Update product failed: {Message}", updateResult.ErrorMessage);
-                    ModelState.AddModelError(string.Empty, updateResult.ErrorMessage ?? "No se pudo actualizar el producto.");
+                    ModelState.AddModelError(string.Empty, updateResult.ErrorMessage ?? "Error updating product.");
                     var categories = await _categoryService.GetActiveAsync();
                     vm.Categories = categories
                         .OrderBy(c => c.Name)
@@ -330,13 +330,13 @@ namespace Firmness.Web.Controllers
                     return View(vm);
                 }
 
-                TempData["Success"] = "Producto actualizado correctamente.";
+                TempData["Success"] = "Product updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating product.");
-                ModelState.AddModelError(string.Empty, "Ocurrió un error al actualizar el producto. Intenta nuevamente.");
+                ModelState.AddModelError(string.Empty, "Error updating product. Try again.");
                 var categories = await _categoryService.GetActiveAsync();
                 vm.Categories = categories
                     .OrderBy(c => c.Name)
@@ -364,17 +364,17 @@ namespace Firmness.Web.Controllers
                 var result = await _productService.DeleteAsync(id);
                 if (!result.IsSuccess)
                 {
-                    TempData["Error"] = result.ErrorMessage ?? "No se pudo eliminar el producto.";
+                    TempData["Error"] = result.ErrorMessage ?? "Error deleting product.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                TempData["Success"] = "Producto eliminado correctamente.";
+                TempData["Success"] = "Product deleted successfully.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting product.");
-                TempData["Error"] = "Ocurrió un error al eliminar el producto. Intenta nuevamente.";
+                TempData["Error"] = "Error deleting product. Try again.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -390,7 +390,7 @@ namespace Firmness.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting products to Excel");
-                TempData["Error"] = "Error al exportar productos a Excel.";
+                TempData["Error"] = "Error exporting products to Excel.";
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -406,7 +406,7 @@ namespace Firmness.Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error exporting products to PDF");
-                TempData["Error"] = "Error al exportar productos a PDF.";
+                TempData["Error"] = "Error exporting products to PDF.";
                 return RedirectToAction(nameof(Index));
             }
         }

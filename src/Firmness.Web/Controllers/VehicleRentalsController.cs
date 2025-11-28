@@ -256,7 +256,7 @@ public class VehicleRentalsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error exporting vehicle rentals to Excel");
-            TempData["Error"] = "Error al exportar rentas a Excel.";
+            TempData["Error"] = "Error exporting rents to Excel.";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -272,7 +272,7 @@ public class VehicleRentalsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error exporting vehicle rentals to PDF");
-            TempData["Error"] = "Error al exportar rentas a PDF.";
+            TempData["Error"] = "Error exporting rents to PDF.";
             return RedirectToAction(nameof(Index));
         }
     }
