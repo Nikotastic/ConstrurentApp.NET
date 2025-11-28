@@ -1,5 +1,5 @@
-﻿﻿﻿using AutoMapper;
-using Firmness.Domain.DTOs.Vehicle;
+﻿using AutoMapper;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Entities;
 
 namespace Firmness.Application.Mappings;
