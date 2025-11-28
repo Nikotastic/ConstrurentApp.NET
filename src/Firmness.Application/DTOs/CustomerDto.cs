@@ -1,4 +1,4 @@
-﻿namespace Firmness.Domain.DTOs;
+﻿namespace Firmness.Application.DTOs;
 
 // DTO for reading customers - API (limited information for security)
 

@@ -1,6 +1,6 @@
 ﻿using Firmness.Domain.Entities;
 
-namespace Firmness.Domain.DTOs;
+namespace Firmness.Application.DTOs;
 
 
 // DTO for dashboard data

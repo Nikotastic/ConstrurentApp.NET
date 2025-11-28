@@ -1,6 +1,6 @@
 ﻿﻿using Firmness.Domain.Enums;
 
-namespace Firmness.Domain.DTOs.Vehicle;
+namespace Firmness.Application.DTOs.Vehicle;
 
 // DTO for reading vehicle rentals - API
 public class VehicleRentalDto

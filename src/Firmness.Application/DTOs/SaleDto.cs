@@ -1,6 +1,6 @@
 ﻿using Firmness.Domain.Enums;
 
-namespace Firmness.Domain.DTOs;
+namespace Firmness.Application.DTOs;
 
 
 // DTO for reading sales - API

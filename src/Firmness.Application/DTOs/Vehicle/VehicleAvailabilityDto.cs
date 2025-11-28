@@ -1,4 +1,4 @@
-﻿namespace Firmness.Domain.DTOs.Vehicle;
+﻿namespace Firmness.Application.DTOs.Vehicle;
 
 // DTO for checking vehicle availability
 public class VehicleAvailabilityDto

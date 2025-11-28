@@ -1,4 +1,4 @@
-﻿namespace Firmness.Domain.DTOs;
+﻿namespace Firmness.Application.DTOs;
 
 // DTO for reading products - API (limited information for security)
 public class ProductDto
