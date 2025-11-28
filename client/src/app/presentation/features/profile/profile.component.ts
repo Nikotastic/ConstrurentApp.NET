@@ -195,16 +195,15 @@ export class ProfileComponent implements OnInit {
 
   profile: UserProfile | null = null;
   profileForm: FormGroup;
-  loading = true;
-  saving = false;
   uploadingImage = false;
+  saving = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
   constructor() {
     this.profileForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
-      email: [''], // Readonly
+      fullName: ['', Validators.required],
+      email: [{ value: '', disabled: true }],
       phone: [''],
       address: [''],
     });
@@ -215,16 +214,14 @@ export class ProfileComponent implements OnInit {
   }
 
   loadProfile() {
-    this.loading = true;
     this.profileService
       .getProfile()
       .pipe(
         catchError((error) => {
-          console.error('Error loading profile', error);
-          this.errorMessage = 'Error loading profile.';
+          console.error('Error loading profile:', error);
+          this.errorMessage = 'Error loading profile data';
           return of(null);
-        }),
-        finalize(() => (this.loading = false))
+        })
       )
       .subscribe((profile) => {
         if (profile) {
@@ -246,55 +243,56 @@ export class ProfileComponent implements OnInit {
     this.successMessage = null;
     this.errorMessage = null;
 
-    const updateData = {
-      ...this.profileForm.value,
-      // Ensure we don't send email if it's readonly in backend logic, but here we just send what form has
-    };
+    const formValue = this.profileForm.getRawValue();
 
     this.profileService
-      .updateProfile(this.profile.id, updateData)
-      .pipe(
-        catchError((error) => {
-          console.error('Error updating profile', error);
-          this.errorMessage = 'Error al guardar los cambios.';
-          return of(null);
-        }),
-        finalize(() => (this.saving = false))
-      )
-      .subscribe((updatedProfile) => {
-        if (updatedProfile) {
+      .updateProfile(this.profile.id, {
+        fullName: formValue.fullName,
+        phone: formValue.phone,
+        address: formValue.address,
+      })
+      .pipe(finalize(() => (this.saving = false)))
+      .subscribe({
+        next: (updatedProfile) => {
           this.profile = updatedProfile;
-          this.successMessage = 'Perfil actualizado correctamente.';
+          this.successMessage = 'Profile updated successfully!';
           setTimeout(() => (this.successMessage = null), 3000);
-        }
+        },
+        error: (error) => {
+          console.error('Error updating profile:', error);
+          this.errorMessage = 'Error updating profile. Please try again.';
+        },
       });
   }
 
-  onFileSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.uploadingImage = true;
-      this.profileService
-        .uploadAvatar(file)
-        .pipe(
-          catchError((error) => {
-            console.error('Error uploading image', error);
-            this.errorMessage = 'Error al subir la imagen.';
-            return of(null);
-          }),
-          finalize(() => (this.uploadingImage = false))
-        )
-        .subscribe((response) => {
-          if (response && this.profile) {
-            // Update profile with new image URL locally
-            this.profile.photoUrl = response.url;
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
 
-            // Also update in backend (if upload endpoint doesn't auto-update customer entity)
-            // Usually upload just returns URL, we need to save it to customer profile
+    const file = input.files[0];
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage = 'Please select a valid image file';
+      return;
+    }
+
+    this.uploadingImage = true;
+    this.errorMessage = null;
+
+    this.profileService
+      .uploadAvatar(file)
+      .pipe(finalize(() => (this.uploadingImage = false)))
+      .subscribe({
+        next: (response) => {
+          if (this.profile) {
+            this.profile.photoUrl = response.url;
             this.updateProfilePicture(response.url);
           }
-        });
-    }
+        },
+        error: (error) => {
+          console.error('Error uploading image:', error);
+          this.errorMessage = 'Error uploading image. Please try again.';
+        },
+      });
   }
 
   updateProfilePicture(url: string) {
