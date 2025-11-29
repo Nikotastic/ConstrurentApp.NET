@@ -23,6 +23,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # Tests (Mandatory first step)
+  tests:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    container_name: firmness-tests
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - firmness-network
+    volumes:
+      - ./TestResults:/app/TestResults
+
   # Backend API (.NET)
   api:
     build:
@@ -61,6 +78,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      tests:
+        condition: service_completed_successfully
     networks:
       - firmness-network
 
@@ -95,6 +114,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      tests:
+        condition: service_completed_successfully
     networks:
       - firmness-network
 
@@ -108,7 +129,10 @@ services:
     ports:
       - "${CLIENT_PORT}:80"
     depends_on:
-      - api
+      api:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
     networks:
       - firmness-network
 
@@ -130,24 +154,6 @@ services:
       - firmness-network
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-
-  # Tests (only run with --profile test)
-  tests:
-    profiles: ["test"]
-    build:
-      context: .
-      dockerfile: tests/Dockerfile
-    container_name: firmness-tests
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Testing
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - firmness-network
-    volumes:
-      - ./TestResults:/app/TestResults
 
 volumes:
   postgres_data:
