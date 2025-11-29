@@ -131,6 +131,24 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  # Tests (only run with --profile test)
+  tests:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    container_name: firmness-tests
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - firmness-network
+    volumes:
+      - ./TestResults:/app/TestResults
+
 volumes:
   postgres_data:
   pgadmin_data:
