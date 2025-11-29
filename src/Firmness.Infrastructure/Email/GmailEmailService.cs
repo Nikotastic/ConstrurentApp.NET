@@ -121,6 +121,17 @@ public class GmailEmailService : IEmailService
             }
         }
 
+        // Add attachments if present
+        if (message.Attachments != null && message.Attachments.Any())
+        {
+            foreach (var attachment in message.Attachments)
+            {
+                var stream = new MemoryStream(attachment.Content);
+                var mailAttachment = new Attachment(stream, attachment.FileName, attachment.ContentType);
+                mailMessage.Attachments.Add(mailAttachment);
+            }
+        }
+
         return mailMessage;
     }
 

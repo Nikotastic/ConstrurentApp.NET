@@ -8,6 +8,7 @@ public class EmailMessage
     public bool IsHtml { get; private set; }
     public List<string>? CcRecipients { get; private set; }
     public List<string>? BccRecipients { get; private set; }
+    public List<EmailAttachment>? Attachments { get; private set; }
 
     public EmailMessage(
         string to,
@@ -15,7 +16,8 @@ public class EmailMessage
         string body,
         bool isHtml = true,
         List<string>? ccRecipients = null,
-        List<string>? bccRecipients = null)
+        List<string>? bccRecipients = null,
+        List<EmailAttachment>? attachments = null)
     {
         if (string.IsNullOrWhiteSpace(to))
             throw new ArgumentException("Recipient email is required", nameof(to));
@@ -32,6 +34,7 @@ public class EmailMessage
         IsHtml = isHtml;
         CcRecipients = ccRecipients;
         BccRecipients = bccRecipients;
+        Attachments = attachments;
     }
 
     // Factory methods para diferentes tipos de emails
@@ -121,5 +124,40 @@ public class EmailMessage
             </html>";
 
         return new EmailMessage(customerEmail, subject, body, isHtml: true);
+    }
+    
+    // Create receipt email with PDF attachment
+    public static EmailMessage CreateReceiptEmail(
+        string customerEmail, 
+        string customerName, 
+        decimal totalAmount, 
+        string invoiceNumber,
+        byte[] pdfContent)
+    {
+        var subject = $"Your Receipt - Invoice #{invoiceNumber}";
+        var body = $@"
+            <html>
+            <body style='font-family: Arial, sans-serif;'>
+                <h2 style='color: #27ae60;'>Thank you for your purchase!</h2>
+                <p>Dear <strong>{customerName}</strong>,</p>
+                <p>Please find attached your receipt for the recent purchase.</p>
+                <div style='background-color: #ecf0f1; padding: 15px; margin: 20px 0; border-radius: 5px;'>
+                    <p><strong>Invoice Number:</strong> {invoiceNumber}</p>
+                    <p><strong>Total:</strong> ${totalAmount:N2}</p>
+                </div>
+                <p>The PDF receipt is attached to this email for your records.</p>
+                <br/>
+                <p style='color: #7f8c8d;'>Greetings,<br/>The Firmness Team</p>
+            </body>
+            </html>";
+
+        var attachment = new EmailAttachment($"Receipt_{invoiceNumber}.pdf", pdfContent);
+        
+        return new EmailMessage(
+            customerEmail, 
+            subject, 
+            body, 
+            isHtml: true,
+            attachments: new List<EmailAttachment> { attachment });
     }
 }
