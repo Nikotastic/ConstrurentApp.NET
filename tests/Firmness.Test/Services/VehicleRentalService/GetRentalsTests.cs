@@ -1,6 +1,6 @@
 using AutoMapper;
 using Firmness.Application.Services;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
 using Firmness.Application.Interfaces;

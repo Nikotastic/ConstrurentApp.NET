@@ -2,7 +2,7 @@ using AutoMapper;
 using Firmness.Api.Controllers;
 using Firmness.Application.Interfaces;
 using Firmness.Domain.Common;
-using Firmness.Domain.DTOs;
+using Firmness.Application.DTOs;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
 using Microsoft.AspNetCore.Http;
