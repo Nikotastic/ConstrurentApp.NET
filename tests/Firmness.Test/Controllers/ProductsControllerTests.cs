@@ -45,7 +45,8 @@ public class ProductsControllerTests
         var paginatedResult = new PaginatedResult<Product>(products, 1, 50, 2);
         var result = Result<PaginatedResult<Product>>.Success(paginatedResult);
 
-        _mockProductService.Setup(s => s.GetAllAsync(1, 50))
+        // Explicitly pass null for optional parameters query and categoryId
+        _mockProductService.Setup(s => s.GetPagedWithCategoryAsync(1, 50, null, null))
             .ReturnsAsync(result);
 
         var productDtos = new List<ProductDto>
@@ -63,7 +64,8 @@ public class ProductsControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
         Assert.NotNull(okResult.Value);
-        _mockProductService.Verify(s => s.GetAllAsync(1, 50), Times.Once);
+        // Verify with explicit nulls
+        _mockProductService.Verify(s => s.GetPagedWithCategoryAsync(1, 50, null, null), Times.Once);
     }
 
     [Fact]
@@ -71,7 +73,8 @@ public class ProductsControllerTests
     {
         // Arrange
         var failure = Result<PaginatedResult<Product>>.Failure("Error", ErrorCodes.ServerError);
-        _mockProductService.Setup(s => s.GetAllAsync(It.IsAny<int>(), It.IsAny<int>()))
+        // Use It.IsAny for all parameters to be safe and explicit
+        _mockProductService.Setup(s => s.GetPagedWithCategoryAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(), It.IsAny<Guid?>()))
             .ReturnsAsync(failure);
 
         // Act
