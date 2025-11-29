@@ -20,9 +20,11 @@ This directory contains documentation, scripts, and tools related to the AI Chat
   - `test-chatbot.ps1`: Performs a quick functional test of the chatbot.
   - `diagnose-chatbot.ps1`: Complete diagnostic tool for troubleshooting.
   - `test-gemini.sh`: Test script for Linux/WSL environments.
+  - **[📋 Scripts Documentation](SCRIPTS.md)**: Detailed guide for all scripts.
 
 - **Documentation**:
   - `TROUBLESHOOTING.md`: Guide for common problems and known errors.
+  - `ARCHITECTURE.md`: Technical architecture and code structure.
 
 ## 🚀 Step-by-Step Configuration Guide
 

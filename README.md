@@ -1,217 +1,155 @@
-# Firmness 🏗️
+# 🏗️ Firmness - Intelligent Construction Management System
 
-**Comprehensive Management System for Construction Supply Sales and Industrial Vehicle Rental**
+<div align="center">
 
-Firmness is a complete business solution that digitizes and optimizes construction company operations:
+![Firmness Logo](https://via.placeholder.com/150?text=Firmness+App)
 
-- 🏪 **Sales Management** - Construction materials and supplies
-- 🚜 **Vehicle Rental** - Heavy machinery, cranes, forklifts
-- 🤖 **AI Chatbot** - Intelligent assistant powered by Google Gemini
-- 👥 **Customer Management** - User control and authentication
-- 📊 **Admin Dashboard** - Complete web-based control panel
-- 🔌 **REST API** - Modular API for system integration
-- 🐳 **Docker Deployment** - Production-ready containerization
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-purple?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
+[![Angular](https://img.shields.io/badge/Angular-17-red?style=flat-square&logo=angular)](https://angular.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+**A comprehensive, enterprise-grade solution for managing construction machinery rentals and material sales.**
+Combines **Clean Architecture** with **AI capabilities**, automated workflows, and seamless cloud integration.
+
+[🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation-hub) • [🏗️ Architecture](#-architecture--diagrams) • [🤖 AI Features](#-ai-powered-features)
+
+</div>
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### One-Command Deployment
 
-- [Docker Desktop](https://www.docker.com/) (recommended)
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [Node.js 18+](https://nodejs.org/) (for Angular client)
+The system uses a **Safety-First Deployment** pipeline. It builds, tests, and deploys in one go.
 
-### Start with Docker (Recommended)
-
-```powershell
-# Windows
-.\rebuild-docker.ps1
-
-# Linux/macOS
-chmod +x rebuild-docker.sh && ./rebuild-docker.sh
+```bash
+# Build, Run 90+ Tests, and Deploy
+docker compose up --build
 ```
 
-### Access the Application
+### Access Points
 
-| Service       | URL                            | Description       |
-| ------------- | ------------------------------ | ----------------- |
-| **API**       | https://localhost:7192         | RESTful API       |
-| **Swagger**   | https://localhost:7192/swagger | API Documentation |
-| **Dashboard** | http://localhost:5000          | Admin Panel       |
-| **Client**    | http://localhost:4200          | Angular Frontend  |
-| **PgAdmin**   | http://localhost:8080          | Database Admin    |
-
-### Default Credentials
-
-**Admin Dashboard:**
-
-- Email: `admin@firmness.com`
-- Password: `Admin123!`
-
-**PgAdmin:**
-
-- Email: `admin@firmness.com`
-- Password: `admin123`
+| Service         | URL                                                            | Credentials (Default)                  |
+| --------------- | -------------------------------------------------------------- | -------------------------------------- |
+| **Client App**  | [http://localhost:80](http://localhost:80)                     | `client@firmness.local` / `Client123!` |
+| **Admin Panel** | [http://localhost:5001](http://localhost:5001)                 | `admin@firmness.local` / `Admin123!`   |
+| **API Swagger** | [http://localhost:5000/swagger](http://localhost:5000/swagger) | -                                      |
+| **PgAdmin**     | [http://localhost:8080](http://localhost:8080)                 | `admin@firmness.local` / `admin123`    |
 
 ---
 
-## 🏗️ Architecture
+## 📚 Documentation Hub
 
-### Clean Architecture (4 Layers)
+Everything you need to know, connected in one place.
 
-```
-┌─────────────────────────────────────────────┐
-│         Presentation Layer                  │
-│  ┌──────────────┐  ┌──────────────┐        │
-│  │ Firmness.Api │  │ Firmness.Web │        │
-│  │  (REST API)  │  │  (MVC Admin) │        │
-│  └──────────────┘  └──────────────┘        │
-├─────────────────────────────────────────────┤
-│        Application Layer                    │
-│  - Services, DTOs, Interfaces               │
-├─────────────────────────────────────────────┤
-│        Domain Layer (Core)                  │
-│  - Entities, Business Rules                 │
-├─────────────────────────────────────────────┤
-│        Infrastructure Layer                 │
-│  - EF Core, PostgreSQL, Identity            │
-└─────────────────────────────────────────────┘
-```
+### 📘 **Guides & Manuals**
 
-### Project Structure
+- **[👉 Features & Setup Guide](docs/FEATURES_AND_SETUP.md)**
+  - _Complete installation guide, Docker setup, and detailed feature walkthrough._
+- **[📄 Excel & PDF Features](docs/building-data/EXCEL_IMPORT_EXPORT.md)**
+  - _How to use Bulk Import/Export and generate PDF contracts._
+- **[☁️ AWS S3 Storage](docs/building-data/S3_STORAGE.md)**
+  - _File uploads, image storage, and CloudFront CDN integration._
+- **[📧 Email Configuration](docs/setup/EMAIL_CONFIGURATION.md)**
+  - _Gmail SMTP, SendGrid, AWS SES setup and usage._
+- **[☁️ Environment & Configuration](docs/setup/ENVIRONMENT.md)**
+  - _Configuration for Database, Email, and AWS S3._
 
-```
-Firmness/
-├── src/
-│   ├── Firmness.Api/           # REST API
-│   ├── Firmness.Web/           # Admin Dashboard
-│   ├── Firmness.Application/   # Business Logic
-│   ├── Firmness.Domain/        # Core Entities
-│   └── Firmness.Infrastructure/# Data Access
-├── client/                     # Angular Frontend
-├── tests/                      # Automated Tests
-└── docs/                       # Documentation
+### 🤖 **AI & Intelligence**
+
+- **[🧠 AI Assistant Documentation](docs/AI/README.md)**
+  - _Integration with Google Gemini, Chatbot architecture, and prompt engineering._
+- **[🔧 AI Scripts](docs/AI/SCRIPTS.md)**
+  - _Configuration, testing, and diagnostic scripts for the chatbot._
+
+### 💻 **Development**
+
+- **[🧪 Testing Guide](tests/Firmness.Test/README_TESTS.md)**
+  - _How to run the 90+ automated tests and add new ones._
+- **[🔌 API Reference](docs/api/ENDPOINTS.md)**
+  - _Detailed list of REST API endpoints and usage._
+- **[🔐 Authentication](docs/api/AUTHENTICATION.md)**
+  - _JWT flow, Roles, and Security._
+- **[🧪 API Testing Scripts](docs/api/SCRIPTS.md)**
+  - _PowerShell scripts for testing endpoints and authentication._
+
+---
+
+## 🏗️ Architecture & Diagrams
+
+Visual documentation to understand the system's core.
+
+| Diagram               | Description                                  | Link                                         |
+| --------------------- | -------------------------------------------- | -------------------------------------------- |
+| **🔄 Use Case**       | Actors, Roles, and System Functionalities    | [**View Diagram**](docs/use-case-diagram.md) |
+| **🏗️ Class Diagram**  | Domain Entities, Services, and Relationships | [**View Diagram**](docs/class-diagram.md)    |
+| **🗄️ Database Model** | ERD, Schema, Tables, and Foreign Keys        | [**View Diagram**](docs/database-model.md)   |
+
+### Clean Architecture Layers
+
+```mermaid
+graph TD
+    A[Presentation Layer] --> B[Application Layer]
+    B --> C[Domain Layer]
+    B --> D[Infrastructure Layer]
+    D --> C
 ```
 
 ---
 
-## 📚 Documentation
+## 🌟 Key Features
 
-### Setup & Configuration
+### 1. 🤖 AI-Powered Chatbot
 
-- **[Environment Variables](docs/setup/ENVIRONMENT.md)** - Configure `.env` and credentials
-- **[Email Configuration](docs/setup/EMAIL_CONFIGURATION.md)** - Gmail SMTP setup
-- **[AI Chatbot Setup](docs/AI/README.md)** - Configure Gemini-powered assistant
+Powered by **Google Gemini**, helping users find machinery, get quotes, and navigate the rental process via natural language.
 
-### Development
+### 2. 📊 Excel Import/Export
 
-- **[Architecture Guide](docs/development/ARCHITECTURE.md)** - Hexagonal architecture details
-- **[Database Migrations](docs/development/MIGRATIONS.md)** - EF Core migration guide
+- **Bulk Import**: Upload thousands of products/customers via `.xlsx`.
+- **Reporting**: Export financial data and inventory status instantly.
 
-### API
+### 3. 📝 PDF Generation
 
-- **[API Endpoints](docs/api/ENDPOINTS.md)** - Complete REST API reference
-- **[Authentication](docs/api/AUTHENTICATION.md)** - JWT and authorization
+- **Contracts**: Auto-generate legal rental contracts.
+- **Invoices**: Create professional invoices on the fly.
 
-### Testing
+### 4. ☁️ Cloud Integration
 
-- **[Test Guide](tests/Firmness.Test/README_TESTS.md)** - Running automated tests (90 tests)
+- **AWS S3**: Secure storage for vehicle images and documents.
+- **CloudFront**: Fast content delivery network.
 
 ---
 
 ## 🛠️ Technology Stack
 
-**Backend:** ASP.NET Core 8.0, Entity Framework Core, PostgreSQL  
-**Frontend:** Angular 17, Angular Material  
-**AI:** Google Gemini 2.0 Flash  
-**DevOps:** Docker, Docker Compose  
-**Testing:** xUnit, Moq, FluentAssertions
-
----
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-dotnet test
-
-# Run with detailed output
-dotnet test --logger "console;verbosity=detailed"
-```
-
-**Coverage:** 90 tests (60 services, 29 controllers, 1 integration)  
-**Status:** ✅ 100% Passing
-
----
-
-## 🔧 Useful Commands
-
-### Docker
-
-```bash
-docker-compose up -d              # Start all services
-docker-compose logs -f            # View logs
-docker-compose restart api        # Restart API
-docker-compose down               # Stop all services
-```
-
-### Development
-
-```bash
-dotnet build                      # Build solution
-dotnet test                       # Run tests
-dotnet ef migrations add Name     # Create migration
-dotnet ef database update         # Apply migrations
-```
-
----
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-**CORS Errors (Linux):** See [docs/CORS_FIX_LINUX.md](docs/CORS_FIX_LINUX.md)  
-**Database Issues:** `docker-compose restart db`  
-**API Not Responding:** `docker logs firmness_api -f`
-
-### More Help
-
-- [API Documentation](docs/api/ENDPOINTS.md)
-- [Architecture Guide](docs/development/ARCHITECTURE.md)
-- [Test Guide](tests/Firmness.Test/README_TESTS.md)
+- **Backend**: .NET 8, ASP.NET Core Web API
+- **Frontend**: Angular 17 (Standalone Components)
+- **Database**: PostgreSQL 15
+- **ORM**: Entity Framework Core
+- **AI**: Google Gemini Pro
+- **DevOps**: Docker, Docker Compose
+- **Testing**: xUnit, Moq, FluentAssertions
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/NewFeature`
-3. Commit changes: `git commit -m "feat: add new feature"`
-4. Push to branch: `git push origin feature/NewFeature`
-5. Open a Pull Request
-
-### Coding Standards
-
-- Follow **Clean Architecture** principles
-- Use **PascalCase** for C# classes/methods
-- Write **tests** for new features
-- Keep controllers **lean** (logic in services)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT** license. See [LICENSE](LICENSE) for details.
+1.  Fork the repository.
+2.  Create a feature branch: `git checkout -b feature/NewFeature`
+3.  Commit changes: `git commit -m "feat: Add NewFeature"`
+4.  **Run Tests**: `dotnet test` (Must pass!)
+5.  Push to branch: `git push origin feature/NewFeature`
+6.  Open a Pull Request.
 
 ---
 
 <div align="center">
-
-**Firmness** - Digitalize your construction business 🏗️
-
-[Documentation](docs/) • [API](https://localhost:7192/swagger) • [Dashboard](http://localhost:5000)
-
-**Made with ❤️ using .NET 8, Angular, and Docker**
-
+  <sub>Built with ❤️ by the Firmness Team</sub>
+  <br>
+  <a href="docs/FEATURES_AND_SETUP.md">Setup Guide</a> • 
+  <a href="docs/AI/README.md">AI Docs</a> • 
+  <a href="docs/api/ENDPOINTS.md">API Docs</a>
 </div>

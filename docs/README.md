@@ -1,115 +1,61 @@
-﻿# Documentation - Firmness
+﻿# 📚 Firmness Documentation Center
 
-Technical documentation organized by category.
+Welcome to the technical documentation hub for the Firmness System.
 
----
+## 🚀 Getting Started
 
-## 🔧 Setup and Configuration
+- **[⚙️ Installation & Setup](setup/INSTALLATION.md)**
+  - _Step-by-step guide to run the project with Docker._
+- **[☁️ Environment Configuration](setup/ENVIRONMENT.md)**
+  - _Setting up .env, Database, Email, and AWS S3._
 
-Guides to configure the project.
+## 🤖 AI & Intelligence
 
-- **[Environment Variables](setup/ENVIRONMENT.md)** - Configure `.env`, database credentials
-- **[Email](setup/EMAIL_CONFIGURATION.md)** - Configure Gmail SMTP for notifications
+- **[🧠 AI Assistant Guide](AI/README.md)**
+  - _Integration with Google Gemini, Chatbot architecture, and Prompts._
+- **[🔧 AI Scripts](AI/SCRIPTS.md)**
+  - _Configuration, testing, and diagnostic scripts for the chatbot._
 
-**Scripts:**
+## 📊 Features & Integrations
 
-- `setup/fix-email-auth.ps1` - Configure/fix email authentication
+### Data Management
 
----
+- **[📄 Excel Import/Export](building-data/EXCEL_IMPORT_EXPORT.md)**
+  - _Bulk data management using EPPlus._
+- **[📝 PDF Generation](building-data/PDF_GENERATION.md)**
+  - _Generating Contracts and Invoices with QuestPDF._
 
-## 💻 Development
+### Cloud & Communication
 
-Guides for developers.
+- **[☁️ AWS S3 Storage](building-data/S3_STORAGE.md)**
+  - _File uploads, image storage, and CloudFront CDN integration._
+- **[📧 Email Configuration](setup/EMAIL_CONFIGURATION.md)**
+  - _Gmail SMTP, SendGrid, AWS SES configuration and usage._
+- **[📬 Email Receipts](building-data/EMAIL_RECEIPTS.md)**
+  - _Sending purchase receipts with PDF attachments._
 
-- **[Architecture](development/ARCHITECTURE.md)** - Clean Architecture, layers, patterns
-- **[Migrations](development/MIGRATIONS.md)** - Entity Framework migrations, commands
+## 🏗️ Architecture & Design
 
----
+- **[🔄 Use Case Diagram](use-case-diagram.md)**
+  - _System actors and functional requirements._
+- **[🏗️ Class Diagram](class-diagram.md)**
+  - _Domain entities and service relationships._
+- **[🗄️ Database Model](database-model.md)**
+  - _ERD, Schema, and SQL structure._
 
-## 🤖 AI Chatbot
+## 💻 API & Development
 
-Documentation for the intelligent chatbot powered by Google Gemini.
-
-- **[Setup Guide](AI/README.md)** - Configure and test the AI chatbot
-- **[Architecture](AI/ARCHITECTURE.md)** - Technical implementation and customization
-- **[Troubleshooting](AI/TROUBLESHOOTING.md)** - Common issues and solutions
-
-**Scripts:**
-
-- `AI/setup-gemini-key.ps1` - Configure Gemini API Key
-- `AI/verify-gemini-config.ps1` - Verify configuration
-- `AI/test-chatbot.ps1` - Quick functionality test
-- `AI/diagnose-chatbot.ps1` - Complete diagnostic tool
-
----
-
-## 🔌 API
-
-REST API documentation.
-
-- **[Endpoints](api/ENDPOINTS.md)** - Complete list of endpoints
-- **[Authentication](api/AUTHENTICATION.md)** - JWT, roles, authorization
-
-**Testing:**
-
-- `api/TEST_ENDPOINTS.http` - Request collection (REST Client / VS Code)
-- `api/test-api.ps1` - Script to test endpoints
-- `api/test-auth.ps1` - Script to test authentication
+- **[🔌 API Endpoints](api/ENDPOINTS.md)**
+  - _REST API reference documentation._
+- **[🔐 Authentication](api/AUTHENTICATION.md)**
+  - _JWT Security flow._
+- **[🧪 API Testing Scripts](api/SCRIPTS.md)**
+  - _PowerShell scripts for testing endpoints and authentication._
+- **[🧪 Testing Guide](../tests/Firmness.Test/README_TESTS.md)**
+  - _Running and writing automated tests._
 
 ---
 
-## 🚀 Quick Start
-
-### Getting Started
-
-1. [Environment Variables](setup/ENVIRONMENT.md) - Configure `.env`
-2. [Migrations](development/MIGRATIONS.md) - Apply DB schema
-3. Run: `dotnet run --project src/Firmness.Api`
-
-### For Development
-
-1. [Architecture](development/ARCHITECTURE.md) - Understand the structure
-2. [Migrations](development/MIGRATIONS.md) - Work with the DB
-3. [API](api/ENDPOINTS.md) - Develop endpoints
-
-### For Integration
-
-1. [Endpoints](api/ENDPOINTS.md) - Complete list of endpoints
-2. [Authentication](api/AUTHENTICATION.md) - How to authenticate
-3. `api/TEST_ENDPOINTS.http` - Usage examples
-
----
-
-## 📁 Structure
-
-```
-docs/
-├── setup/              # Initial setup
-│   ├── ENVIRONMENT.md          # Environment variables
-│   ├── EMAIL_CONFIGURATION.md  # Configure email
-│   └── fix-email-auth.ps1      # Email script
-│
-├── development/        # Development
-│   ├── ARCHITECTURE.md  # Clean Architecture
-│   └── MIGRATIONS.md    # EF Core migrations
-│
-├── AI/                 # AI Chatbot
-│   ├── README.md            # Setup guide
-│   ├── ARCHITECTURE.md      # Technical details
-│   ├── TROUBLESHOOTING.md   # Common issues
-│   ├── setup-gemini-key.ps1
-│   ├── verify-gemini-config.ps1
-│   ├── test-chatbot.ps1
-│   └── diagnose-chatbot.ps1
-│
-└── api/                # REST API
-    ├── ENDPOINTS.md         # Endpoint list
-    ├── AUTHENTICATION.md    # JWT and security
-    └── TEST_ENDPOINTS.http  # Test collection
-```
-
----
-
-## 🔄 Back to Home
-
-[← Project main README](../README.md)
+<div align="center">
+  <a href="../README.md">⬅️ Back to Main README</a>
+</div>
