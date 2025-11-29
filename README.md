@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Firmness Logo](https://via.placeholder.com/150?text=Firmness+App)
+![Firmness Logo](https://firmness-images.s3.us-east-2.amazonaws.com/logo.png)
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-purple?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![Angular](https://img.shields.io/badge/Angular-17-red?style=flat-square&logo=angular)](https://angular.io/)
