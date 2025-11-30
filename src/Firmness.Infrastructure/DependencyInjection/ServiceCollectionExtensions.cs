@@ -69,6 +69,12 @@ public static class ServiceCollectionExtensions
         
         services.AddScoped<IFileStorageService, S3FileStorageService>();
         
+        // Payment Service (Simulated for now)
+        services.AddScoped<IPaymentService, Firmness.Infrastructure.Payment.SimulatedPaymentService>();
+        
+        // PDF Service
+        services.AddScoped<IPdfService, Firmness.Infrastructure.Pdf.QuestPdfService>();
+        
         return services;
     }
 }
