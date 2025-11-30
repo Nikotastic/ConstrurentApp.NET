@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy csproj files first
@@ -18,9 +18,17 @@ WORKDIR "/src/Firmness.Api"
 RUN dotnet publish "Firmness.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Final stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS final
-# Install dependencies for Excel generation (System.Drawing.Common support)
-RUN apk add --no-cache icu-libs libgdiplus krb5-libs libssl3 libintl libuuid pango cairo gobject-introspection fontconfig ttf-dejavu
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+# Install dependencies for Excel (EPPlus) and PDF (QuestPDF) generation
+# libgdiplus: for System.Drawing (EPPlus)
+# libfontconfig1, fonts-*: for SkiaSharp (QuestPDF)
+RUN apt-get update && apt-get install -y \
+    libgdiplus \
+    libfontconfig1 \
+    fonts-dejavu \
+    fonts-liberation \
+    fontconfig \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /app/publish .
