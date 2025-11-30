@@ -1,5 +1,7 @@
 # ⚙️ Setup & Installation Guide
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 This guide covers the complete process to set up the Firmness system locally using Docker.
 
 ## ✅ Prerequisites
@@ -121,3 +123,10 @@ docker logs -f firmness-api
 ```bash
 docker compose run --rm tests
 ```
+
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a>
+</div>

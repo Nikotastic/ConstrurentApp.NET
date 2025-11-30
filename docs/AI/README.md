@@ -1,5 +1,7 @@
 # 🤖 AI Chatbot (Gemini) - Documentation & Configuration
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 This directory contains documentation, scripts, and tools related to the AI Chatbot integrated into the Firmness application. The chatbot uses **Google Gemini 2.0 Flash** to provide intelligent responses based on real-time data from the database (vehicles, products, prices, availability).
 
 ## 📋 Features
@@ -91,3 +93,10 @@ For a deep dive into the system architecture, code structure, and customization 
 ## 🔧 Troubleshooting
 
 If you encounter errors (like 404, 500, or empty responses), check the [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) file for detailed solutions to common problems.
+
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a>
+</div>

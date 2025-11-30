@@ -1,5 +1,7 @@
 ﻿# 📧 Email Configuration Guide
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 Complete guide for configuring email functionality in Firmness using **Gmail SMTP** or other providers.
 
 ## 🎯 Overview
@@ -315,3 +317,11 @@ option_settings:
 - Use a professional service: SendGrid, AWS SES, or Mailgun
 - Or use corporate email: `noreply@yourdomain.com`
 - Never use personal Gmail in production
+
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a> | 
+  <a href="ENVIRONMENT.md">☁️ Environment Setup</a>
+</div>

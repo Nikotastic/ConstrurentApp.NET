@@ -1,5 +1,7 @@
 # Firmness - Angular Client
 
+> [⬅️ Back to Main README](../README.md) | [📚 Documentation Hub](../docs/README.md)
+
 **Modern Angular 19 frontend** implementing **Clean Architecture** principles for the Firmness construction rental platform.
 
 > 🏗️ **Clean Architecture** | 🎯 **Domain-Driven Design** | ⚡ **Standalone Components**

@@ -1,5 +1,7 @@
 ﻿# Environment Variables Configuration
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 ## 📋 Description
 
 This project uses environment variables to configure database credentials, JWT, and other sensitive services, following security best practices (12-Factor App).
@@ -35,21 +37,21 @@ The application will automatically load the `.env` file on startup.
 
 ### Database (Required)
 
-| Variable | Description | Default Value | Required |
-|----------|-------------|---------------|----------|
-| `POSTGRES_HOST` | PostgreSQL host | `localhost` | No |
-| `POSTGRES_DB` | Database name | `FirmnessDB` | No |
-| `POSTGRES_USER` | PostgreSQL user | `postgres` | No |
-| `POSTGRES_PASSWORD` | Password | - | **YES** |
-| `PG_PORT` | Port | `5432` | No |
+| Variable            | Description     | Default Value | Required |
+| ------------------- | --------------- | ------------- | -------- |
+| `POSTGRES_HOST`     | PostgreSQL host | `localhost`   | No       |
+| `POSTGRES_DB`       | Database name   | `FirmnessDB`  | No       |
+| `POSTGRES_USER`     | PostgreSQL user | `postgres`    | No       |
+| `POSTGRES_PASSWORD` | Password        | -             | **YES**  |
+| `PG_PORT`           | Port            | `5432`        | No       |
 
 ### JWT (Optional)
 
-| Variable | Description |
-|----------|-------------|
-| `JWT__Key` | Secret key to sign JWT tokens (minimum 32 chars) |
-| `JWT__Issuer` | Token issuer |
-| `JWT__Audience` | Token audience |
+| Variable        | Description                                      |
+| --------------- | ------------------------------------------------ |
+| `JWT__Key`      | Secret key to sign JWT tokens (minimum 32 chars) |
+| `JWT__Issuer`   | Token issuer                                     |
+| `JWT__Audience` | Token audience                                   |
 
 ### Email (Use User Secrets)
 
@@ -91,3 +93,10 @@ The project includes `compose.yaml` which automatically reads from `.env`:
 - [DotNetEnv](https://github.com/tonerdo/dotnet-env) - Library used
 - [12-Factor App Config](https://12factor.net/config)
 
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a> | 
+  <a href="EMAIL_CONFIGURATION.md">📧 Email Configuration</a>
+</div>

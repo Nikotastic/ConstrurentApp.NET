@@ -1,5 +1,7 @@
 ﻿# API Endpoints - Firmness
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 ## 🔗 Base URL
 
 ```
@@ -10,6 +12,7 @@ Production:  https://your-domain.com/api
 ## 📚 Swagger UI
 
 Interactive documentation available at:
+
 ```
 https://localhost:7192/swagger/index.html
 ```
@@ -25,6 +28,7 @@ https://localhost:7192/swagger/index.html
 **Authentication:** Not required
 
 **Request Body:**
+
 ```json
 {
   "email": "admin@firmness.com",
@@ -33,6 +37,7 @@ https://localhost:7192/swagger/index.html
 ```
 
 **Response 200 (Success):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -41,6 +46,7 @@ https://localhost:7192/swagger/index.html
 ```
 
 **Errors:**
+
 - `401 Unauthorized` - Invalid credentials
 - `400 Bad Request` - Validation failed
 
@@ -53,6 +59,7 @@ https://localhost:7192/swagger/index.html
 **Authentication:** Not required (public endpoint)
 
 **Request Body:**
+
 ```json
 {
   "username": "client123",
@@ -67,6 +74,7 @@ https://localhost:7192/swagger/index.html
 ```
 
 **Response 200 (Success):**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -75,11 +83,13 @@ https://localhost:7192/swagger/index.html
 ```
 
 **Errors:**
+
 - `409 Conflict` - Email already registered
 - `409 Conflict` - Username already in use
 - `400 Bad Request` - Validation failed (weak password, required fields, etc.)
 
 **Notes:**
+
 - Automatically creates a `Customer` and an `ApplicationUser` (Identity)
 - Automatically assigns the `Client` role
 - Sends welcome email (if configured)
@@ -104,12 +114,14 @@ https://localhost:7192/swagger/index.html
 | `pageSize` | int | 10 | Page size |
 
 **Request:**
+
 ```http
 GET /api/CustomersApi?pageNumber=1&pageSize=10
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Response 200:**
+
 ```json
 {
   "items": [
@@ -143,9 +155,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 **Authentication:** Bearer Token (role: `Admin`)
 
 **Path Parameters:**
+
 - `id` (Guid) - Customer ID
 
 **Response 200:**
+
 ```json
 {
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -163,6 +177,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Errors:**
+
 - `404 Not Found` - Customer does not exist
 
 ---
@@ -174,6 +189,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 **Authentication:** Bearer Token (role: `Admin`)
 
 **Request Body:**
+
 ```json
 {
   "firstName": "Mary",
@@ -187,6 +203,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Response 201 (Created):**
+
 ```json
 {
   "id": "new-customer-guid",
@@ -201,6 +218,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Errors:**
+
 - `400 Bad Request` - Validation failed
 - `409 Conflict` - Email already exists
 
@@ -213,9 +231,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 **Authentication:** Bearer Token (role: `Admin`)
 
 **Path Parameters:**
+
 - `id` (Guid) - Customer ID
 
 **Request Body:**
+
 ```json
 {
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -230,6 +250,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Response 200:**
+
 ```json
 {
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -244,6 +265,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
 **Errors:**
+
 - `404 Not Found` - Customer does not exist
 - `400 Bad Request` - Validation failed
 
@@ -256,14 +278,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 **Authentication:** Bearer Token (role: `Admin`)
 
 **Path Parameters:**
+
 - `id` (Guid) - Customer ID
 
 **Response 204 (No Content)**
 
 **Errors:**
+
 - `404 Not Found` - Customer does not exist
 
 **⚠️ Important:**
+
 - Deletes the `Customer` from the table
 - Deletes the associated `ApplicationUser` (Identity)
 - Deletes all related records (UserRoles, UserTokens, etc.)
@@ -288,6 +313,7 @@ curl -X POST "https://localhost:7192/api/Auth/login" \
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLWlkIiwibmFtZSI6ImFkbWluIiwicm9sZSI6IkFkbWluIiwiZXhwIjoxNzMyMTIzNDU2fQ...",
@@ -298,11 +324,13 @@ curl -X POST "https://localhost:7192/api/Auth/login" \
 #### 2. Use Token in Requests
 
 **Header:**
+
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 **Complete example with curl:**
+
 ```bash
 # 1. Login and save token
 TOKEN=$(curl -s -X POST "https://localhost:7192/api/Auth/login" \
@@ -316,6 +344,7 @@ curl -X GET "https://localhost:7192/api/CustomersApi" \
 ```
 
 **Example with PowerShell:**
+
 ```powershell
 # 1. Login
 $response = Invoke-RestMethod -Uri "https://localhost:7192/api/Auth/login" `
@@ -346,16 +375,18 @@ The JWT token includes the following claims:
 
 ## 📝 Roles and Permissions
 
-| Role | Description | Access |
-|------|-------------|--------|
-| `Admin` | System administrator | Full access to all endpoints |
-| `Client` | Registered client | Limited access (future) |
+| Role     | Description          | Access                       |
+| -------- | -------------------- | ---------------------------- |
+| `Admin`  | System administrator | Full access to all endpoints |
+| `Client` | Registered client    | Limited access (future)      |
 
 ### Public Endpoints (no authentication)
+
 - `POST /Auth/login`
 - `POST /Auth/register-client`
 
 ### Protected Endpoints (require JWT)
+
 - All `/CustomersApi/*` endpoints require `Admin` role
 
 ---
@@ -402,17 +433,17 @@ Authorization: Bearer {{token}}
 
 ## 📋 HTTP Status Codes
 
-| Code | Meaning |
-|------|---------|
-| `200 OK` | Successful request |
-| `201 Created` | Resource created successfully |
-| `204 No Content` | Successful deletion |
-| `400 Bad Request` | Invalid data or validation failed |
-| `401 Unauthorized` | Invalid or missing token |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Resource not found |
-| `409 Conflict` | Conflict (e.g., duplicate email) |
-| `500 Internal Server Error` | Server error |
+| Code                        | Meaning                           |
+| --------------------------- | --------------------------------- |
+| `200 OK`                    | Successful request                |
+| `201 Created`               | Resource created successfully     |
+| `204 No Content`            | Successful deletion               |
+| `400 Bad Request`           | Invalid data or validation failed |
+| `401 Unauthorized`          | Invalid or missing token          |
+| `403 Forbidden`             | Insufficient permissions          |
+| `404 Not Found`             | Resource not found                |
+| `409 Conflict`              | Conflict (e.g., duplicate email)  |
+| `500 Internal Server Error` | Server error                      |
 
 ---
 
@@ -441,6 +472,7 @@ Authorization: Bearer {{token}}
 **Cause:** Invalid or missing token
 
 **Solution:**
+
 1. Verify you're sending the `Authorization: Bearer {token}` header
 2. Verify the token hasn't expired (1 hour)
 3. Login again to get a fresh token
@@ -450,6 +482,7 @@ Authorization: Bearer {{token}}
 **Cause:** You don't have the required role
 
 **Solution:**
+
 - `/CustomersApi` endpoints require `Admin` role
 - Verify your user has the correct role
 
@@ -458,6 +491,7 @@ Authorization: Bearer {{token}}
 **Cause:** Duplicate email or username
 
 **Solution:**
+
 - Use a different email/username
 - Or delete the existing user first (from the dashboard)
 
@@ -466,7 +500,16 @@ Authorization: Bearer {{token}}
 **Cause:** Development certificate not trusted
 
 **Solution:**
+
 ```bash
 # Trust the development certificate
 dotnet dev-certs https --trust
 ```
+
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a> | 
+  <a href="AUTHENTICATION.md">🔐 Authentication Guide</a>
+</div>

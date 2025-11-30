@@ -47,10 +47,16 @@ Everything you need to know, connected in one place.
 
 ### 📘 **Guides & Manuals**
 
-- **[👉 Features & Setup Guide](docs/FEATURES_AND_SETUP.md)**
-  - _Complete installation guide, Docker setup, and detailed feature walkthrough._
+- **[� Complete Documentation Hub](docs/README.md)**
+  - _Central documentation index with all guides and references._
+- **[⚙️ Installation & Setup Guide](docs/setup/INSTALLATION.md)**
+  - _Complete installation guide, Docker setup, and deployment._
 - **[📄 Excel & PDF Features](docs/building-data/EXCEL_IMPORT_EXPORT.md)**
   - _How to use Bulk Import/Export and generate PDF contracts._
+- **[📝 PDF Generation](docs/building-data/PDF_GENERATION.md)**
+  - _Generate contracts, invoices, and receipts with QuestPDF._
+- **[💳 Payment Receipts](docs/building-data/EMAIL_RECEIPTS.md)**
+  - _Automated payment processing with PDF receipts sent via email._
 - **[☁️ AWS S3 Storage](docs/building-data/S3_STORAGE.md)**
   - _File uploads, image storage, and CloudFront CDN integration._
 - **[📧 Email Configuration](docs/setup/EMAIL_CONFIGURATION.md)**
@@ -115,8 +121,17 @@ Powered by **Google Gemini**, helping users find machinery, get quotes, and navi
 
 - **Contracts**: Auto-generate legal rental contracts.
 - **Invoices**: Create professional invoices on the fly.
+- **Receipts**: Generate payment receipts with transaction details.
 
-### 4. ☁️ Cloud Integration
+### 4. 💳 Payment Processing & Receipts
+
+- **Simulated Payment Gateway**: Test payment flows with realistic processing delays.
+- **Transaction Management**: Track payments with unique transaction IDs and invoice numbers.
+- **Automated PDF Receipts**: Generate professional PDF receipts after successful payments.
+- **Email Delivery**: Automatically send receipts to customers via email with PDF attachments.
+- **Complete Purchase Flow**: Payment → PDF Generation → Email notification in one seamless process.
+
+### 5. ☁️ Cloud Integration
 
 - **AWS S3**: Secure storage for vehicle images and documents.
 - **CloudFront**: Fast content delivery network.
@@ -130,6 +145,9 @@ Powered by **Google Gemini**, helping users find machinery, get quotes, and navi
 - **Database**: PostgreSQL 15
 - **ORM**: Entity Framework Core
 - **AI**: Google Gemini Pro
+- **PDF Generation**: QuestPDF
+- **Email**: SMTP (Gmail, SendGrid, AWS SES)
+- **Cloud Storage**: AWS S3 + CloudFront CDN
 - **DevOps**: Docker, Docker Compose
 - **Testing**: xUnit, Moq, FluentAssertions
 
@@ -149,7 +167,8 @@ Powered by **Google Gemini**, helping users find machinery, get quotes, and navi
 <div align="center">
   <sub>Built with ❤️ by the Firmness Team</sub>
   <br>
-  <a href="docs/FEATURES_AND_SETUP.md">Setup Guide</a> • 
+  <a href="docs/setup/INSTALLATION.md">Setup Guide</a> • 
   <a href="docs/AI/README.md">AI Docs</a> • 
-  <a href="docs/api/ENDPOINTS.md">API Docs</a>
+  <a href="docs/api/ENDPOINTS.md">API Docs</a> •
+  <a href="docs/README.md">Full Documentation</a>
 </div>
