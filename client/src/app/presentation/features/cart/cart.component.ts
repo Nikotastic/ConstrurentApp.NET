@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { CartService } from '@application/services/cart.service';
 import { ToastService } from '@application/services/toast.service';
 import { ConfirmationService } from '@application/services/confirmation.service';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -14,9 +14,7 @@ import { FormsModule } from '@angular/forms';
     <div class="container mx-auto px-4 py-8">
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-4xl font-bold mb-2 text-gray-800">
-          🛒 Shopping Cart
-        </h1>
+        <h1 class="text-4xl font-bold mb-2 text-gray-800">🛒 Shopping Cart</h1>
         <p class="text-gray-600">
           Review and confirm your products before proceeding to payment
         </p>
@@ -410,6 +408,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class CartComponent {
   cartService = inject(CartService);
+  private router = inject(Router);
   private toastService = inject(ToastService);
   private confirmationService = inject(ConfirmationService);
 
@@ -442,9 +441,7 @@ export class CartComponent {
     if (currentQuantity < maxStock) {
       this.cartService.updateQuantity(productId, currentQuantity + 1);
     } else {
-      this.toastService.warning(
-        '⚠️ This product is out of stock.'
-      );
+      this.toastService.warning('⚠️ This product is out of stock.');
     }
   }
 
@@ -465,10 +462,7 @@ export class CartComponent {
   }
 
   proceedToCheckout() {
-    this.toastService.warning(
-      '🚧 We are preparing something amazing! The payment system will be available very soon. You can pay with credit card, transfer, and more.',
-      6000
-    );
+    this.router.navigate(['/checkout']);
   }
 
   onImageError(event: any) {
