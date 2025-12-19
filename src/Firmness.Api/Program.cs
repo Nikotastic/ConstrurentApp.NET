@@ -159,13 +159,13 @@ builder.Services.AddAuthorization(options =>
 // Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .WithExposedHeaders("*");
-    });
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
 });
 
 // Add services to the container.
@@ -242,17 +242,14 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-// Enable Swagger in all environments for easier testing
-app.UseSwagger();
-app.UseSwaggerUI();
-
-// Only use HTTPS redirection when not in container (Docker uses HTTP internally)
-if (!inContainer)
+if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABLE_SWAGGER") == "true")
 {
     app.UseHttpsRedirection();
 }
 
 // Enable CORS - MUST be before Authentication/Authorization
+app.UseCors("AllowAll");
+
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
