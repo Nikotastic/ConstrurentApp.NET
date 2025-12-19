@@ -1,6 +1,4 @@
-﻿export const environment = {
+export const environment = {
   production: true,
-  apiUrl: '/api', // Proxy através de nginx (mismo dominio, sin CORS)
-  apiTimeout: 30000,
+  apiUrl: 'https://TU-APP-BACKEND.azurewebsites.net', // Reemplazar con la URL de Azure
 };
-
