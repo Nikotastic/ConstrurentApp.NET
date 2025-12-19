@@ -66,8 +66,31 @@ var rawConn = Environment.GetEnvironmentVariable("CONN_STR")
               ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
               ?? configuration.GetConnectionString("DefaultConnection");
 
-// Sanitize connection string from potentially invisible characters or quotes coming from Azure
-var defaultConn = rawConn?.Trim(' ', '"', '\'', '\r', '\n');
+// Extreme sanitize: remove non-printable characters and trim quotes/spaces
+var defaultConn = rawConn != null 
+    ? System.Text.RegularExpressions.Regex.Replace(rawConn, @"[^\x20-\x7E]", "").Trim(' ', '"', '\'', '\r', '\n') 
+    : null;
+
+// Auto-convert URI format (postgresql://...) to Key-Value format (more robust for Npgsql in some environments)
+if (!string.IsNullOrEmpty(defaultConn) && (defaultConn.StartsWith("postgres://") || defaultConn.StartsWith("postgresql://")))
+{
+    try 
+    {
+        var uri = new Uri(defaultConn);
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+        var userInfo = uri.UserInfo.Split(':');
+        var user = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        
+        defaultConn = $"Host={host};Port={port};Database={database};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true";
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DB] Warning: Failed to convert URI format: {ex.Message}");
+    }
+}
 
 // If no complete connection string, build it from individual environment variables
 if (string.IsNullOrWhiteSpace(defaultConn))
