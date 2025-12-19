@@ -268,9 +268,15 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABLE_SWAGGER") == "true")
+if (app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
+}
+
+if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABLE_SWAGGER") == "true")
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // Enable CORS - MUST be before Authentication/Authorization
