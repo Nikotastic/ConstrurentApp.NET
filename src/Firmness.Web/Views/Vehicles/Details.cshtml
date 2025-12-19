@@ -109,8 +109,8 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Current Hours:</strong> @(Model.CurrentHours?.ToString("N1") ?? "N/A") hours</p>
-                                <p><strong>Current Mileage:</strong> @(Model.CurrentMileage?.ToString("N1") ?? "N/A") km</p>
+                                <p><strong>Current Hours:</strong> @(Model.CurrentHours?.ToString("N0") ?? "N/A") hours</p>
+                                <p><strong>Current Mileage:</strong> @(Model.CurrentMileage?.ToString("N0") ?? "N/A") km</p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Last Maintenance:</strong> @(Model.LastMaintenanceDate?.ToString("MMM dd, yyyy") ?? "N/A")</p>

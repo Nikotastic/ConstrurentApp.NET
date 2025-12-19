@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -308,9 +308,30 @@ public class VehicleRentalsController : ControllerBase
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Security check: Clients can only cancel their own rentals
+            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var isAdmin = User.IsInRole("Admin");
+            
+            if (!isAdmin)
+            {
+                // Get the rental to verify ownership
+                var rentalResult = await _rentalService.GetRentalByIdAsync(id);
+                if (!rentalResult.IsSuccess)
+                    return NotFound(new { isSuccess = false, message = "Rental not found" });
+                
+                // Get the customer associated with the current user
+                var currentCustomer = await _customerService.GetByIdentityUserIdAsync(currentUserId!);
+                
+                if (currentCustomer == null || rentalResult.Value!.CustomerId != currentCustomer.Id)
+                {
+                    _logger.LogWarning("User {UserId} attempted to cancel rental {RentalId} that doesn't belong to them", currentUserId, id);
+                    return Forbid(); // 403 Forbidden
+                }
+            }
+
             var result = await _rentalService.CancelRentalAsync(id, cancelDto.CancellationReason);
             if (!result.IsSuccess)
-                return NotFound(new { isSuccess = false, message = result.ErrorMessage });
+                return BadRequest(new { isSuccess = false, message = result.ErrorMessage });
 
             return Ok(new
             {

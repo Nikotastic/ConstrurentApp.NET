@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs;
+using Firmness.Application.DTOs;
+using Firmness.Domain.Entities;
+using Firmness.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,17 +19,20 @@ public class SalesController : ControllerBase
 {
     private readonly ISaleService _saleService;
     private readonly ICustomerService _customerService;
+    private readonly IEmailService _emailService;
     private readonly IMapper _mapper;
     private readonly ILogger<SalesController> _logger;
 
     public SalesController(
         ISaleService saleService,
         ICustomerService customerService,
+        IEmailService emailService,
         IMapper mapper,
         ILogger<SalesController> logger)
     {
         _saleService = saleService;
         _customerService = customerService;
+        _emailService = emailService;
         _mapper = mapper;
         _logger = logger;
     }
@@ -164,6 +169,48 @@ public class SalesController : ControllerBase
         {
             _logger.LogError(ex, "Error creating sale");
             return StatusCode(500, new { message = "Internal Server Error" });
+        }
+    }
+
+    // POST: api/sales/{id}/send-receipt
+    // Send purchase receipt via email
+
+    [HttpPost("{id:guid}/send-receipt")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SendReceipt(Guid id)
+    {
+        try
+        {
+            var sale = await _saleService.GetByIdWithDetailsAsync(id);
+            if (sale == null)
+                return NotFound(new { message = $"Sale with ID {id} not found" });
+
+            var customer = await _customerService.GetByIdAsync(sale.CustomerId);
+            if (customer == null)
+                return NotFound(new { message = "Customer not found" });
+
+            // Create email message with receipt
+            var emailMessage = EmailMessage.CreatePurchaseConfirmation(
+                customer.Email,
+                $"{customer.FirstName} {customer.LastName}",
+                sale.TotalAmount,
+                sale.Id.ToString().Substring(0, 8).ToUpper()
+            );
+
+            await _emailService.SendEmailAsync(emailMessage);
+
+            _logger.LogInformation("Receipt sent to {Email} for sale {SaleId}", customer.Email, sale.Id);
+
+            return Ok(new { 
+                isSuccess = true, 
+                message = "Receipt sent successfully to customer email" 
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending receipt for sale {SaleId}", id);
+            return StatusCode(500, new { message = "Error sending email. Please try again later." });
         }
     }
 

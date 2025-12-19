@@ -1,4 +1,4 @@
-﻿@model Firmness.Web.ViewModels.VehicleRental.ProcessPaymentViewModel
+@model Firmness.Web.ViewModels.VehicleRental.ProcessPaymentViewModel
 @{
     ViewData["Title"] = "Process Payment";
 }
@@ -54,7 +54,7 @@
                         <label asp-for="Amount" class="form-label"></label>
                         <div class="input-group input-group-lg">
                             <span class="input-group-text">$</span>
-                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0.01" max="@Model.PendingAmount" id="paymentAmount" />
+                            <input asp-for="Amount" class="form-control" type="number" step="1" min="0.01" max="@Model.PendingAmount" id="paymentAmount" />
                         </div>
                         <span asp-validation-for="Amount" class="text-danger"></span>
                         <small class="form-text text-muted">Maximum: $@Model.PendingAmount.ToString("N2")</small>

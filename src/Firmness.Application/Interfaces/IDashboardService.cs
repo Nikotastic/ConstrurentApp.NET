@@ -1,4 +1,4 @@
-﻿using Firmness.Domain.DTOs;
+﻿using Firmness.Application.DTOs;
 
 namespace Firmness.Application.Interfaces;
 public interface IDashboardService

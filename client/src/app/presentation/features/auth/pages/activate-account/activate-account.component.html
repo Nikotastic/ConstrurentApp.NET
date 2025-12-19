@@ -1,0 +1,87 @@
+<div class="activate-container">
+  <div class="activate-card">
+    <h2>Activate Account</h2>
+    <p class="subtitle">Set your password to activate your account</p>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+
+    <form
+      [formGroup]="activateForm"
+      (ngSubmit)="onSubmit()"
+      *ngIf="!successMessage"
+    >
+      <div class="form-group">
+        <label for="password">New Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="Enter new password"
+          [class.error]="
+            activateForm.get('password')?.invalid &&
+            activateForm.get('password')?.touched
+          "
+        />
+        <div
+          class="error-message"
+          *ngIf="
+            activateForm.get('password')?.hasError('required') &&
+            activateForm.get('password')?.touched
+          "
+        >
+          Password is required
+        </div>
+        <div
+          class="error-message"
+          *ngIf="
+            activateForm.get('password')?.hasError('minlength') &&
+            activateForm.get('password')?.touched
+          "
+        >
+          Password must be at least 6 characters
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          placeholder="Confirm new password"
+          [class.error]="
+            activateForm.get('confirmPassword')?.invalid &&
+            activateForm.get('confirmPassword')?.touched
+          "
+        />
+        <div
+          class="error-message"
+          *ngIf="
+            activateForm.hasError('mismatch') &&
+            activateForm.get('confirmPassword')?.touched
+          "
+        >
+          Passwords do not match
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="activateForm.invalid || isLoading || !userId || !code"
+      >
+        <span *ngIf="isLoading">Activating...</span>
+        <span *ngIf="!isLoading">Activate Account</span>
+      </button>
+    </form>
+
+    <div class="links">
+      <a routerLink="/auth/login">Back to Login</a>
+    </div>
+  </div>
+</div>

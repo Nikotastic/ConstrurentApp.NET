@@ -121,11 +121,33 @@ public class GmailEmailService : IEmailService
             }
         }
 
+        // Add attachments if present
+        if (message.Attachments != null && message.Attachments.Any())
+        {
+            foreach (var attachment in message.Attachments)
+            {
+                var stream = new MemoryStream(attachment.Content);
+                var mailAttachment = new Attachment(stream, attachment.FileName, attachment.ContentType);
+                mailMessage.Attachments.Add(mailAttachment);
+            }
+        }
+
         return mailMessage;
     }
 
     private void ValidateSettings()
     {
+        // Debug logging
+        _logger.LogInformation("🔍 Email Settings Debug:");
+        _logger.LogInformation("  SmtpServer: '{SmtpServer}'", _settings.SmtpServer ?? "(null)");
+        _logger.LogInformation("  SmtpPort: {SmtpPort}", _settings.SmtpPort);
+        _logger.LogInformation("  SenderEmail: '{SenderEmail}'", _settings.SenderEmail ?? "(null)");
+        _logger.LogInformation("  SenderName: '{SenderName}'", _settings.SenderName ?? "(null)");
+        _logger.LogInformation("  Username: '{Username}'", _settings.Username ?? "(null)");
+        _logger.LogInformation("  Password: '{Password}'", string.IsNullOrWhiteSpace(_settings.Password) ? "(not set)" : "(set)");
+        _logger.LogInformation("  EnableSsl: {EnableSsl}", _settings.EnableSsl);
+        _logger.LogInformation("  TimeoutSeconds: {TimeoutSeconds}", _settings.TimeoutSeconds);
+        
         var errors = new List<string>();
         
         if (string.IsNullOrWhiteSpace(_settings.SmtpServer))

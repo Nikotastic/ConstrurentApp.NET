@@ -42,5 +42,10 @@ public interface INotificationService
     Task SendBulkVehicleReturnRemindersAsync(
         IEnumerable<(Customer customer, string vehicleName, DateTime returnDate)> rentals,
         CancellationToken cancellationToken = default);
+
+    Task SendAccountActivationEmailAsync(Customer customer, string activationLink, CancellationToken cancellationToken = default);
+
+    // Send password reset email
+    Task SendPasswordResetEmailAsync(string email, string userName, string resetLink, CancellationToken cancellationToken = default);
 }
 

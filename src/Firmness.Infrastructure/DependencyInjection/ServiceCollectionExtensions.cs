@@ -1,9 +1,13 @@
-﻿using Firmness.Domain.Interfaces;
+﻿using Amazon.S3;
+using Amazon.Runtime;
+using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Repositories;
 using Firmness.Infrastructure.Email;
+using Firmness.Infrastructure.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Firmness.Infrastructure.Data;
+using Firmness.Application.Interfaces;
 
 namespace Firmness.Infrastructure.DependencyInjection;
 
@@ -23,11 +27,12 @@ public static class ServiceCollectionExtensions
         // UnitOfWork for application services to consume
         services.AddScoped<IUnitOfWork, ApplicationDbContext>();
         
+        // Identity Services
+        services.AddScoped<IUserAccountService, Firmness.Infrastructure.Identity.UserAccountService>();
+
         // Email Service Configuration (adapter)
-        // The configuration determines which implementation is used (Gmail or Enterprise)
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         
-        // Register the email service based on the configuration
         var emailProvider = configuration.GetValue<string>("EmailSettings:Provider") ?? "Gmail";
         
         if (emailProvider.Equals("Enterprise", StringComparison.OrdinalIgnoreCase))
@@ -38,6 +43,37 @@ public static class ServiceCollectionExtensions
         {
             services.AddScoped<IEmailService, GmailEmailService>();
         }
+        
+        // S3 File Storage Service Configuration
+        services.Configure<S3Settings>(configuration.GetSection("S3Settings"));
+        
+        // Register AWS S3 Client
+        services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var s3Settings = configuration.GetSection("S3Settings").Get<S3Settings>();
+            
+            if (s3Settings == null || string.IsNullOrWhiteSpace(s3Settings.AccessKey))
+            {
+                // Return a dummy client if S3 is not configured (for development)
+                return null!;
+            }
+            
+            var credentials = new BasicAWSCredentials(s3Settings.AccessKey, s3Settings.SecretKey);
+            var config = new AmazonS3Config
+            {
+                RegionEndpoint = Amazon.RegionEndpoint.GetBySystemName(s3Settings.Region)
+            };
+            
+            return new AmazonS3Client(credentials, config);
+        });
+        
+        services.AddScoped<IFileStorageService, S3FileStorageService>();
+        
+        // Payment Service (Simulated for now)
+        services.AddScoped<IPaymentService, Firmness.Infrastructure.Payment.SimulatedPaymentService>();
+        
+        // PDF Service
+        services.AddScoped<IPdfService, Firmness.Infrastructure.Pdf.QuestPdfService>();
         
         return services;
     }

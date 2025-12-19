@@ -1,4 +1,4 @@
-﻿using Firmness.Domain.Entities;
+﻿﻿using Firmness.Domain.Entities;
 using Firmness.Domain.Interfaces;
 using Firmness.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,10 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
 {
     // CRUD operations
     public async Task<Product?> GetByIdAsync(Guid id)
-        => await db.Products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        => await db.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
     public Task<IEnumerable<Product>> GetAllAsync()
         => Task.FromResult<IEnumerable<Product>>(db.Products.AsNoTracking().ToList());
 
@@ -32,6 +35,15 @@ public class ProductRepository(ApplicationDbContext db) : IProductRepository
 
     public async Task UpdateAsync(Product product)
     {
+        // Detach any existing tracked entity with the same ID to avoid conflicts
+        var existingEntry = db.ChangeTracker.Entries<Product>()
+            .FirstOrDefault(e => e.Entity.Id == product.Id);
+        
+        if (existingEntry != null)
+        {
+            existingEntry.State = EntityState.Detached;
+        }
+        
         db.Products.Update(product);
         await db.SaveChangesAsync();
     }

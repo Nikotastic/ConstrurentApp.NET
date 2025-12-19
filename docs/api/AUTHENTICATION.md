@@ -1,15 +1,17 @@
 ﻿# Authentication and Authorization
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../README.md)
+
 ## 🔐 Authentication System
 
 The project uses **ASP.NET Core Identity** + **JWT** for authentication and authorization.
 
 ## 🎭 Roles
 
-| Rol | Description               | Access                           |
-|-----|---------------------------|----------------------------------|
-| `Admin` | System administrator | Complete dashboard, complete API |
-| `Client` | Registered customer      | Acceso limitado         |
+| Rol      | Description          | Access                           |
+| -------- | -------------------- | -------------------------------- |
+| `Admin`  | System administrator | Complete dashboard, complete API |
+| `Client` | Registered customer  | Acceso limitado                  |
 
 ## 🔑 JWT (JSON Web Tokens)
 
@@ -31,6 +33,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 ```
 
 ### Environment Variables
+
 ```env
 JWT__Key=clave_secreta_minimo_32_caracteres
 JWT__Issuer=Firmness.Api
@@ -41,19 +44,19 @@ JWT__Audience=FirmnessClients
 
 ```csharp
 var claims = new[]
-{ 
-new Claim(ClaimTypes.NameIdentifier, user.Id), 
-new Claim(ClaimTypes.Name, user.UserName), 
-new Claim(ClaimTypes.Email, user.Email), 
-// Add roles 
+{
+new Claim(ClaimTypes.NameIdentifier, user.Id),
+new Claim(ClaimTypes.Name, user.UserName),
+new Claim(ClaimTypes.Email, user.Email),
+// Add roles
 ...roles.Select(role => new Claim(ClaimTypes.Role, role))
 };
 
-var token = new JwtSecurityToken( 
-issuer: jwtIssuer, 
-audience: jwtAudience, 
-claims: claims, 
-expires: DateTime.UtcNow.AddHours(1), 
+var token = new JwtSecurityToken(
+issuer: jwtIssuer,
+audience: jwtAudience,
+claims: claims,
+expires: DateTime.UtcNow.AddHours(1),
 signingCredentials:creds
 );
 
@@ -63,6 +66,7 @@ return new JwtSecurityTokenHandler().WriteToken(token);
 ### Use Token
 
 **In Headers:**
+
 ```http
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
@@ -89,17 +93,17 @@ public class CustomersApiController : ControllerBase { }
 
 ```csharp
 public class MyController : ControllerBase
-{ 
-    // public endpoint 
-    [AllowAnonymous] 
-    public IActionResult public() { } 
-    
-    // Requires authentication 
-    [Authorize] 
-    public IActionResult Protected() { } 
-    
-    // Admin only 
-    [Authorize(Roles = "Admin")] 
+{
+    // public endpoint
+    [AllowAnonymous]
+    public IActionResult public() { }
+
+    // Requires authentication
+    [Authorize]
+    public IActionResult Protected() { }
+
+    // Admin only
+    [Authorize(Roles = "Admin")]
     public IActionResult AdminOnly() { }
 }
 ```
@@ -168,13 +172,13 @@ Return token
 
 ```
 GET /api/CustomersApi
-Header: Authorization Bearer {token} 
+Header: Authorization Bearer {token}
         ↓
-Middleware validates JWT 
+Middleware validates JWT
         ↓
-Extract claims (userId, roles) 
+Extract claims (userId, roles)
         ↓
-Policy/role validation 
+Policy/role validation
         ↓
 Execute action
 ```
@@ -184,8 +188,8 @@ Execute action
 ```csharp
 // Program.cs
 builder.Services.AddAuthorization(options =>
-{ 
-options.AddPolicy("RequireAdminRole", policy => 
+{
+options.AddPolicy("RequireAdminRole", policy =>
 policy.RequireRole("Admin"));
 });
 ```
@@ -195,21 +199,27 @@ policy.RequireRole("Admin"));
 ### Get Token
 
 ```bash
-curl -X POST https://localhost:7192/api/Auth/login \ 
-    -H "Content-Type: application/json" \ 
+curl -X POST https://localhost:7192/api/Auth/login \
+    -H "Content-Type: application/json" \
     -d '{"email":"admin@test.com","password":"Admin123!"}'
 ```
 
 ### Use Token
 
 ```bash
-curl -X GET https://localhost:7192/api/CustomersApi \ 
+curl -X GET https://localhost:7192/api/CustomersApi \
     -H "Authorization: Bearer eyJhbG..."
 ```
-
 
 ## 📚 Referencias
 
 - [ASP.NET Core Identity](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity)
 - [JWT Authentication](https://jwt.io/introduction)
 
+---
+
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../README.md">📚 Documentation Hub</a> | 
+  <a href="ENDPOINTS.md">🔌 API Endpoints</a>
+</div>

@@ -79,7 +79,7 @@ public class ExportService : IExportService
             row++;
         }
 
-        worksheet.Cells.AutoFitColumns();
+        worksheet.DefaultColWidth = 25;
         return package.GetAsByteArray();
     }
 
@@ -123,7 +123,7 @@ public class ExportService : IExportService
             row++;
         }
 
-        worksheet.Cells.AutoFitColumns();
+        worksheet.DefaultColWidth = 25;
         return package.GetAsByteArray();
     }
 
@@ -165,7 +165,7 @@ public class ExportService : IExportService
             row++;
         }
 
-        worksheet.Cells.AutoFitColumns();
+        worksheet.DefaultColWidth = 25;
         return package.GetAsByteArray();
     }
 
@@ -443,7 +443,7 @@ public class ExportService : IExportService
             row++;
         }
 
-        worksheet.Cells.AutoFitColumns();
+        worksheet.DefaultColWidth = 25;
         return package.GetAsByteArray();
     }
 
@@ -574,7 +574,7 @@ public class ExportService : IExportService
             row++;
         }
 
-        worksheet.Cells.AutoFitColumns();
+        worksheet.DefaultColWidth = 25;
         return package.GetAsByteArray();
     }
 
