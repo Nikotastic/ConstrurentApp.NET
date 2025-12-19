@@ -96,7 +96,34 @@ else
 var configuration = builder.Configuration;
 
 // Get CONN_STR from environment (loaded from .env or .env.local, or set by docker-compose)
-var connStrFromEnv = Environment.GetEnvironmentVariable("CONN_STR");
+var rawConn = Environment.GetEnvironmentVariable("CONN_STR");
+
+// Extreme sanitize: remove non-printable characters and trim quotes/spaces
+var connStrFromEnv = rawConn != null 
+    ? System.Text.RegularExpressions.Regex.Replace(rawConn, @"[^\x20-\x7E]", "").Trim(' ', '"', '\'', '\r', '\n') 
+    : null;
+
+// Auto-convert URI format (postgresql://...) to Key-Value format (more robust for Npgsql)
+if (!string.IsNullOrEmpty(connStrFromEnv) && (connStrFromEnv.StartsWith("postgres://") || connStrFromEnv.StartsWith("postgresql://")))
+{
+    try 
+    {
+        var uri = new Uri(connStrFromEnv);
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+        var userInfo = uri.UserInfo.Split(':');
+        var user = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        
+        connStrFromEnv = $"Host={host};Port={port};Database={database};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true";
+        Console.WriteLine("[INFO] Converted postgres URI to Key-Value format");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[WARNING] Failed to convert URI format: {ex.Message}");
+    }
+}
 
 string? defaultConn = null;
 
@@ -104,7 +131,7 @@ if (inContainer)
 {
     // Running in Docker: use CONN_STR from environment (docker-compose sets this)
     defaultConn = connStrFromEnv;
-    Console.WriteLine("[INFO] Running in Docker container - using CONN_STR from docker-compose");
+    Console.WriteLine("[INFO] Running in Docker container - using CONN_STR from environment");
 }
 else
 {
@@ -112,8 +139,6 @@ else
     defaultConn = connStrFromEnv 
                   ?? configuration.GetConnectionString("DefaultConnection") 
                   ?? configuration.GetConnectionString("ApplicationDbContextConnection");
-    
-    Console.WriteLine("[INFO] Running locally - using CONN_STR from .env.local");
 }
 
 if (string.IsNullOrWhiteSpace(defaultConn))
