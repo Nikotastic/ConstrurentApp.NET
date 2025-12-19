@@ -18,6 +18,7 @@ public class NotificationService : INotificationService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+   // Send welcome email
     public async Task SendWelcomeEmailAsync(Customer customer, CancellationToken cancellationToken = default)
     {
         try
@@ -46,7 +47,8 @@ public class NotificationService : INotificationService
             throw;
         }
     }
-
+    
+    // Send bulk welcome emails
     public async Task SendBulkWelcomeEmailsAsync(IEnumerable<Customer> customers, CancellationToken cancellationToken = default)
     {
         try
@@ -80,7 +82,8 @@ public class NotificationService : INotificationService
             throw;
         }
     }
-
+    
+    // Send purchase confirmation email
     public async Task SendPurchaseConfirmationAsync(
         Customer customer,
         decimal totalAmount,
@@ -115,7 +118,7 @@ public class NotificationService : INotificationService
             throw;
         }
     }
-
+    // Send vehicle rental confirmation email
     public async Task SendVehicleRentalConfirmationAsync(
         Customer customer,
         string vehicleName,
@@ -171,6 +174,7 @@ public class NotificationService : INotificationService
         }
     }
 
+    // Send vehicle return reminder email
     public async Task SendVehicleReturnReminderAsync(
         Customer customer,
         string vehicleName,
@@ -222,7 +226,7 @@ public class NotificationService : INotificationService
             throw;
         }
     }
-
+    // Send bulk vehicle return reminders
     public async Task SendBulkVehicleReturnRemindersAsync(
         IEnumerable<(Customer customer, string vehicleName, DateTime returnDate)> rentals,
         CancellationToken cancellationToken = default)
@@ -276,6 +280,67 @@ public class NotificationService : INotificationService
             _logger.LogError(
                 ex,
                 "Failed to send bulk vehicle return reminders");
+            throw;
+        }
+    }
+    
+    // Send account activation email
+    public async Task SendAccountActivationEmailAsync(Customer customer, string activationLink, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Preparing account activation email for customer {CustomerId} - {CustomerName}",
+                customer.Id,
+                customer.FullName);
+
+            var emailMessage = EmailMessage.CreateAccountActivationEmail(
+                customer.Email,
+                customer.FullName,
+                activationLink);
+
+            await _emailService.SendEmailAsync(emailMessage, cancellationToken);
+
+            _logger.LogInformation(
+                "Account activation email sent successfully to {Email}",
+                customer.Email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to send account activation email to customer {CustomerId}",
+                customer.Id);
+            throw;
+        }
+    }
+
+    // Send password reset email
+    public async Task SendPasswordResetEmailAsync(string email, string userName, string resetLink, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Preparing password reset email for {Email}",
+                email);
+
+            var emailMessage = EmailMessage.CreatePasswordResetEmail(
+                email,
+                userName,
+                resetLink);
+
+            await _emailService.SendEmailAsync(emailMessage, cancellationToken);
+
+            _logger.LogInformation(
+                "Password reset email sent successfully to {Email}",
+                email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Failed to send password reset email to {Email}",
+                email);
             throw;
         }
     }

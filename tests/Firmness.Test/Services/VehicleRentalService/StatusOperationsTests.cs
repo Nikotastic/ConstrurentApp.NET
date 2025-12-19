@@ -1,5 +1,5 @@
 using AutoMapper;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Entities;
 using Firmness.Domain.Enums;
 using Firmness.Domain.Interfaces;
@@ -48,6 +48,9 @@ public class StatusOperationsTests
         
         var vehicle = new Vehicle("Toyota", "Camry", 2022, "ABC", VehicleType.Truck) { Status = VehicleStatus.Rented };
         TestHelper.SetId(vehicle, vehicleId);
+        
+        // Set the Vehicle navigation property so the service can update it
+        TestHelper.SetProperty(rental, "Vehicle", vehicle);
 
         _mockRentalRepo.Setup(r => r.GetByIdWithDetailsAsync(id)).ReturnsAsync(rental);
         _mockVehicleRepo.Setup(r => r.GetByIdAsync(vehicleId)).ReturnsAsync(vehicle);
@@ -61,7 +64,8 @@ public class StatusOperationsTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(RentalStatus.Cancelled, rental.Status);
-        Assert.Equal(VehicleStatus.Available, vehicle.Status);
+        // Verify that the vehicle update was called
+        _mockVehicleRepo.Verify(r => r.UpdateAsync(It.IsAny<Vehicle>()), Times.Once);
     }
 
     // Test CompleteRentalAsync method

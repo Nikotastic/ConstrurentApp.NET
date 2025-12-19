@@ -1,0 +1,164 @@
+version: "3.9"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: firmness-db
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${PG_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - firmness-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Tests (Mandatory first step)
+  tests:
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    container_name: firmness-tests
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Testing
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - firmness-network
+    volumes:
+      - ./TestResults:/app/TestResults
+
+  # Backend API (.NET)
+  api:
+    build:
+      context: ./src
+      dockerfile: Firmness.Api/Dockerfile
+    container_name: firmness-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
+      - JWT__Key=${JWT__Key}
+      - JWT__Issuer=${JWT__Issuer}
+      - JWT__Audience=${JWT__Audience}
+      - EmailSettings__SmtpServer=${EmailSettings__SmtpServer}
+      - EmailSettings__SmtpPort=${EmailSettings__SmtpPort}
+      - EmailSettings__SenderEmail=${EmailSettings__SenderEmail}
+      - EmailSettings__SenderName=${EmailSettings__SenderName}
+      - EmailSettings__Username=${EmailSettings__Username}
+      - EmailSettings__Password=${EmailSettings__Password}
+      - EmailSettings__EnableSsl=${EmailSettings__EnableSsl}
+      - EmailSettings__TimeoutSeconds=${EmailSettings__TimeoutSeconds}
+      - S3Settings__BucketName=${S3Settings__BucketName}
+      - S3Settings__Region=${S3Settings__Region}
+      - S3Settings__AccessKey=${S3Settings__AccessKey}
+      - S3Settings__SecretKey=${S3Settings__SecretKey}
+      - S3Settings__UseCloudFront=${S3Settings__UseCloudFront}
+      - S3Settings__CloudFrontDomain=${S3Settings__CloudFrontDomain}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - Gemini__ApiKey=${GEMINI_API_KEY}
+      - Gemini__Model=${Gemini__Model}
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      tests:
+        condition: service_completed_successfully
+    networks:
+      - firmness-network
+
+  # Admin Panel (MVC)
+  admin:
+    build:
+      context: ./src
+      dockerfile: Firmness.Web/Dockerfile
+    container_name: firmness-admin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=http://+:8080
+      - CONN_STR=${ConnectionStrings__DefaultConnection}
+      - EmailSettings__SmtpServer=${EmailSettings__SmtpServer}
+      - EmailSettings__SmtpPort=${EmailSettings__SmtpPort}
+      - EmailSettings__SenderEmail=${EmailSettings__SenderEmail}
+      - EmailSettings__SenderName=${EmailSettings__SenderName}
+      - EmailSettings__Username=${EmailSettings__Username}
+      - EmailSettings__Password=${EmailSettings__Password}
+      - EmailSettings__EnableSsl=${EmailSettings__EnableSsl}
+      - EmailSettings__TimeoutSeconds=${EmailSettings__TimeoutSeconds}
+      - S3Settings__BucketName=${S3Settings__BucketName}
+      - S3Settings__Region=${S3Settings__Region}
+      - S3Settings__AccessKey=${S3Settings__AccessKey}
+      - S3Settings__SecretKey=${S3Settings__SecretKey}
+      - S3Settings__UseCloudFront=${S3Settings__UseCloudFront}
+      - S3Settings__CloudFrontDomain=${S3Settings__CloudFrontDomain}
+    ports:
+      - "${ADMIN_PORT}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      tests:
+        condition: service_completed_successfully
+    networks:
+      - firmness-network
+
+  # Frontend (Angular + Nginx)
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: firmness-client
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT}:80"
+    depends_on:
+      api:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
+    networks:
+      - firmness-network
+
+  # PgAdmin (Optional - for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: firmness-pgadmin
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "${PGADMIN_PORT}:80"
+    depends_on:
+      - db
+    networks:
+      - firmness-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  firmness-network:
+    driver: bridge

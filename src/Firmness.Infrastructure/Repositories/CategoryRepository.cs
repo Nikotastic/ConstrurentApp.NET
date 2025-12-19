@@ -28,6 +28,7 @@ public class CategoryRepository : ICategoryRepository
     public async Task<IEnumerable<Category>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.Products)
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
     }
@@ -37,6 +38,7 @@ public class CategoryRepository : ICategoryRepository
         var totalItems = await _context.Categories.LongCountAsync(cancellationToken);
         
         var items = await _context.Categories
+            .Include(c => c.Products)
             .OrderBy(c => c.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -48,6 +50,7 @@ public class CategoryRepository : ICategoryRepository
     public async Task<IEnumerable<Category>> GetActiveAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.Products)
             .Where(c => c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);
@@ -56,6 +59,7 @@ public class CategoryRepository : ICategoryRepository
     public async Task<IEnumerable<Category>> GetActiveSortedAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Categories
+            .Include(c => c.Products)
             .Where(c => c.IsActive)
             .OrderBy(c => c.Name)
             .ToListAsync(cancellationToken);

@@ -40,20 +40,53 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest model)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        try 
+        {
+            _logger.LogInformation("Login attempt for {Email}", model.Email);
 
-        var user = await _userManager.FindByEmailAsync(model.Email);
-        if (user == null)
-            return Unauthorized(new { message = "Invalid credentials" });
+            if (!ModelState.IsValid) 
+            {
+                _logger.LogWarning("Invalid model state for {Email}", model.Email);
+                return BadRequest(ModelState);
+            }
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-        if (!result.Succeeded)
-            return Unauthorized(new { message = "Invalid credentials" });
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                _logger.LogWarning("User not found: {Email}", model.Email);
+                return Unauthorized(new { message = "Invalid credentials" });
+            }
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var token = GenerateJwtToken(user, roles);
+            _logger.LogInformation("User found, checking password for {Email}", model.Email);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+            if (!result.Succeeded)
+            {
+                _logger.LogWarning("Invalid password for {Email}", model.Email);
+                return Unauthorized(new { message = "Invalid credentials" });
+            }
 
-        return Ok(new LoginResponse { Token = token, ExpiresInSeconds = 3600 });
+            // Check if customer is active
+            var customer = await _customerService.GetByIdentityUserIdAsync(user.Id);
+            if (customer != null && !customer.IsActive)
+            {
+                _logger.LogWarning("Login blocked: Customer account is inactive for {Email}", model.Email);
+                return Unauthorized(new { message = "Your account is inactive. Please contact support." });
+            }
+
+            _logger.LogInformation("Password correct, getting roles for {Email}", model.Email);
+            var roles = await _userManager.GetRolesAsync(user);
+            
+            _logger.LogInformation("Generating token for {Email}", model.Email);
+            var token = GenerateJwtToken(user, roles);
+
+            _logger.LogInformation("Login successful for {Email}", model.Email);
+            return Ok(new LoginResponse { Token = token, ExpiresInSeconds = 3600 });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for email {Email}. StackTrace: {StackTrace}", model.Email, ex.StackTrace);
+            return StatusCode(500, new { message = $"Internal Server Error: {ex.Message}", details = ex.ToString() });
+        }
     }
 
     [HttpPost("register-client")]
@@ -174,6 +207,109 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+    // Activate user account
+    [HttpPost("activate")]
+    public async Task<IActionResult> ActivateAccount([FromBody] ActivateAccountRequest model)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user == null)
+        {
+            return BadRequest(new { message = "User not found" });
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+        }
+
+        // Ensure email is confirmed
+        if (!user.EmailConfirmed)
+        {
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+        }
+        
+        // Ensure customer is active
+        var customer = await _customerService.GetByIdentityUserIdAsync(user.Id);
+        if (customer != null && !customer.IsActive)
+        {
+            customer.IsActive = true;
+            await _customerService.UpdateAsync(customer);
+        }
+
+        return Ok(new { message = "Account activated successfully" });
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user doesn't exist for security reasons
+                return Ok(new { message = "If the email exists, a password reset link has been sent." });
+            }
+
+            // Generate password reset token
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            
+            // Create reset link
+            var clientUrl = _configuration["ClientUrl"] ?? "http://localhost:4200";
+            var resetLink = $"{clientUrl}/auth/reset-password?userId={user.Id}&code={System.Net.WebUtility.UrlEncode(token)}";
+
+            // Get user name for email
+            var customer = await _customerService.GetByIdentityUserIdAsync(user.Id);
+            var userName = customer?.FullName ?? user.UserName ?? "User";
+
+            // Send password reset email
+            try
+            {
+                await _notificationService.SendPasswordResetEmailAsync(user.Email!, userName, resetLink);
+                _logger.LogInformation("Password reset email sent to {Email}", user.Email);
+            }
+            catch (Exception emailEx)
+            {
+                _logger.LogError(emailEx, "Failed to send password reset email to {Email}", user.Email);
+                return StatusCode(500, new { message = "Error sending password reset email. Please try again later." });
+            }
+
+            return Ok(new { message = "If the email exists, a password reset link has been sent." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in forgot password process for {Email}", model.Email);
+            return StatusCode(500, new { message = "An error occurred processing your request." });
+        }
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest model)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var user = await _userManager.FindByIdAsync(model.UserId);
+        if (user == null)
+        {
+            return BadRequest(new { message = "Invalid request" });
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, model.Code, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+        }
+
+        _logger.LogInformation("Password reset successful for user {UserId}", user.Id);
+        return Ok(new { message = "Password reset successfully. You can now login with your new password." });
+    }
+
     // DTOs
     public class LoginRequest
     {
@@ -200,5 +336,23 @@ public class AuthController : ControllerBase
         public string Token { get; set; } = string.Empty;
         public int ExpiresInSeconds { get; set; }
     }
-    
+
+    public class ActivateAccountRequest
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class ForgotPasswordRequest
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }

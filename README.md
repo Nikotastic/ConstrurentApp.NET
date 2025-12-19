@@ -1,522 +1,174 @@
-# Firmness 🏗️
+# 🏗️ Firmness - Intelligent Construction Management System
 
-**Comprehensive Management System for the Sale of Construction Supplies and Rental of Industrial Vehicles**
+<div align="center">
 
-Firmness is a complete business solution that digitizes and optimizes the operations of construction companies, combining:
-- 🏪 **Sales Management** of construction materials and supplies
-- 🚜 **Rental of Industrial Vehicles** (heavy machinery, cranes, forklifts, etc.)
-- 👥 **Customer Management** and User Control
-- 📊 **Complete Web-Based Administrative Dashboard**
-- 🔌 **Modular REST API** for integration with other systems
-- 🐳 **Orchestrated Deployment** with Docker for production
-- ✅ **Automated Testing** to ensure quality
----
+![Firmness Logo](https://firmness-images.s3.us-east-2.amazonaws.com/logo.png)
 
-## 🎯 Main Features
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-purple?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
+[![Angular](https://img.shields.io/badge/Angular-17-red?style=flat-square&logo=angular)](https://angular.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-### 📦 Sales Module - Construction Supplies
-- ✅ Complete catalog of products and materials
-- ✅ Categorization and advanced search
-- ✅ Real-time inventory control
-- ✅ Price, cost, and SKU management
-- ✅ Sales system with invoicing
-- ✅ Sales reports and export to Excel/PDF
+**A comprehensive, enterprise-grade solution for managing construction machinery rentals and material sales.**
+Combines **Clean Architecture** with **AI capabilities**, automated workflows, and seamless cloud integration.
 
-### 🚗 Vehicle Rental Module
-- ✅ Management of commercial vehicle fleets
-- ✅ Reservation system and availability control
-- ✅ Management of active and completed rentals
-- ✅ Complete history by client and vehicle
-- ✅ Automatic calculation of rental costs
-### 👥 Customer Management
-- ✅ Customer registration and administration
-- ✅ Purchase and rental history
-- ✅ Roles and permissions system
-- ✅ Secure authentication with JWT
-- ✅ Complete data deletion (GDPR compliant)
+[🚀 Quick Start](#-quick-start) • [📚 Documentation](#-documentation-hub) • [🏗️ Architecture](#-architecture--diagrams) • [🤖 AI Features](#-ai-powered-features)
 
-### 💼 Administrative Dashboard (Firmness.Web)
-- ✅ Complete control panel for administrators
-- ✅ Visual management of clients, products, and vehicles
-- ✅ Business reports and statistics
-- ✅ Data export to Excel and PDF
-- ✅ Responsive interface developed in ASP.NET MVC
-
-### 🔌 REST API (Firmness.Api)
-- ✅ Complete and documented RESTful API
-- ✅ Swagger/OpenAPI for interactive documentation
-- ✅ JWT Bearer authentication
-- ✅ Endpoints for all business modules
-- ✅ Designed for Angular frontend integration
-
-### 🔐 Security and Authentication
-- ✅ ASP.NET Core Identity for user management
-- ✅ JWT (JSON Web Tokens) for APIs
-- ✅ Role system: Admin and Client
-- ✅ Endpoint authorization policies
-- ✅ Protection against common attacks (CORS, XSS)
-
-### 🐳 DevOps and Deployment
-- ✅ Docker Compose for service orchestration
-- ✅ Containers for API, Web, PostgreSQL, and PgAdmin
-- ✅ Environment variables for configuration
-- ✅ CI/CD ready
-- ✅ Automated migration scripts
+</div>
 
 ---
 
-## 🏗 System Architecture
+## 🚀 Quick Start
 
-### Clean Architecture in 4 Layers
+### One-Command Deployment
 
-```
-┌─────────────────────────────────────────────┐
-│         Presentation Layer                  │
-│  ┌──────────────┐  ┌──────────────┐        │
-│  │ Firmness.Api │  │ Firmness.Web │        │
-│  │  (REST API)  │  │  (MVC Admin) │        │
-│  └──────────────┘  └──────────────┘        │
-├─────────────────────────────────────────────┤
-│        Application Layer                    │
-│  ┌──────────────────────────────┐          │
-│  │   Firmness.Application        │          │
-│  │  - Services                   │          │
-│  │  - DTOs, Interfaces           │          │
-│  └──────────────────────────────┘          │
-├─────────────────────────────────────────────┤
-│          Domain Layer (Core)                │
-│  ┌──────────────────────────────┐          │
-│  │   Firmness.Domain             │          │
-│  │  - Entities (Customer,        │          │
-│  │    Product, Vehicle, Sale)    │          │
-│  │  - Business Rules             │          │
-│  └──────────────────────────────┘          │
-├─────────────────────────────────────────────┤
-│       Infrastructure Layer                  │
-│  ┌──────────────────────────────┐          │
-│  │   Firmness.Infrastructure     │          │
-│  │  - EF Core + PostgreSQL       │          │
-│  │  - Identity                   │          │
-│  │  - Email Service              │          │
-│  │  - Repositories               │          │
-│  └──────────────────────────────┘          │
-└─────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────┐
-│        Frontend (en desarrollo)             │
-│  ┌──────────────────────────────┐          │
-│  │   Client (Angular 17)         │          │
-│  │  - Módulo de Cliente          │          │
-│  │  - Interfaz web moderna       │          │
-│  └──────────────────────────────┘          │
-└─────────────────────────────────────────────┘
-```
-
-### System Modules
-
-```
-Firmness/
-├── src/
-│   ├── Firmness.Api/           # 🔌 API REST
-│   ├── Firmness.Web/           # 💼 Dashboard Admin (MVC)
-│   ├── Firmness.Application/   # 📋 Use Cases and Services
-│   ├── Firmness.Domain/        # 🏛️ Business Entities
-│   └── Firmness.Infrastructure/# 🔧 Data, Identity, Email
-├── client/                     # 🎨 Frontend Angular 
-├── tests/
-│   └── Firmness.Test/          # ✅ Automated Testing
-└── docs/                       # 📚 Technical Documentation
-```
-
----
-
-## 🚀Quick Start
-
-### 📋 Prerequisites
-
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [PostgreSQL 15+](https://www.postgresql.org/download/)
-- [Docker Desktop](https://www.docker.com/) (recommended for production)
-- [Node.js 18+](https://nodejs.org/) (for Angular client)
-
-### 🐳Option 1: Docker Compose (Recommended)
-
-The fastest way to run the entire project:
+The system uses a **Safety-First Deployment** pipeline. It builds, tests, and deploys in one go.
 
 ```bash
-    # 1. Clone repository
-    git clone <repo-url>
-    cd ConstrurentApp.NET
-    
-    # 2. Configure environment variables
-    cp .env.example .env
-    # Edit .env with your PostgreSQL credentials
-    
-    # 3. Start all services (API, Web, PostgreSQL, PgAdmin)
-    docker-compose up -d
-    
-    # 4. Apply migrations (first time)
-    docker-compose exec web dotnet ef database update
-    
-    # 5. Access the services
-    # API: https://localhost:7192
-    # Dashboard: http://localhost:5000
-    # PgAdmin: http://localhost:8080
+# Build, Run 90+ Tests, and Deploy
+docker compose up --build
 ```
 
-### 💻 Option 2: Local Development
+### Access Points
 
-For active development without Docker:
+| Service         | URL                                                            | Credentials (Default)                  |
+| --------------- | -------------------------------------------------------------- | -------------------------------------- |
+| **Client App**  | [http://localhost:80](http://localhost:80)                     | `client@firmness.local` / `Client123!` |
+| **Admin Panel** | [http://localhost:5001](http://localhost:5001)                 | `admin@firmness.local` / `Admin123!`   |
+| **API Swagger** | [http://localhost:5000/swagger](http://localhost:5000/swagger) | -                                      |
+| **PgAdmin**     | [http://localhost:8080](http://localhost:8080)                 | `admin@firmness.local` / `admin123`    |
 
-```bash
-        # 1. Configure environment variables
-        cp .env.example .env
-        # Edit .env with local PostgreSQL credentials
-        
-        # 2. Restore dependencies
-        dotnet restore
-        
-        # 3. Apply database migrations
-        cd src/Firmness.Infrastructure
-        dotnet ef database update --startup-project ../Firmness.Api
-        
-        # 4. Start REST API (Terminal 1)
-        cd ../Firmness.Api
-        dotnet run
-        # API available at: https://localhost:7192
-        
-        # 5. Start Web Dashboard (Terminal 2)
-        cd ../Firmness.Web
-        dotnet run
-        # Dashboard at: http://localhost:5000
-        
-        # 6. Start Angular Client (Terminal 3) - Optional
-        cd ../../client
-        npm install
-        ng serve
-        # Client at: http://localhost:4200
+---
+
+## 📚 Documentation Hub
+
+Everything you need to know, connected in one place.
+
+### 📘 **Guides & Manuals**
+
+- **[� Complete Documentation Hub](docs/README.md)**
+  - _Central documentation index with all guides and references._
+- **[⚙️ Installation & Setup Guide](docs/setup/INSTALLATION.md)**
+  - _Complete installation guide, Docker setup, and deployment._
+- **[📄 Excel & PDF Features](docs/building-data/EXCEL_IMPORT_EXPORT.md)**
+  - _How to use Bulk Import/Export and generate PDF contracts._
+- **[📝 PDF Generation](docs/building-data/PDF_GENERATION.md)**
+  - _Generate contracts, invoices, and receipts with QuestPDF._
+- **[💳 Payment Receipts](docs/building-data/EMAIL_RECEIPTS.md)**
+  - _Automated payment processing with PDF receipts sent via email._
+- **[☁️ AWS S3 Storage](docs/building-data/S3_STORAGE.md)**
+  - _File uploads, image storage, and CloudFront CDN integration._
+- **[📧 Email Configuration](docs/setup/EMAIL_CONFIGURATION.md)**
+  - _Gmail SMTP, SendGrid, AWS SES setup and usage._
+- **[☁️ Environment & Configuration](docs/setup/ENVIRONMENT.md)**
+  - _Configuration for Database, Email, and AWS S3._
+
+### 🤖 **AI & Intelligence**
+
+- **[🧠 AI Assistant Documentation](docs/AI/README.md)**
+  - _Integration with Google Gemini, Chatbot architecture, and prompt engineering._
+- **[🔧 AI Scripts](docs/AI/SCRIPTS.md)**
+  - _Configuration, testing, and diagnostic scripts for the chatbot._
+
+### 💻 **Development**
+
+- **[🧪 Testing Guide](tests/Firmness.Test/README_TESTS.md)**
+  - _How to run the 90+ automated tests and add new ones._
+- **[🔌 API Reference](docs/api/ENDPOINTS.md)**
+  - _Detailed list of REST API endpoints and usage._
+- **[🔐 Authentication](docs/api/AUTHENTICATION.md)**
+  - _JWT flow, Roles, and Security._
+- **[🧪 API Testing Scripts](docs/api/SCRIPTS.md)**
+  - _PowerShell scripts for testing endpoints and authentication._
+
+---
+
+## 🏗️ Architecture & Diagrams
+
+Visual documentation to understand the system's core.
+
+| Diagram               | Description                                  | Link                                         |
+| --------------------- | -------------------------------------------- | -------------------------------------------- |
+| **🔄 Use Case**       | Actors, Roles, and System Functionalities    | [**View Diagram**](docs/use-case-diagram.md) |
+| **🏗️ Class Diagram**  | Domain Entities, Services, and Relationships | [**View Diagram**](docs/class-diagram.md)    |
+| **🗄️ Database Model** | ERD, Schema, Tables, and Foreign Keys        | [**View Diagram**](docs/database-model.md)   |
+
+### Clean Architecture Layers
+
+```mermaid
+graph TD
+    A[Presentation Layer] --> B[Application Layer]
+    B --> C[Domain Layer]
+    B --> D[Infrastructure Layer]
+    D --> C
 ```
 
 ---
 
-## 🔐 Default Credentials
+## 🌟 Key Features
 
-### Administrative Dashboard
-- **URL:** http://localhost:5000
-- **Email:** `admin@firmness.com`
-- **Password:** `Admin123!`
+### 1. 🤖 AI-Powered Chatbot
 
-### PostgreSQL Database
-- **Host:** `localhost:5432`
-- **Database:** `FirmnessDB`
-- **User:** `postgres`
-- **Password:** (configure in `.env`)
+Powered by **Google Gemini**, helping users find machinery, get quotes, and navigate the rental process via natural language.
 
-### PgAdmin (with Docker)
-- **URL:** http://localhost:8080
-- **Email:** `admin@firmness.com`
-- **Password:** `admin123`
+### 2. 📊 Excel Import/Export
 
----
+- **Bulk Import**: Upload thousands of products/customers via `.xlsx`.
+- **Reporting**: Export financial data and inventory status instantly.
 
-## 🔗 Servicios y URLs
+### 3. 📝 PDF Generation
 
-| Service            | URL | Description                      |
-|--------------------|-----|----------------------------------|
-| **API REST**       | https://localhost:7192 | Main RESTful API           |
-| **Swagger**        | https://localhost:7192/swagger | Interactive API documentation    |
-| **Dashboard Web**  | http://localhost:5000 | MVC Administrative Panel       |
-| **Client Angular** | http://localhost:4200 | Modern interface (under development)) |
-| **PgAdmin**        | http://localhost:8080 | PostgreSQL Administration       |
+- **Contracts**: Auto-generate legal rental contracts.
+- **Invoices**: Create professional invoices on the fly.
+- **Receipts**: Generate payment receipts with transaction details.
 
----
+### 4. 💳 Payment Processing & Receipts
 
-## 📚 Technical Documentation
+- **Simulated Payment Gateway**: Test payment flows with realistic processing delays.
+- **Transaction Management**: Track payments with unique transaction IDs and invoice numbers.
+- **Automated PDF Receipts**: Generate professional PDF receipts after successful payments.
+- **Email Delivery**: Automatically send receipts to customers via email with PDF attachments.
+- **Complete Purchase Flow**: Payment → PDF Generation → Email notification in one seamless process.
 
-### 🔧 Setup and Configuration
-- **[Environment Variables](docs/setup/ENVIRONMENT.md)** - Configuring `.env` and credentials
-- **[Email](docs/setup/EMAIL_CONFIGURATION.md)** - Configuring Gmail SMTP for notifications
+### 5. ☁️ Cloud Integration
 
-### 💻 Development Guides
-- **[Architecture](docs/development/ARCHITECTURE.md)** - Hexagonal architecture, ports, and adapters
-- **[Migrations](docs/development/MIGRATIONS.md)** - Entity Framework Core, commands, and best practices
-
-### 🔌 API Documentation
-- **[Endpoints](docs/api/ENDPOINTS.md)** - Complete list of REST endpoints
-- **[Authentication](docs/api/AUTHENTICATION.md)** - JWT, Roles and Authorization
-- **[Test Collection](docs/api/TEST_ENDPOINTS.http)** - Examples with REST Client
-
-### 🧪 Testing Documentation
-- **[Test Summary](docs/TEST_SUMMARY.md)** - Complete test coverage and analysis (90 tests)
-- **[Test Guide](tests/Firmness.Test/README_TESTS.md)** - Quick reference for running tests
-
-### 📖 More Documentation
-See [docs/README.md](docs/README.md) for the complete technical documentation index.
-
----
-
-## 🧪 Testing
-
-### Automated Tests with xUnit
-
-The project includes **90 comprehensive tests** covering services, controllers, and database integration:
-
-```
-✅ Services: 60 tests (Business Logic)
-✅ Controllers: 29 tests (HTTP APIs)
-✅ Integration: 1 test (Database)
-Status: 100% Passing
-```
-
-**Quick Commands:**
-
-```bash
-# Run all tests
-dotnet test
-
-# Run only service tests (most important)
-dotnet test --filter "FullyQualifiedName~Services"
-
-# Run with detailed output
-dotnet test --logger "console;verbosity=detailed"
-```
-
-📘 **See [Test Documentation](tests/Firmness.Test/README_TESTS.md) for detailed information.**
-
-### Test Coverage
-
-**Integration Tests:**
-- ✅ **AuthenticationTests** - Login, registration, JWT validation
-- ✅ **CustomersApiTests** - CRUD operations, pagination, authorization
-- ✅ **ProductRepositoryIntegrationTests** - Repository layer
-
-**Test Technologies:**
-- xUnit - Test framework
-- FluentAssertions - Readable assertions
-- Moq - Mocking framework
-- ASP.NET Core Testing - Integration tests with in-memory DB
-
-See [tests/Firmness.Test/README.md](tests/Firmness.Test/README.md) for detailed testing documentation.
-
-### Manual API Testing
-
-Use the `docs/api/TEST_ENDPOINTS.http` file with **REST Client** extension (VS Code):
-
-```http
-### Login as Admin
-POST https://localhost:7192/api/Auth/login
-Content-Type: application/json
-
-{
-  "email": "admin@firmness.com",
-  "password": "Admin123!"
-}
-```
+- **AWS S3**: Secure storage for vehicle images and documents.
+- **CloudFront**: Fast content delivery network.
 
 ---
 
 ## 🛠️ Technology Stack
-### Backend (.NET)
-- **Framework:** ASP.NET Core 8.0
-- **ORM:** Entity Framework Core 8.0
-- **Data base:** PostgreSQL 15
-- **Autenticación:** ASP.NET Core Identity + JWT
-- **Mapeo:** AutoMapper
-- **API Docs:** Swagger/OpenAPI (Swashbuckle)
-- **Email:** System.Net.Mail + Gmail SMTP
 
-### Frontend
-- **Framework:** Angular 17 (in development)
-- **UI:** Angular Material / Bootstrap
-- **Estado:** RxJS
-
-### DevOps
-- **Containers:** Docker + Docker Compose
-- **Orchestration:** Docker Compose
-- **Database:** PostgreSQL (official container)
-- **Tools:** PgAdmin 4 (container)
-
-### Testing
-- **Framework:** xUnit
-- **Mocking:** Moq (futuro)
-- **Assertions:** FluentAssertions (futuro)
+- **Backend**: .NET 8, ASP.NET Core Web API
+- **Frontend**: Angular 17 (Standalone Components)
+- **Database**: PostgreSQL 15
+- **ORM**: Entity Framework Core
+- **AI**: Google Gemini Pro
+- **PDF Generation**: QuestPDF
+- **Email**: SMTP (Gmail, SendGrid, AWS SES)
+- **Cloud Storage**: AWS S3 + CloudFront CDN
+- **DevOps**: Docker, Docker Compose
+- **Testing**: xUnit, Moq, FluentAssertions
 
 ---
 
-## 📦 Main Entities
+## 🤝 Contributing
 
-### Customer Management
-- **Customer** - Complete customer information
-- **ApplicationUser** - Identity users (authentication)
-
-### Product Management
-- **Product** - Construction materials
-- **Category** - Product categories
-
-### Sales Management
-- **Sale** - Sales made
-- **SaleItem** - Individual items in each sale
-
-### Vehicle Management
-- **Vehicle** - Available industrial vehicles
-- **VehicleRental** - Active/historical vehicle rentals
-
----
-
-## 🔧 Useful Commands
-
-### Development
-
-```bash
-    # Compile complete solution
-    dotnet build
-    
-    # Run tests
-    dotnet test
-    
-    # Create new migration
-    cd src/Firmness.Infrastructure
-    dotnet ef migrations add MigrationName --startup-project ../Firmness.Api
-    
-    # Apply migrations
-    dotnet ef database update --startup-project ../Firmness.Api
-    
-    # Revert last migration
-    dotnet ef migrations remove --startup-project ../Firmness.Api
-```
-
-### Docker
-
-```bash
-        # Start services
-        docker-compose up -d
-        
-        # View logs in real time
-        docker-compose logs -f
-        
-        # Restart a specific service
-        docker-compose restart api
-        
-        # Stop services
-        docker-compose down
-        
-        # Clean up volumes (⚠️ Deletes the database)
-        docker-compose down -v
-```
-
-### Angular Frontend
-
-```bash
-    cd client
-    
-    # Install dependencies
-    npm install
-    
-    # Development server
-    ng serve
-    
-    # Production build
-    ng build --configuration production
-    
-    # Run tests
-    ng test
-```
-
----
-
-## 🤝 Contribución
-
-### Flujo de Trabajo
-
-1. **Fork** the repository
-2. Create a branch for your feature:
-   ```bash
-   git checkout -b feature/NewFunctionality
-   ```
-3. Make your changes following the standards.
-4. Commit with descriptive messages:
-   ```bash
-   git commit -m "feat: add reports module"
-   ```
-5. Push your fork:
-   ```bash
-   git push origin feature/NewDunctionality
-   ```
-6. Open a **Pull Request**
-
-### ECoding Standards
-
-#### Backend (.NET)
-- ✅ Follow **Hexagonal Architecture (Ports and Adapters)**
-- ✅ Use **PascalCase** naming conventions for classes and methods
-- ✅ Document public methods with XML comments
-- ✅ Write **tests** for new functionality
-- ✅ Keep controllers **lean** (logic in services)
-- ✅ The **Domain** should not depend on external frameworks
-
-#### Frontend (Angular)
-- ✅ Follow the **Angular style guide**
-- ✅ Use **small and reusable** components
-- ✅ Use **TypeScript strict mode**
-- ✅ Implement **lazy loading** for routes
-
-#### Database
-- ✅ Use **EF Core migrations**, never manual changes
-- ✅ Use **singular** table names: `Customer`, `Product`
-- ✅ Configure **indexes** in frequently searched columns
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT** license. See [LICENSE](LICENSE) for details.
-
-
-## 👥 Team
-
-Developed as an academic project for the comprehensive management of construction companies.
-
----
-
-## 📞 Support
-
-- **Documentation:** [/docs](docs/)
-
----
-
-## 🗺️ Roadmap
-
-### ✅ Completed (v1.0)
-- [x] Complete REST API with JWT
-- [x] MVC administrative dashboard
-- [x] Client and product management
-- [x] Sales system
-- [x] Vehicle and rental management
-- [x] Docker Compose deployment
-- [x] Basic integration tests
-
-### 🚧 In Development (v1.5)
-- [ ] Complete Angular client
-- [ ] Real-time statistics dashboard
-- [ ] Push notification system
-- [ ] More automated tests
-
-### 🔮 Future (v2.0)
-- [ ] Electronic invoicing system
-- [ ] Payment gateway integration
-- [ ] Mobile application (React Native)
-- [ ] BI dashboard with advanced charts
-- [ ] External ERP integration
+1.  Fork the repository.
+2.  Create a feature branch: `git checkout -b feature/NewFeature`
+3.  Commit changes: `git commit -m "feat: Add NewFeature"`
+4.  **Run Tests**: `dotnet test` (Must pass!)
+5.  Push to branch: `git push origin feature/NewFeature`
+6.  Open a Pull Request.
 
 ---
 
 <div align="center">
-
-**Firmness** - Digitalize your construction business 🏗️
-
-[Documentation](docs/) • [API](https://localhost:7192/swagger) • [Dashboard](http://localhost:5000)
-
-**Made with ❤️ using .NET 8, Angular, and Docker**
-
+  <sub>Built with ❤️ by the Firmness Team</sub>
+  <br>
+  <a href="docs/setup/INSTALLATION.md">Setup Guide</a> • 
+  <a href="docs/AI/README.md">AI Docs</a> • 
+  <a href="docs/api/ENDPOINTS.md">API Docs</a> •
+  <a href="docs/README.md">Full Documentation</a>
 </div>
-

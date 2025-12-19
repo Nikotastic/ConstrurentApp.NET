@@ -69,31 +69,31 @@ public class VehicleFormViewModel
     public int VehicleType { get; set; }
 
     [Required(ErrorMessage = "Hourly Rate is required")]
-    [Range(0, 999999.99, ErrorMessage = "Hourly Rate must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Hourly Rate must be positive")]
     [Display(Name = "Hourly Rate")]
     public decimal HourlyRate { get; set; }
 
     [Required(ErrorMessage = "Daily Rate is required")]
-    [Range(0, 999999.99, ErrorMessage = "Daily Rate must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Daily Rate must be positive")]
     [Display(Name = "Daily Rate")]
     public decimal DailyRate { get; set; }
 
     [Required(ErrorMessage = "Weekly Rate is required")]
-    [Range(0, 999999.99, ErrorMessage = "Weekly Rate must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Weekly Rate must be positive")]
     [Display(Name = "Weekly Rate")]
     public decimal WeeklyRate { get; set; }
 
     [Required(ErrorMessage = "Monthly Rate is required")]
-    [Range(0, 999999.99, ErrorMessage = "Monthly Rate must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Monthly Rate must be positive")]
     [Display(Name = "Monthly Rate")]
     public decimal MonthlyRate { get; set; }
 
     [Display(Name = "Current Hours")]
-    [Range(0, 999999.99, ErrorMessage = "Hours must be positive")]
+    [Range(0, 999999999, ErrorMessage = "Hours must be positive")]
     public decimal? CurrentHours { get; set; }
 
     [Display(Name = "Current Mileage")]
-    [Range(0, 999999.99, ErrorMessage = "Mileage must be positive")]
+    [Range(0, 999999999, ErrorMessage = "Mileage must be positive")]
     public decimal? CurrentMileage { get; set; }
 
     [Display(Name = "Specifications")]
@@ -105,7 +105,7 @@ public class VehicleFormViewModel
     public string? SerialNumber { get; set; }
 
     [Display(Name = "Maintenance Hours Interval")]
-    [Range(0, 999999.99, ErrorMessage = "Must be positive")]
+    [Range(0, 999999999, ErrorMessage = "Must be positive")]
     public decimal? MaintenanceHoursInterval { get; set; }
 
     [Display(Name = "Last Maintenance Date")]
@@ -129,8 +129,12 @@ public class VehicleFormViewModel
     [Display(Name = "Is Active")]
     public bool IsActive { get; set; } = true;
 
+    [Display(Name = "Status")]
+    public int Status { get; set; }
+
     // For dropdowns
     public List<SelectListItem> VehicleTypes { get; set; } = new();
+    public List<SelectListItem> Statuses { get; set; } = new();
 }
 
 // ViewModel for vehicle details

@@ -181,7 +181,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy  =>
         {
-            policy.WithOrigins("http://localhost:4200") // La URL de tu Angular
+            policy.WithOrigins("http://localhost:4200", "http://localhost:7192") // La URL de tu Angular
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -222,13 +222,13 @@ else
     // In dev show developer exceptions as needed
     app.UseDeveloperExceptionPage();
 }
+app.UseRouting();
 app.UseCors(MyAllowSpecificOrigins); 
-app.MapControllers();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 // ---------- Endpoints ----------
 app.MapControllerRoute(

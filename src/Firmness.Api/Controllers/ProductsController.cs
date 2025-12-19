@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Firmness.Application.Interfaces;
-using Firmness.Domain.DTOs;
+using Firmness.Application.DTOs;
 using Firmness.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +36,8 @@ public class ProductsController : ControllerBase
     {
         try
         {
-            var result = await _service.GetAllAsync(page, pageSize);
+            // Use GetPagedWithCategoryAsync to include category information
+            var result = await _service.GetPagedWithCategoryAsync(page, pageSize);
             if (!result.IsSuccess)
                 return BadRequest(result);
 

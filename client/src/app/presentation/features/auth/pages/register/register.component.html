@@ -1,0 +1,220 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <a routerLink="/" class="back-home">← Come back</a>
+      <h1>Create Account</h1>
+      <p>Register as a client</p>
+    </div>
+
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="onSubmit()"
+      class="register-form"
+    >
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username *</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          class="form-control"
+          [class.error]="username?.invalid && username?.touched"
+          placeholder="usuario123"
+        />
+        @if (username?.invalid && username?.touched) {
+        <div class="error-message">
+          @if (username?.errors?.['required']) {
+          <span>Username is required</span>
+          } @if (username?.errors?.['minlength']) {
+          <span>Must have at least 3 characters</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.error]="email?.invalid && email?.touched"
+          placeholder="your@email.com"
+        />
+        @if (email?.invalid && email?.touched) {
+        <div class="error-message">
+          @if (email?.errors?.['required']) {
+          <span>Email is required</span>
+          } @if (email?.errors?.['email']) {
+          <span>Enter a valid email</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password *</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.error]="password?.invalid && password?.touched"
+          placeholder="••••••••"
+        />
+        <!-- Password Requirements -->
+        @if (password?.touched || password?.dirty) {
+        <div class="password-requirements">
+          <p class="text-xs text-gray-500 mb-1">Password must contain:</p>
+          <ul class="text-xs space-y-1">
+            <li
+              [class.text-green-600]="hasMinLength"
+              [class.text-gray-400]="!hasMinLength"
+            >
+              <span class="mr-1">{{ hasMinLength ? "✓" : "○" }}</span> At least
+              6 characters
+            </li>
+            <li
+              [class.text-green-600]="hasUpperCase"
+              [class.text-gray-400]="!hasUpperCase"
+            >
+              <span class="mr-1">{{ hasUpperCase ? "✓" : "○" }}</span> Uppercase
+              letter
+            </li>
+            <li
+              [class.text-green-600]="hasLowerCase"
+              [class.text-gray-400]="!hasLowerCase"
+            >
+              <span class="mr-1">{{ hasLowerCase ? "✓" : "○" }}</span> Lowercase
+              letter
+            </li>
+            <li
+              [class.text-green-600]="hasNumber"
+              [class.text-gray-400]="!hasNumber"
+            >
+              <span class="mr-1">{{ hasNumber ? "✓" : "○" }}</span> Number
+            </li>
+            <li
+              [class.text-green-600]="hasSymbol"
+              [class.text-gray-400]="!hasSymbol"
+            >
+              <span class="mr-1">{{ hasSymbol ? "✓" : "○" }}</span> Symbol (e.g.
+              !&#64;#$)
+            </li>
+          </ul>
+        </div>
+        }
+      </div>
+
+      <!-- First Name & Last Name (Row) -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">Name *</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            class="form-control"
+            [class.error]="firstName?.invalid && firstName?.touched"
+            placeholder="Juan"
+          />
+          @if (firstName?.invalid && firstName?.touched) {
+          <div class="error-message">
+            @if (firstName?.errors?.['required']) {
+            <span>Required</span>
+            } @if (firstName?.errors?.['minlength']) {
+            <span>Min. 2 characters</span>
+            }
+          </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name *</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            class="form-control"
+            [class.error]="lastName?.invalid && lastName?.touched"
+            placeholder="Pérez"
+          />
+          @if (lastName?.invalid && lastName?.touched) {
+          <div class="error-message">
+            @if (lastName?.errors?.['required']) {
+            <span>Required</span>
+            } @if (lastName?.errors?.['minlength']) {
+            <span>Min. 2 characters</span>
+            }
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Document -->
+      <div class="form-group">
+        <label for="document">Document</label>
+        <input
+          id="document"
+          type="text"
+          formControlName="document"
+          class="form-control"
+          placeholder="12345678"
+        />
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input
+          id="phone"
+          type="tel"
+          formControlName="phone"
+          class="form-control"
+          placeholder="+57 300 123 4567"
+        />
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input
+          id="address"
+          type="text"
+          formControlName="address"
+          class="form-control"
+          placeholder="Calle 123 #45-67"
+        />
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage) {
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+      }
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        @if (isLoading) {
+        <span class="spinner"></span>
+        <span>Registering...</span>
+        } @else {
+        <span>Register</span>
+        }
+      </button>
+
+      <!-- Login Link -->
+      <div class="form-footer">
+        <p>
+          Do you have an account?
+          <a routerLink="/login" class="link">Login here</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

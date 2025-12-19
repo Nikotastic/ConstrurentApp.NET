@@ -55,7 +55,7 @@ public class CreateRentalViewModel
     public DateTime EstimatedReturnDate { get; set; } = DateTime.Now.AddDays(7);
 
     [Required(ErrorMessage = "Rental Rate is required")]
-    [Range(0, 999999.99, ErrorMessage = "Rate must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Rate must be positive")]
     [Display(Name = "Rental Rate")]
     public decimal RentalRate { get; set; }
 
@@ -64,15 +64,15 @@ public class CreateRentalViewModel
     public string RentalPeriodType { get; set; } = "Daily";
 
     [Required(ErrorMessage = "Deposit is required")]
-    [Range(0, 999999.99, ErrorMessage = "Deposit must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Deposit must be positive")]
     [Display(Name = "Security Deposit")]
     public decimal Deposit { get; set; }
 
-    [Range(0, 999999.99, ErrorMessage = "Discount must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Discount must be positive")]
     [Display(Name = "Discount")]
     public decimal Discount { get; set; } = 0;
 
-    [Range(0, 999999.99, ErrorMessage = "Tax must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Tax must be positive")]
     [Display(Name = "Tax")]
     public decimal Tax { get; set; } = 0;
 
@@ -89,11 +89,11 @@ public class CreateRentalViewModel
     public string? ReturnLocation { get; set; }
 
     [Display(Name = "Initial Hours")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? InitialHours { get; set; }
 
     [Display(Name = "Initial Mileage")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? InitialMileage { get; set; }
 
     [Display(Name = "Initial Condition")]
@@ -135,11 +135,11 @@ public class CompleteRentalViewModel
     public DateTime ReturnDate { get; set; } = DateTime.Now;
 
     [Display(Name = "Final Hours")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? FinalHours { get; set; }
 
     [Display(Name = "Final Mileage")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? FinalMileage { get; set; }
 
     [Required(ErrorMessage = "Final Condition is required")]
@@ -236,7 +236,7 @@ public class VehicleRentalFormViewModel
     public DateTime EstimatedReturnDate { get; set; } = DateTime.Today.AddDays(7);
 
     [Required(ErrorMessage = "Rental Rate is required")]
-    [Range(0.01, 999999.99, ErrorMessage = "Rate must be greater than 0")]
+    [Range(0.01, 999999999.99, ErrorMessage = "Rate must be greater than 0")]
     [Display(Name = "Rental Rate (per period)")]
     public decimal RentalRate { get; set; }
 
@@ -245,7 +245,7 @@ public class VehicleRentalFormViewModel
     public string RentalPeriodType { get; set; } = "Daily";
 
     [Required(ErrorMessage = "Deposit is required")]
-    [Range(0, 999999.99, ErrorMessage = "Deposit must be positive")]
+    [Range(0, 999999999.99, ErrorMessage = "Deposit must be positive")]
     [Display(Name = "Security Deposit")]
     public decimal Deposit { get; set; }
 
@@ -258,11 +258,11 @@ public class VehicleRentalFormViewModel
     public string? ReturnLocation { get; set; }
 
     [Display(Name = "Initial Hours")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? InitialHours { get; set; }
 
     [Display(Name = "Initial Mileage (km)")]
-    [Range(0, 999999.99)]
+    [Range(0, 999999999)]
     public decimal? InitialMileage { get; set; }
 
     [Display(Name = "Initial Condition Notes")]
@@ -300,7 +300,7 @@ public class ProcessPaymentViewModel
     public decimal PendingAmount { get; set; }
 
     [Required(ErrorMessage = "Payment Amount is required")]
-    [Range(0.01, 999999.99, ErrorMessage = "Amount must be greater than 0")]
+    [Range(0.01, 999999999.99, ErrorMessage = "Amount must be greater than 0")]
     [Display(Name = "Payment Amount")]
     public decimal Amount { get; set; }
 

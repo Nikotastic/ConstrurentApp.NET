@@ -82,25 +82,25 @@
                         <div class="col-md-6">
                             <label asp-for="FinalHours" class="form-label"></label>
                             <div class="input-group">
-                                <input asp-for="FinalHours" class="form-control" type="number" step="0.1" />
+                                <input asp-for="FinalHours" class="form-control" type="number" step="1" />
                                 <span class="input-group-text">hours</span>
                             </div>
                             <span asp-validation-for="FinalHours" class="text-danger"></span>
                             @if (Model.InitialHours.HasValue)
                             {
-                                <small class="text-muted">Initial: @Model.InitialHours.Value.ToString("N1") hours</small>
+                                <small class="text-muted">Initial: @Model.InitialHours.Value.ToString("N0") hours</small>
                             }
                         </div>
                         <div class="col-md-6">
                             <label asp-for="FinalMileage" class="form-label"></label>
                             <div class="input-group">
-                                <input asp-for="FinalMileage" class="form-control" type="number" step="0.1" />
+                                <input asp-for="FinalMileage" class="form-control" type="number" step="1" />
                                 <span class="input-group-text">km</span>
                             </div>
                             <span asp-validation-for="FinalMileage" class="text-danger"></span>
                             @if (Model.InitialMileage.HasValue)
                             {
-                                <small class="text-muted">Initial: @Model.InitialMileage.Value.ToString("N1") km</small>
+                                <small class="text-muted">Initial: @Model.InitialMileage.Value.ToString("N0") km</small>
                             }
                         </div>
                     </div>
@@ -172,8 +172,8 @@
     <script>
         // Calculate usage difference
         document.addEventListener('DOMContentLoaded', function() {
-            const initialHours = @(Model.InitialHours?.ToString("N1") ?? "0");
-            const initialMileage = @(Model.InitialMileage?.ToString("N1") ?? "0");
+            const initialHours = @(Model.InitialHours?.ToString("N0") ?? "0");
+            const initialMileage = @(Model.InitialMileage?.ToString("N0") ?? "0");
 
             const finalHoursInput = document.getElementById('FinalHours');
             const finalMileageInput = document.getElementById('FinalMileage');

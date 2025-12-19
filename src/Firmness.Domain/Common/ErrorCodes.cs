@@ -7,6 +7,7 @@ namespace Firmness.Domain.Common
         public const string NotFound = "NotFound";
         public const string ServerError = "ServerError";
         public const string Conflict = "Conflict";
+        public const string PaymentFailed = "PaymentFailed";
     }
 }
 

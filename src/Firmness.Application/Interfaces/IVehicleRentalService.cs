@@ -1,5 +1,5 @@
 ﻿using Firmness.Domain.Common;
-using Firmness.Domain.DTOs.Vehicle;
+using Firmness.Application.DTOs.Vehicle;
 using Firmness.Domain.Enums;
 
 namespace Firmness.Application.Interfaces;

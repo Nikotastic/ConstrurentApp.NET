@@ -1,0 +1,62 @@
+<!-- Chat Button -->
+<button class="chat-toggle-btn" [class.hidden]="isOpen" (click)="toggleChat()">
+  <i class="bi bi-chat-dots-fill"></i>
+  <span class="notification-badge">1</span>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" [class.open]="isOpen">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="header-info">
+      <div class="avatar">
+        <i class="bi bi-robot"></i>
+      </div>
+      <div>
+        <h3>Firmness Assistant</h3>
+        <span class="status">Online</span>
+      </div>
+    </div>
+    <button class="close-btn" (click)="toggleChat()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="chat-messages" #scrollContainer>
+    <div
+      *ngFor="let msg of messages"
+         class="message" 
+         [class.user]="msg.isUser" 
+      [class.bot]="!msg.isUser"
+    >
+      <div class="message-content">
+        {{ msg.text }}
+      </div>
+      <span class="timestamp">{{ msg.timestamp | date : "shortTime" }}</span>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div *ngIf="isTyping" class="message bot typing">
+      <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-input">
+    <input 
+      type="text" 
+      [(ngModel)]="userInput" 
+      (keyup.enter)="sendMessage()"
+      placeholder="Escribe tu pregunta..."
+      [disabled]="isTyping"
+    />
+    <button (click)="sendMessage()" [disabled]="!userInput.trim() || isTyping">
+      <i class="bi bi-send-fill"></i>
+    </button>
+  </div>
+</div>

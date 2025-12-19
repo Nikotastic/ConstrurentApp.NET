@@ -1,0 +1,83 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <a routerLink="/" class="back-home">← Back to Home</a>
+      <h1>Welcome</h1>
+      <p>Login to your account</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.error]="email?.invalid && email?.touched"
+          placeholder="your@email.com"
+        />
+        @if (email?.invalid && email?.touched) {
+        <div class="error-message">
+          @if (email?.errors?.['required']) {
+          <span>Email is required</span>
+          } @if (email?.errors?.['email']) {
+          <span>Enter a valid email address</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.error]="password?.invalid && password?.touched"
+          placeholder="••••••••"
+        />
+        @if (password?.invalid && password?.touched) {
+        <div class="error-message">
+          @if (password?.errors?.['required']) {
+          <span>Password is required</span>
+          } @if (password?.errors?.['minlength']) {
+          <span>The password must be at least 6 characters long</span>
+          }
+        </div>
+        }
+      </div>
+
+      <!-- Error Message -->
+      @if (errorMessage) {
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+      }
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+        @if (isLoading) {
+        <span class="spinner"></span>
+        <span>Logging in...</span>
+        } @else {
+        <span>Login</span>
+        }
+      </button>
+
+      <!-- Links -->
+      <div class="form-footer">
+        <p>
+          <a routerLink="/auth/forgot-password" class="link">Forgot Password?</a>
+        </p>
+        <p>
+          Don't have an account?
+          <a routerLink="/register" class="link">Register here</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

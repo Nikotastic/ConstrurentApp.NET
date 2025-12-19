@@ -1,5 +1,7 @@
 # Unit Tests - Firmness.Test
 
+> [⬅️ Back to Main README](../../README.md) | [📚 Documentation Hub](../../docs/README.md)
+
 ## ✅ Current Status
 
 ```
@@ -12,6 +14,7 @@ Total Tests: 90
 ## 🧪 Test Categories
 
 ### **Services** (60 tests) - Business Logic
+
 - **CustomerService** (10) - CRUD, validations, email notifications
 - **ProductService** (11) - CRUD, stock management, validations
 - **SaleService** (11) - Sales with stock validation
@@ -22,10 +25,12 @@ Total Tests: 90
 - **DashboardService** (2) - Metrics and aggregations
 
 ### **Controllers** (29 tests) - HTTP API Endpoints
+
 - **ProductsController** (11) - Product API endpoints
 - **SalesController** (18) - Sales API with role-based authorization
 
 ### **Integration** (1 test) - Database Operations
+
 - **ProductRepository** - Real database operations with EF Core
 
 ## 🚀 Quick Start
@@ -69,6 +74,7 @@ MethodName_Scenario_ExpectedBehavior
 ```
 
 Examples:
+
 - `GetByIdAsync_ValidId_ReturnsCustomer`
 - `CreateSaleAsync_InsufficientStock_ThrowsException`
 - `AddAsync_NullProduct_ReturnsFailure`
@@ -102,7 +108,7 @@ public async Task GetByIdAsync_ValidId_ReturnsProduct()
 ✅ **Error Handling** - Proper error codes and exception management  
 ✅ **Database Operations** - Integration tests with EF Core  
 ✅ **API Endpoints** - HTTP status codes and responses  
-✅ **Authorization** - Role-based access control  
+✅ **Authorization** - Role-based access control
 
 ## 📖 Documentation
 
@@ -111,3 +117,7 @@ public async Task GetByIdAsync_ValidId_ReturnsProduct()
 
 ---
 
+<div align="center">
+  <a href="../../README.md">⬅️ Back to Main README</a> | 
+  <a href="../../docs/README.md">📚 Documentation Hub</a>
+</div>

@@ -1,0 +1,391 @@
+// ============================================================================
+// REGISTER COMPONENT - CONSTRUCTION THEME
+// ============================================================================
+
+$construction-orange: #ff6b35;
+$construction-yellow: #ffa500;
+$construction-dark: #2c3e50;
+$construction-blue: #3498db;
+
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    $construction-blue 0%,
+    #2980b9 50%,
+    $construction-orange 100%
+  );
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+
+  // Animated construction pattern
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 35px,
+      rgba(255, 255, 255, 0.03) 35px,
+      rgba(255, 255, 255, 0.03) 70px
+    );
+    animation: slide 20s linear infinite;
+  }
+
+  &::after {
+    content: "🚧";
+    position: absolute;
+    font-size: 250px;
+    opacity: 0.04;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(15deg);
+    pointer-events: none;
+  }
+}
+
+.register-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+  animation: slideUp 0.6s ease-out;
+
+  // Construction cone decoration
+  &::before {
+    content: "🚧";
+    position: absolute;
+    top: -30px;
+    left: 30px;
+    font-size: 60px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+}
+
+.register-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .back-home {
+    display: inline-block;
+    color: $construction-blue;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: $construction-orange;
+      transform: translateX(-4px);
+    }
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(
+      135deg,
+      $construction-blue,
+      $construction-orange
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(
+        90deg,
+        $construction-blue,
+        $construction-orange
+      );
+      border-radius: 2px;
+    }
+  }
+
+  p {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-top: 20px;
+  }
+}
+
+.register-form {
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: $construction-dark;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+
+      &:focus {
+        outline: none;
+        border-color: $construction-blue;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
+        transform: translateY(-2px);
+      }
+
+      &.error {
+        border-color: #dc3545;
+        background: #fff5f5;
+      }
+
+      &::placeholder {
+        color: #adb5bd;
+      }
+    }
+
+    .error-message {
+      margin-top: 8px;
+      color: #dc3545;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      &::before {
+        content: "⚠️";
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .alert {
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+
+    &.alert-error {
+      background: #fff5f5;
+      border: 2px solid #dc3545;
+      color: #dc3545;
+
+      &::before {
+        content: "🚨";
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      transition: left 0.5s ease;
+    }
+
+    &:hover::before {
+      left: 100%;
+    }
+
+    &.btn-primary {
+      background: linear-gradient(
+        135deg,
+        $construction-blue,
+        $construction-orange
+      );
+      color: white;
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(52, 152, 219, 0.4);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+  }
+
+  .form-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e9ecef;
+
+    p {
+      color: #6c757d;
+      font-size: 0.95rem;
+    }
+
+    .link {
+      color: $construction-blue;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: $construction-blue;
+        transition: width 0.3s ease;
+      }
+
+      &:hover {
+        color: $construction-orange;
+
+        &::after {
+          width: 100%;
+          background: $construction-orange;
+        }
+      }
+    }
+  }
+}
+
+// ============================================================================
+// ANIMATIONS
+// ============================================================================
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slide {
+  to {
+    background-position: 70px 70px;
+  }
+}
+
+// ============================================================================
+// RESPONSIVE
+// ============================================================================
+@media (max-width: 640px) {
+  .register-card {
+    padding: 32px 24px;
+
+    &::before {
+      font-size: 40px;
+      top: -20px;
+      left: 20px;
+    }
+  }
+
+  .register-header h1 {
+    font-size: 2rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr !important;
+  }
+}

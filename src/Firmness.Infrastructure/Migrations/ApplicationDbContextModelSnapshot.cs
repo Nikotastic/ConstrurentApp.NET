@@ -395,10 +395,10 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<decimal?>("CurrentHours")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<decimal?>("CurrentMileage")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<decimal>("DailyRate")
                         .HasColumnType("decimal(18,2)");
@@ -426,7 +426,7 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<decimal?>("MaintenanceHoursInterval")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<string>("Model")
                         .IsRequired()
@@ -526,20 +526,20 @@ namespace Firmness.Infrastructure.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<decimal?>("FinalHours")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<decimal?>("FinalMileage")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<string>("InitialCondition")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
                     b.Property<decimal?>("InitialHours")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<decimal?>("InitialMileage")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,0)");
 
                     b.Property<string>("InvoiceNumber")
                         .HasMaxLength(50)

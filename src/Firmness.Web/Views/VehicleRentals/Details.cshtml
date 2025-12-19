@@ -210,8 +210,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="text-muted">Initial Condition</h6>
-                                <p><strong>Hours:</strong> @(Model.InitialHours?.ToString("N1") ?? "N/A")</p>
-                                <p><strong>Mileage:</strong> @(Model.InitialMileage?.ToString("N1") ?? "N/A") km</p>
+                                <p><strong>Hours:</strong> @(Model.InitialHours?.ToString("N0") ?? "N/A")</p>
+                                <p><strong>Mileage:</strong> @(Model.InitialMileage?.ToString("N0") ?? "N/A") km</p>
                                 @if (!string.IsNullOrEmpty(Model.InitialCondition))
                                 {
                                     <p class="mb-0"><strong>Notes:</strong><br />@Model.InitialCondition</p>
@@ -221,8 +221,8 @@
                                 <h6 class="text-muted">Final Condition</h6>
                                 @if (Model.ActualReturnDate.HasValue)
                                 {
-                                    <p><strong>Hours:</strong> @(Model.FinalHours?.ToString("N1") ?? "N/A")</p>
-                                    <p><strong>Mileage:</strong> @(Model.FinalMileage?.ToString("N1") ?? "N/A") km</p>
+                                    <p><strong>Hours:</strong> @(Model.FinalHours?.ToString("N0") ?? "N/A")</p>
+                                    <p><strong>Mileage:</strong> @(Model.FinalMileage?.ToString("N0") ?? "N/A") km</p>
                                     @if (!string.IsNullOrEmpty(Model.FinalCondition))
                                     {
                                         <p class="mb-0"><strong>Notes:</strong><br />@Model.FinalCondition</p>
