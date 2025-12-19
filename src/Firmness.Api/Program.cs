@@ -62,9 +62,12 @@ if (!string.IsNullOrEmpty(envPath))
 var configuration = builder.Configuration;
 
 // Try to get complete connection string first
-var defaultConn = Environment.GetEnvironmentVariable("CONN_STR")
-                  ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-                  ?? configuration.GetConnectionString("DefaultConnection");
+var rawConn = Environment.GetEnvironmentVariable("CONN_STR")
+              ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+              ?? configuration.GetConnectionString("DefaultConnection");
+
+// Sanitize connection string from potentially invisible characters or quotes coming from Azure
+var defaultConn = rawConn?.Trim(' ', '"', '\'', '\r', '\n');
 
 // If no complete connection string, build it from individual environment variables
 if (string.IsNullOrWhiteSpace(defaultConn))
@@ -248,8 +251,6 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("ENABL
 }
 
 // Enable CORS - MUST be before Authentication/Authorization
-app.UseCors("AllowAll");
-
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
