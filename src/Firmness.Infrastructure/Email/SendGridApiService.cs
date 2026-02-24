@@ -45,7 +45,14 @@ public class SendGridApiService : IEmailService
                 content = new[]
                 {
                     new { type = message.IsHtml ? "text/html" : "text/plain", value = message.Body }
-                }
+                },
+                attachments = message.Attachments?.Select(a => new
+                {
+                    content = Convert.ToBase64String(a.Content),
+                    filename = a.FileName,
+                    type = a.ContentType,
+                    disposition = "attachment"
+                }).ToArray()
             };
 
             var json = JsonSerializer.Serialize(sendGridMessage);
