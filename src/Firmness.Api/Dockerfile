@@ -2,10 +2,10 @@
 WORKDIR /src
 
 # Copy csproj files first
-COPY ["Firmness.Api/Firmness.Api.csproj", "Firmness.Api/"]
-COPY ["Firmness.Application/Firmness.Application.csproj", "Firmness.Application/"]
-COPY ["Firmness.Domain/Firmness.Domain.csproj", "Firmness.Domain/"]
-COPY ["Firmness.Infrastructure/Firmness.Infrastructure.csproj", "Firmness.Infrastructure/"]
+COPY ["src/Firmness.Api/Firmness.Api.csproj", "Firmness.Api/"]
+COPY ["src/Firmness.Application/Firmness.Application.csproj", "Firmness.Application/"]
+COPY ["src/Firmness.Domain/Firmness.Domain.csproj", "Firmness.Domain/"]
+COPY ["src/Firmness.Infrastructure/Firmness.Infrastructure.csproj", "Firmness.Infrastructure/"]
 
 # Restore
 RUN dotnet restore "Firmness.Api/Firmness.Api.csproj"
@@ -14,7 +14,7 @@ RUN dotnet restore "Firmness.Api/Firmness.Api.csproj"
 COPY . .
 
 # Publish
-WORKDIR "/src/Firmness.Api"
+WORKDIR "/src/src/Firmness.Api"
 RUN dotnet publish "Firmness.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Final stage
