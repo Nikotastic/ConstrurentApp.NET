@@ -35,7 +35,15 @@ public static class ServiceCollectionExtensions
         
         var emailProvider = configuration.GetValue<string>("EmailSettings:Provider") ?? "Gmail";
         
-        if (emailProvider.Equals("Enterprise", StringComparison.OrdinalIgnoreCase))
+        services.AddHttpClient(); // Added HttpClient registration
+
+        var emailSettings = configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>(); // Added to get EmailSettings object
+
+        if (emailSettings != null && emailSettings.SmtpServer == "smtp.sendgrid.net")
+        {
+            services.AddScoped<IEmailService, SendGridApiService>();
+        }
+        else if (emailSettings != null && !string.IsNullOrEmpty(emailSettings.SmtpServer) && emailSettings.SmtpServer.Contains("outlook.com"))
         {
             services.AddScoped<IEmailService, EnterpriseEmailService>();
         }
